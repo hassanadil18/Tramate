@@ -75,7 +75,10 @@ GEM
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
     ast (2.4.3)
+    attr_encrypted (3.1.0)
+      encryptor (~> 3.0.0)
     base64 (0.2.0)
+    bcrypt (3.1.20)
     bcrypt_pbkdf (1.1.1)
     benchmark (0.4.0)
     bigdecimal (3.1.9)
@@ -104,6 +107,7 @@ GEM
     dotenv (3.1.8)
     drb (2.2.1)
     ed25519 (1.3.0)
+    encryptor (3.0.0)
     erubi (1.13.1)
     et-orbi (1.2.11)
       tzinfo
@@ -270,7 +274,7 @@ GEM
     ruby-progressbar (1.13.0)
     rubyzip (2.4.1)
     securerandom (0.4.1)
-    selenium-webdriver (4.31.0)
+    selenium-webdriver (4.32.0)
       base64 (~> 0.2)
       logger (~> 1.4)
       rexml (~> 3.2, >= 3.2.5)
@@ -334,6 +338,8 @@ PLATFORMS
   x86_64-linux-gnu
 
 DEPENDENCIES
+  attr_encrypted (~> 3.1.0)
+  bcrypt (~> 3.1.7)
   bootsnap
   brakeman
   capybara

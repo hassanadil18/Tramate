@@ -1,27 +1,90 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "Tramate" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
+    <title>Tramate</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-    <%= yield :head %>
-
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
-
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application" %>
+    <%= javascript_include_tag "application" %>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=League+Spartan:wght@500;600;800&display=swap" rel="stylesheet">
   </head>
 
-  <body>
-    <%= yield %>
+  <body class="tramate-body">
+    <header class="tramate-header">
+      <div class="container">
+        <div class="header-content">
+          <div class="logo">
+            <%= image_tag "https://placehold.co/398x239", alt: "Tramate Logo", class: "logo-image" %>
+          </div>
+          <nav class="main-nav">
+            <ul>
+              <li><%= link_to "Home", root_path %></li>
+              <li><%= link_to "How it works", "#how-it-works" %></li>
+              <li><%= link_to "Memberships", "#memberships" %></li>
+              <li><%= link_to "About", "#about" %></li>
+              <li><%= link_to "Contact", "#contact" %></li>
+              <li class="login-btn"><%= link_to "Login", "/auth/login" %></li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="tramate-content">
+      <%= yield %>
+    </main>
+
+    <footer class="tramate-footer">
+      <div class="footer-main">
+        <div class="container">
+          <div class="footer-columns">
+            <div class="footer-col company-info">
+              <div class="footer-brand">Tramate</div>
+              <p class="disclaimer">
+                Tramate is official trademark of Tramate.Inc. Tramate has registered LLC to operate in United States. Tramate cannot be hold accountable for any kind of mistreat from channel's misbehavior. Errors and omissions on behalf of Tramate can be challenged with our support
+              </p>
+              <div class="social-icons">
+                <a href="#" class="social-icon"></a>
+                <a href="#" class="social-icon"></a>
+                <a href="#" class="social-icon"></a>
+                <a href="#" class="social-icon"></a>
+              </div>
+            </div>
+            <div class="footer-col">
+              <h3>Support</h3>
+              <ul>
+                <li><a href="#">Support</a></li>
+                <li><a href="#">Community</a></li>
+                <li><a href="#">About us</a></li>
+              </ul>
+            </div>
+            <div class="footer-col">
+              <h3>Resources</h3>
+              <ul>
+                <li><a href="#">Contact</a></li>
+                <li><a href="#">Memberships</a></li>
+                <li><a href="#">Documentation</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="footer-bottom">
+            <div class="footer-links">
+              <a href="#" class="policy-link">Privacy Policy</a>
+              <a href="#" class="policy-link">Terms & Conditions</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="social-footer">
+        <div class="container">
+          <h2>Follow us on social media</h2>
+          <div class="social-large-icons">
+            <!-- Social icons go here -->
+          </div>
+        </div>
+      </div>
+    </footer>
   </body>
 </html>

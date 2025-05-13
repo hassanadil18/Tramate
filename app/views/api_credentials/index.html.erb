@@ -1,0 +1,64 @@
+<h2>Your Binance API Connections</h2>
+
+<p>Connect your Binance account to enable automated trading based on signals.</p>
+
+<% if @api_credentials.any? %>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Label</th>
+          <th>API Key</th>
+          <th>Platform</th>
+          <th>Status</th>
+          <th>IP Restriction</th>
+          <th>Connected On</th>
+          <th colspan="2">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% @api_credentials.each do |credential| %>
+          <tr>
+            <td><%= credential.label %></td>
+            <td><%= mask_api_key(credential.api_key) %></td>
+            <td><%= credential.platform.titleize %></td>
+            <td>
+              <% if credential.active? %>
+                <span class="badge badge-success">Active</span>
+              <% else %>
+                <span class="badge badge-danger">Inactive</span>
+              <% end %>
+            </td>
+            <td><%= credential.ip_restriction.presence || 'None' %></td>
+            <td><%= credential.created_at.strftime("%b %d, %Y") %></td>
+            <td><%= link_to "Edit", edit_api_credential_path(credential), class: 'btn btn-sm btn-outline-primary' %></td>
+            <td><%= link_to "Remove", api_credential_path(credential), 
+                    method: :delete, 
+                    data: { confirm: "Are you sure you want to remove this API connection?" }, 
+                    class: 'btn btn-sm btn-outline-danger' %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="alert alert-info">
+    You don't have any Binance API connections yet. Add one to enable automated trading.
+  </div>
+<% end %>
+
+<div class="mt-3">
+  <%= link_to "Add New Binance Connection", new_api_credential_path, class: 'btn btn-primary' %>
+</div>
+
+<div class="mt-5">
+  <h4>About Binance API Integration</h4>
+  <p>
+    Tramate uses your Binance API credentials to execute trades on your behalf based on signals.
+    Your API credentials are encrypted securely and never shared with third parties.
+  </p>
+  <div class="alert alert-warning">
+    <strong>Important:</strong> For your security, we recommend creating API keys with trading permissions only (no withdrawal permissions).
+  </div>
+</div>

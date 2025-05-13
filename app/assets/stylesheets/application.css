@@ -8,3 +8,442 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+/* Base styles */
+body {
+  font-family: Inter, sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #222831;
+  line-height: 1.5;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 600;
+  margin-top: 0;
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 16px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.btn-primary {
+  background-color: #00ADB5;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #008a91;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: white;
+  border: 2px solid white;
+}
+
+.btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn-large {
+  padding: 14px 30px;
+  font-size: 18px;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+/* Header */
+.tramate-header {
+  background-color: #222831;
+  padding: 20px 0;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-image {
+  max-height: 60px;
+  width: auto;
+}
+
+.main-nav ul {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.main-nav li {
+  margin-left: 30px;
+}
+
+.main-nav a {
+  color: white;
+  font-size: 20px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.main-nav a:hover {
+  color: #00ADB5;
+}
+
+.main-nav .login-btn a {
+  background-color: white;
+  color: #222831;
+  padding: 8px 24px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.main-nav .login-btn a:hover {
+  background-color: #f0f0f0;
+}
+
+/* Main Content */
+.tramate-content {
+  min-height: 500px;
+}
+
+/* Hero Section */
+.hero-section {
+  background-color: #222831;
+  color: white;
+  padding: 80px 0;
+  text-align: center;
+}
+
+.hero-title {
+  font-size: 74px;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+.hero-description {
+  font-size: 24px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.75);
+  max-width: 800px;
+  margin: 0 auto 40px;
+}
+
+/* How It Works */
+.how-it-works {
+  padding: 80px 0;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 50px;
+  color: #222831;
+  margin-bottom: 60px;
+}
+
+.steps-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.step {
+  width: 30%;
+  margin-bottom: 40px;
+}
+
+.step-number {
+  color: #00ADB5;
+  font-size: 30px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.step-description {
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 25px;
+  letter-spacing: 0.21px;
+}
+
+/* About Section */
+.about-section {
+  background-color: #222831;
+  padding: 80px 0;
+  color: white;
+}
+
+.about-title {
+  font-size: 49px;
+  font-weight: 600;
+  margin-bottom: 40px;
+}
+
+.about-content {
+  color: #B8B8B8;
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* Channels Section */
+.channels-section {
+  padding: 80px 0;
+  text-align: center;
+}
+
+.channels-title {
+  font-size: 48px;
+  color: #222831;
+  margin-bottom: 60px;
+}
+
+.channels-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.channel-card {
+  width: calc(33.333% - 20px);
+  margin-bottom: 30px;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.channel-name {
+  color: #00ADB5;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+/* Contact Form */
+.cta-section {
+  padding: 80px 0;
+  background-color: #f5f5f5;
+  text-align: center;
+}
+
+.cta-title {
+  font-size: 67px;
+  font-weight: 600;
+  color: #222831;
+  margin-bottom: 40px;
+}
+
+.contact-form {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 15px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-family: Inter, sans-serif;
+  font-size: 16px;
+}
+
+.form-group textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+/* Footer */
+.tramate-footer {
+  background-color: #222831;
+  color: white;
+}
+
+.footer-main {
+  padding: 60px 0;
+}
+
+.footer-columns {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.footer-col {
+  width: 30%;
+}
+
+.footer-col.company-info {
+  width: 40%;
+}
+
+.footer-brand {
+  font-size: 24px;
+  font-weight: 400;
+  margin-bottom: 20px;
+}
+
+.disclaimer {
+  color: #B8B8B8;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.footer-col h3 {
+  color: #454545;
+  font-size: 26px;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.footer-col ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-col li {
+  margin-bottom: 10px;
+}
+
+.footer-col a {
+  color: #B8B8B8;
+  text-decoration: none;
+}
+
+.footer-col a:hover {
+  color: #00ADB5;
+}
+
+.social-icons {
+  display: flex;
+  gap: 15px;
+}
+
+.social-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #393E46;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-bottom {
+  border-top: 1px solid #393E46;
+  padding-top: 20px;
+  margin-top: 40px;
+}
+
+.footer-links {
+  display: flex;
+  gap: 30px;
+}
+
+.policy-link {
+  color: black;
+  font-size: 23px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.social-footer {
+  background-color: #393E46;
+  padding: 60px 0;
+  text-align: center;
+}
+
+.social-footer h2 {
+  font-size: 67px;
+  font-weight: 600;
+  margin-bottom: 40px;
+}
+
+.social-large-icons {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+}
+
+/* Responsive styles */
+@media (max-width: 992px) {
+  .main-nav ul {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .main-nav li {
+    margin: 10px 0;
+  }
+  
+  .step,
+  .channel-card,
+  .footer-col {
+    width: 48%;
+  }
+  
+  .footer-col.company-info {
+    width: 100%;
+    margin-bottom: 40px;
+  }
+  
+  .hero-title,
+  .social-footer h2 {
+    font-size: 50px;
+  }
+}
+
+@media (max-width: 576px) {
+  .step,
+  .channel-card,
+  .footer-col {
+    width: 100%;
+  }
+  
+  .hero-title {
+    font-size: 40px;
+  }
+  
+  .hero-description {
+    font-size: 18px;
+  }
+  
+  .section-title,
+  .about-title,
+  .channels-title {
+    font-size: 36px;
+  }
+}

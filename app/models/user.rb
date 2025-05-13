@@ -6,6 +6,7 @@ class User < ApplicationRecord
   has_many :payments
   has_many :user_channel_accesses
   has_many :channels, through: :user_channel_accesses
+  has_many :api_credentials, dependent: :destroy
 
   # Validations
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
@@ -16,6 +17,11 @@ class User < ApplicationRecord
 
   # Callbacks
   before_save :downcase_email
+
+  # Method to check if user has valid Binance credentials
+  def has_valid_binance_credentials?
+    api_credentials.binance.active.exists?
+  end
 
   private
 

@@ -1,14 +1,36 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  # API credentials routes
+  resources :api_credentials
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
+  # Authentication routes
+  get "auth/login" => "auth#login"
+  get "auth/register" => "auth#register"
+  post "auth/authenticate" => "auth#authenticate"
+  get "auth/logout" => "auth#logout"
+
+  # Dashboard routes
+  get "dashboard" => "dashboard#index"
+
+  # Channel routes
+  resources :channels, only: [ :index, :show ]
+
+  # Payments routes
+  resources :payments
+
+  # Trades routes
+  resources :trades, only: [ :index, :show ]
+
+  # Admin routes namespace
+  namespace :admin do
+    get "/" => "dashboard#index"
+    resources :users
+    resources :channels
+    resources :payments
+  end
+
+  # Health check
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
-
-  # Defines the root path route ("/")
-  # root "posts#index"
+  # Set the root path to use dashboard controller
+  root "layouts#application"
 end

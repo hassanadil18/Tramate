@@ -11,9 +11,13 @@ class User < ApplicationRecord
   # Validations
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :subscription_status, inclusion: { in: %w[active inactive pending] }, allow_nil: true
+  validates :terms_of_service, acceptance: true
+
+  # Virtual attribute for terms of service
+  attr_accessor :terms_of_service
 
   # Encrypt the Binance API secret
-  attr_encrypted :binance_api_secret, key: Rails.application.credentials.secret_key_base[0..31]
+  attr_encrypted :binance_api_secret, key: Rails.application.credentials.secret_key_base&.first(32) || 'x' * 32
 
   # Callbacks
   before_save :downcase_email

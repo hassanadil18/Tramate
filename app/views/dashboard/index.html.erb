@@ -122,3 +122,602 @@
     </div>
   </div>
 </section>
+
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Welcome, <%= current_user.email.split('@').first %></h1>
+    <p class="dashboard-subtitle">Your trading automation dashboard</p>
+  </div>
+
+  <div class="dashboard-stats">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="stat-signal"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value"><%= @channels&.count || 0 %></span>
+        <span class="stat-label">Connected Channels</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="stat-trade"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value"><%= @trades&.count || 0 %></span>
+        <span class="stat-label">Recent Trades</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="stat-exchange"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value"><%= @connected_apis&.count || 0 %></span>
+        <span class="stat-label">Connected Exchanges</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-sections">
+    <div class="dashboard-section">
+      <div class="section-header">
+        <h2>Recent Trades</h2>
+        <%= link_to "View All", "/dashboard/trades", class: "view-all-link" %>
+      </div>
+      
+      <div class="table-responsive">
+        <% if @trades&.any? %>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Pair</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @trades.each do |trade| %>
+                <tr>
+                  <td><span class="trading-pair"><%= trade.trading_pair %></span></td>
+                  <td><span class="trade-type <%= trade.trade_type.downcase %>"><%= trade.trade_type %></span></td>
+                  <td><%= trade.amount %></td>
+                  <td><%= trade.price %></td>
+                  <td><span class="status-badge <%= trade.status.downcase %>"><%= trade.status %></span></td>
+                  <td><%= trade.created_at.strftime("%b %d, %H:%M") %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        <% else %>
+          <div class="empty-state">
+            <div class="empty-icon">📊</div>
+            <h3>No trades yet</h3>
+            <p>Trades will appear here once signals are received from your connected channels.</p>
+            <%= link_to "Connect a Channel", "#", class: "btn btn-primary" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="dashboard-section">
+      <div class="section-header">
+        <h2>Connected Channels</h2>
+        <%= link_to "View All", "/dashboard/channels", class: "view-all-link" %>
+      </div>
+      
+      <% if @channels&.any? %>
+        <div class="channels-grid">
+          <% @channels.each do |channel| %>
+            <div class="channel-card">
+              <div class="channel-header">
+                <div class="channel-icon">
+                  <% if channel.respond_to?(:logo_url) && channel.logo_url.present? %>
+                    <%= image_tag channel.logo_url, alt: channel.name %>
+                  <% else %>
+                    <div class="channel-icon-placeholder"><%= channel.name.first.upcase %></div>
+                  <% end %>
+                </div>
+                <div class="channel-title">
+                  <h3><%= channel.name %></h3>
+                  <span class="channel-type">Discord</span>
+                </div>
+              </div>
+              <div class="channel-stats">
+                <div class="channel-stat">
+                  <span class="channel-stat-value"><%= channel.signals.count if channel.respond_to?(:signals) %></span>
+                  <span class="channel-stat-label">Signals</span>
+                </div>
+                <div class="channel-stat">
+                  <span class="channel-stat-value">
+                    <% if channel.respond_to?(:success_rate) %>
+                      <%= number_to_percentage(channel.success_rate, precision: 0) %>
+                    <% else %>
+                      N/A
+                    <% end %>
+                  </span>
+                  <span class="channel-stat-label">Success Rate</span>
+                </div>
+              </div>
+              <div class="channel-actions">
+                <%= link_to "View Details", "#", class: "btn btn-sm btn-outline" %>
+                <div class="channel-status connected">Connected</div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="empty-state">
+          <div class="empty-icon">💬</div>
+          <h3>No channels connected</h3>
+          <p>Connect your Discord channels to start receiving trading signals.</p>
+          <%= link_to "Connect Discord", "#", class: "btn btn-primary" %>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="dashboard-section">
+      <div class="section-header">
+        <h2>Exchange Connections</h2>
+        <%= link_to "Manage API", "/dashboard/api_connections", class: "view-all-link" %>
+      </div>
+      
+      <% if @connected_apis&.any? %>
+        <div class="api-connections">
+          <% @connected_apis.each do |api| %>
+            <div class="api-connection-card">
+              <div class="api-logo">
+                <%= image_tag "binance.png", alt: api.provider %>
+              </div>
+              <div class="api-details">
+                <h3><%= api.provider.titleize %></h3>
+                <p>Connected on <%= api.created_at.strftime("%b %d, %Y") %></p>
+                <div class="api-status active">
+                  <span class="status-dot"></span> Active
+                </div>
+              </div>
+              <div class="api-actions">
+                <%= link_to "Test", "#", class: "btn btn-sm btn-outline" %>
+                <%= link_to "Settings", "#", class: "btn btn-sm btn-outline" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="empty-state">
+          <div class="empty-icon">🔑</div>
+          <h3>No API Keys Connected</h3>
+          <p>Connect your exchange API keys to enable automated trading.</p>
+          <%= link_to "Connect Binance", "#", class: "btn btn-primary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<style>
+  .dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+  }
+  
+  .dashboard-header {
+    margin-bottom: 30px;
+  }
+  
+  .dashboard-header h1 {
+    font-size: 32px;
+    font-weight: 600;
+    color: #222831;
+    margin-bottom: 5px;
+  }
+  
+  .dashboard-subtitle {
+    font-size: 16px;
+    color: #666;
+  }
+  
+  .dashboard-stats {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 35px;
+  }
+  
+  .stat-card {
+    flex: 1;
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+  }
+  
+  .stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(0, 173, 181, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 20px;
+  }
+  
+  .stat-signal:before {
+    content: "📡";
+    font-size: 24px;
+  }
+  
+  .stat-trade:before {
+    content: "📊";
+    font-size: 24px;
+  }
+  
+  .stat-exchange:before {
+    content: "💱";
+    font-size: 24px;
+  }
+  
+  .stat-value {
+    display: block;
+    font-size: 36px;
+    font-weight: 700;
+    color: #222831;
+    line-height: 1;
+  }
+  
+  .stat-label {
+    color: #666;
+    font-size: 14px;
+  }
+  
+  .dashboard-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+  
+  .dashboard-section {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    padding: 25px;
+  }
+  
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .section-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    color: #222831;
+  }
+  
+  .view-all-link {
+    color: #00ADB5;
+    font-size: 14px;
+    text-decoration: none;
+  }
+  
+  .table-responsive {
+    overflow-x: auto;
+  }
+  
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .data-table th,
+  .data-table td {
+    padding: 12px 15px;
+    text-align: left;
+  }
+  
+  .data-table th {
+    font-weight: 500;
+    color: #666;
+    font-size: 14px;
+  }
+  
+  .data-table tbody tr {
+    border-bottom: 1px solid #f2f2f2;
+  }
+  
+  .data-table tbody tr:hover {
+    background-color: #f9f9f9;
+  }
+  
+  .trading-pair {
+    font-weight: 500;
+  }
+  
+  .trade-type {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .trade-type.buy {
+    background-color: rgba(46, 213, 115, 0.15);
+    color: #2ed573;
+  }
+  
+  .trade-type.sell {
+    background-color: rgba(255, 71, 87, 0.15);
+    color: #ff4757;
+  }
+  
+  .status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .status-badge.completed {
+    background-color: rgba(46, 213, 115, 0.15);
+    color: #2ed573;
+  }
+  
+  .status-badge.pending {
+    background-color: rgba(255, 168, 0, 0.15);
+    color: #ffa800;
+  }
+  
+  .status-badge.failed {
+    background-color: rgba(255, 71, 87, 0.15);
+    color: #ff4757;
+  }
+  
+  .channels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  
+  .channel-card {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 20px;
+  }
+  
+  .channel-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .channel-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    margin-right: 15px;
+    overflow: hidden;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .channel-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .channel-icon-placeholder {
+    font-size: 20px;
+    font-weight: 600;
+    color: #222831;
+  }
+  
+  .channel-title h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #222831;
+  }
+  
+  .channel-type {
+    display: block;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .channel-stats {
+    display: flex;
+    margin-bottom: 15px;
+  }
+  
+  .channel-stat {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .channel-stat-value {
+    display: block;
+    font-size: 20px;
+    font-weight: 600;
+    color: #222831;
+  }
+  
+  .channel-stat-label {
+    font-size: 12px;
+    color: #666;
+  }
+  
+  .channel-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+  
+  .btn-outline {
+    background: transparent;
+    border: 1px solid #00ADB5;
+    color: #00ADB5;
+  }
+  
+  .btn-outline:hover {
+    background: rgba(0, 173, 181, 0.1);
+  }
+  
+  .channel-status {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .channel-status:before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+  }
+  
+  .channel-status.connected:before {
+    background: #2ed573;
+  }
+  
+  .channel-status.disconnected:before {
+    background: #ff4757;
+  }
+  
+  .api-connections {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .api-connection-card {
+    display: flex;
+    align-items: center;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 15px;
+  }
+  
+  .api-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    margin-right: 15px;
+    overflow: hidden;
+    background: #f5f5f5;
+  }
+  
+  .api-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  
+  .api-details {
+    flex: 1;
+  }
+  
+  .api-details h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  
+  .api-details p {
+    margin: 3px 0;
+    font-size: 13px;
+    color: #666;
+  }
+  
+  .api-status {
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+  }
+  
+  .api-status.active .status-dot {
+    background: #2ed573;
+  }
+  
+  .api-actions {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+  }
+  
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+  }
+  
+  .empty-state h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  
+  .empty-state p {
+    margin: 0 0 20px;
+    color: #666;
+    font-size: 14px;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  @media (max-width: 768px) {
+    .dashboard-stats {
+      flex-direction: column;
+    }
+    
+    .channels-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .api-connection-card {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .api-logo {
+      margin-right: 0;
+      margin-bottom: 10px;
+    }
+    
+    .api-actions {
+      margin-top: 15px;
+    }
+  }
+</style>

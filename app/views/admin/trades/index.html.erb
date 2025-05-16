@@ -1,0 +1,234 @@
+<div class="admin-dashboard">
+  <div class="admin-header">
+    <h1>Trade Management</h1>
+    <p class="admin-subtitle">Monitor and manage all trade activities on the platform</p>
+  </div>
+
+  <!-- Trade Stats -->
+  <div class="stats-container">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="admin-icon-trades"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value"><%= Trade.count %></div>
+        <div class="stat-label">All Trades</div>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="admin-icon-success"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value"><%= Trade.where(status: "completed").count %></div>
+        <div class="stat-label">Successful</div>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="admin-icon-pending"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value"><%= Trade.where(status: "pending").count %></div>
+        <div class="stat-label">Pending</div>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="admin-icon-failed"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value"><%= Trade.where(status: "failed").count %></div>
+        <div class="stat-label">Failed</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-container">
+    <%= form_with url: admin_trades_path, method: :get, class: "filters-form" do |f| %>
+      <div class="filter-group">
+        <%= f.label :status, "Status:" %>
+        <%= f.select :status, 
+          options_for_select([
+            ["All", ""], 
+            ["Completed", "completed"], 
+            ["Pending", "pending"], 
+            ["Failed", "failed"]
+          ], params[:status]), {}, { class: "filter-select" } %>
+      </div>
+      
+      <div class="filter-group">
+        <%= f.label :user_id, "User:" %>
+        <%= f.select :user_id, 
+          options_for_select([["All Users", ""]] + User.all.map { |u| [u.email, u.id] }, 
+          params[:user_id]), {}, { class: "filter-select" } %>
+      </div>
+      
+      <div class="filter-group">
+        <%= f.label :channel_id, "Channel:" %>
+        <%= f.select :channel_id, 
+          options_for_select([["All Channels", ""]] + Channel.all.map { |c| [c.name, c.id] }, 
+          params[:channel_id]), {}, { class: "filter-select" } %>
+      </div>
+      
+      <%= f.submit "Apply Filters", class: "btn btn-primary" %>
+      <%= link_to "Clear Filters", admin_trades_path, class: "btn btn-secondary" %>
+      <%= link_to "Export CSV", admin_trades_path(format: :csv, **request.query_parameters), class: "btn btn-success" %>
+    <% end %>
+  </div>
+
+  <!-- Trades Table -->
+  <div class="admin-section">
+    <div class="section-header">
+      <h2>Trade List</h2>
+      <div class="total-count">
+        <%= page_entries_info @trades, entry_name: 'trade' %>
+      </div>
+    </div>
+    
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>User</th>
+            <th>Channel</th>
+            <th>Symbol</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @trades.each do |trade| %>
+            <% signal = trade.signal %>
+            <% channel = signal&.channel %>
+            <% trading_pair = signal&.parsed_data&.dig('symbol') || 'N/A' %>
+            <% trade_type = signal&.parsed_data&.dig('side') || 'N/A' %>
+            
+            <tr class="<%= 'needs-review' if trade.needs_review %>">
+              <td><%= trade.id %></td>
+              <td><%= trade.user.email %></td>
+              <td><%= channel&.name || 'N/A' %></td>
+              <td><%= trading_pair %></td>
+              <td>
+                <span class="trade-type <%= trade_type.downcase if trade_type %>">
+                  <%= trade_type %>
+                </span>
+              </td>
+              <td><%= trade.amount || 'N/A' %></td>
+              <td>
+                <span class="status-badge <%= trade.status.downcase if trade.status %>">
+                  <%= trade.status %>
+                </span>
+              </td>
+              <td><%= trade.created_at.strftime("%b %d, %H:%M") %></td>
+              <td>
+                <%= link_to admin_trade_path(trade), class: "action-button view" do %>
+                  <i class="fas fa-eye"></i>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="pagination-container">
+      <%= paginate @trades %>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Add to existing admin styles */
+  .filters-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+  }
+  
+  .filters-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end;
+  }
+  
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 200px;
+  }
+  
+  .filter-group label {
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #555;
+  }
+  
+  .filter-select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #f9f9f9;
+  }
+  
+  .needs-review {
+    background-color: #fffbea;
+    border-left: 3px solid #f59f00;
+  }
+  
+  .trade-type {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .trade-type.buy {
+    background-color: #e6f7ea;
+    color: #18a853;
+  }
+  
+  .trade-type.sell {
+    background-color: #ffecee;
+    color: #e63a52;
+  }
+  
+  .status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .status-badge.completed {
+    background-color: #e6f7ea;
+    color: #18a853;
+  }
+  
+  .status-badge.pending {
+    background-color: #fff4db;
+    color: #e69500;
+  }
+  
+  .status-badge.failed {
+    background-color: #ffecee;
+    color: #e63a52;
+  }
+  
+  .pagination-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+  }
+</style> 

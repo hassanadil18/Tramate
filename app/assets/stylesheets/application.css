@@ -166,12 +166,13 @@ h1, h2, h3, h4, h5, h6 {
 .features-grid {
   display: flex;
   justify-content: space-between;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* Changed from flex-wrap: wrap to nowrap */
   margin-top: 40px;
+  gap: 30px; /* Added gap for consistent spacing */
 }
 
 .feature-card {
-  width: 30%;
+  flex: 1; /* Use flex: 1 instead of fixed width for equal distribution */
   background: #fff;
   border-radius: 8px;
   padding: 30px;
@@ -288,12 +289,13 @@ h1, h2, h3, h4, h5, h6 {
 
 .channels-container {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* Changed from wrap to nowrap to ensure horizontal layout */
   justify-content: space-between;
+  gap: 30px; /* Added gap for consistent spacing */
 }
 
 .channel-card {
-  width: calc(33.333% - 20px);
+  flex: 1; /* Use flex: 1 instead of fixed width for equal distribution */
   margin-bottom: 30px;
   padding: 30px;
   border-radius: 10px;
@@ -525,41 +527,46 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 30px;
 }
 
-.cta-section .btn-secondary {
-  background-color: transparent;
-  color: white;
-  border: 2px solid white;
-}
-
 .contact-form {
   max-width: 600px;
   margin: 50px auto 0;
   text-align: left;
-  background-color: rgba(255, 255, 255, 0.1);
-  padding: 30px;
-  border-radius: 8px;
+  background-color: #2E323C;
+  padding: 30px 40px;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
 }
 
 .contact-form h3 {
-  font-size: 24px;
-  margin-bottom: 20px;
+  font-size: 28px;
+  margin-bottom: 30px;
   text-align: center;
+  color: #FFFFFF;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .form-group input,
 .form-group textarea {
   width: 100%;
-  padding: 15px;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background-color: rgba(255, 255, 255, 0.1);
+  padding: 16px 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background-color: #3B3F48;
   color: white;
   font-family: Inter, sans-serif;
   font-size: 16px;
+  transition: all 0.3s ease;
+  box-sizing: border-box; /* Add this to fix padding issues */
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: #00ADB5;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 173, 181, 0.2);
 }
 
 .form-group input::placeholder,
@@ -570,6 +577,18 @@ h1, h2, h3, h4, h5, h6 {
 .form-group textarea {
   min-height: 150px;
   resize: vertical;
+}
+
+.form-group button.btn-primary {
+  width: auto;
+  padding: 14px 30px;
+  font-size: 16px;
+  font-weight: 500;
+  background-color: #00ADB5;
+  border: none;
+  cursor: pointer;
+  display: block;
+  margin: 0 auto;
 }
 
 /* Footer */
@@ -711,10 +730,25 @@ h1, h2, h3, h4, h5, h6 {
   .main-nav li {
     margin: 10px 0;
   }
+
+  .features-grid {
+    flex-wrap: wrap; /* Allow wrapping on medium screens */
+  }
+  
+  .feature-card {
+    flex: 0 0 48%; /* Two cards per row on medium screens */
+    margin-bottom: 20px;
+  }
+  
+  .channels-container {
+    flex-wrap: wrap; /* Allow channel cards to wrap on medium screens */
+  }
+  
+  .channel-card {
+    flex: 0 0 48%; /* Two channel cards per row on medium screens */
+  }
   
   .step,
-  .feature-card,
-  .channel-card,
   .testimonial,
   .pricing-card,
   .footer-col {
@@ -740,13 +774,29 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @media (max-width: 768px) {
-  .feature-card,
+  .features-grid {
+    flex-wrap: wrap;
+  }
+  
+  .feature-card {
+    flex: 0 0 100%; /* Full width on small screens */
+    margin-bottom: 20px;
+  }
+  
   .pricing-card {
     width: 100%;
   }
   
   .pricing-card.featured {
     transform: scale(1);
+  }
+  
+  .channels-container {
+    flex-wrap: wrap;
+  }
+  
+  .channel-card {
+    flex: 0 0 100%; /* Full width channel cards on small screens */
   }
 }
 

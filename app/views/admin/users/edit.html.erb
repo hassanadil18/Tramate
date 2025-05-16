@@ -1,0 +1,177 @@
+<div class="admin-dashboard">
+  <div class="admin-header">
+    <div class="back-link">
+      <%= link_to admin_user_path(@user) do %>
+        <i class="fas fa-arrow-left"></i> Back to User Profile
+      <% end %>
+    </div>
+    <h1>Edit User: <%= @user.full_name %></h1>
+  </div>
+
+  <div class="details-section">
+    <%= form_with(model: [:admin, @user], class: "edit-user-form") do |form| %>
+      <% if @user.errors.any? %>
+        <div class="error-messages">
+          <h2><%= pluralize(@user.errors.count, "error") %> prohibited this user from being saved:</h2>
+          <ul>
+            <% @user.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="form-section">
+        <h3>Basic Information</h3>
+        
+        <div class="form-group">
+          <%= form.label :full_name, "Full Name" %>
+          <%= form.text_field :full_name, class: "form-input" %>
+        </div>
+        
+        <div class="form-group">
+          <%= form.label :email, "Email" %>
+          <%= form.email_field :email, class: "form-input" %>
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <h3>Account Settings</h3>
+        
+        <div class="form-group">
+          <%= form.label :discord_id, "Discord ID" %>
+          <%= form.text_field :discord_id, class: "form-input" %>
+        </div>
+        
+        <div class="form-group">
+          <%= form.label :subscription_status, "Subscription Status" %>
+          <%= form.select :subscription_status, 
+            options_for_select([
+              ["Active", "active"],
+              ["Pending", "pending"],
+              ["Inactive", "inactive"]
+            ], @user.subscription_status), 
+            {}, { class: "form-select" } %>
+        </div>
+        
+        <div class="form-group checkbox-group">
+          <%= form.label :admin, class: "checkbox-container" do %>
+            <%= form.check_box :admin, class: "checkbox-input" %>
+            <span class="checkbox-label">Admin User</span>
+            <span class="checkbox-description">Grant admin privileges to this user</span>
+          <% end %>
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <%= form.submit "Update User", class: "btn btn-primary" %>
+        <%= link_to "Cancel", admin_user_path(@user), class: "btn btn-secondary" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+  /* Form specific styles */
+  .edit-user-form {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .form-section {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .form-section h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+  }
+  
+  .form-input,
+  .form-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: #fff;
+  }
+  
+  .form-input:focus,
+  .form-select:focus {
+    border-color: #0066ff;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.1);
+  }
+  
+  .checkbox-group {
+    margin-top: 15px;
+  }
+  
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  .checkbox-input {
+    margin-right: 10px;
+    transform: scale(1.2);
+  }
+  
+  .checkbox-label {
+    font-weight: 500;
+    margin-right: 10px;
+  }
+  
+  .checkbox-description {
+    font-size: 14px;
+    color: #777;
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .error-messages {
+    background: #ffecee;
+    border-left: 4px solid #e63a52;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+  }
+  
+  .error-messages h2 {
+    font-size: 16px;
+    color: #e63a52;
+    margin-bottom: 10px;
+  }
+  
+  .error-messages ul {
+    margin: 0;
+    padding-left: 20px;
+  }
+  
+  .error-messages li {
+    color: #e63a52;
+    margin-bottom: 5px;
+  }
+</style> 

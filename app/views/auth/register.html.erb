@@ -1,142 +1,811 @@
-<div class="auth-container">
-  <div class="auth-form-container">
-    <div class="auth-logo">
-      <%= image_tag "tramateLogog.png", alt: "Tramate Logo", class: "logo-image", width: "150" %>
+<div class="registration-container">
+  <div class="registration-content">
+    <h1 class="registration-title">Join Tramate</h1>
+    <p class="registration-subtitle">Complete the steps below to automate your crypto trading</p>
+
+    <!-- Progress indicator -->
+    <div class="progress-steps">
+      <div class="step active" data-step="1">1</div>
+      <div class="step-line"></div>
+      <div class="step" data-step="2">2</div>
+      <div class="step-line"></div>
+      <div class="step" data-step="3">3</div>
     </div>
-    <h2>Create Your Tramate Account</h2>
-    
-    <% if @user.errors.any? %>
-      <div class="alert alert-danger">
-        <h4><%= pluralize(@user.errors.count, "error") %> prevented registration:</h4>
-        <ul>
-          <% @user.errors.full_messages.each do |message| %>
-            <li><%= message %></li>
-          <% end %>
-        </ul>
+
+    <!-- Multi-step form -->
+    <div class="registration-form-container">
+      <!-- Step 1: User details -->
+      <div class="registration-step active" id="step1">
+        <h2 class="step-title">Create your account</h2>
+        <form id="userDetailsForm">
+          <div class="form-group">
+            <label for="user_full_name">Full Name</label>
+            <input type="text" name="user[full_name]" id="user_full_name" class="form-control" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="user_email">Email</label>
+            <input type="email" name="user[email]" id="user_email" class="form-control" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="user_password">Password</label>
+            <input type="password" name="user[password]" id="user_password" class="form-control" required>
+            <small class="form-text text-muted">At least 8 characters with letters and numbers</small>
+          </div>
+          
+          <div class="form-group">
+            <label for="user_password_confirmation">Confirm Password</label>
+            <input type="password" name="user[password_confirmation]" id="user_password_confirmation" class="form-control" required>
+          </div>
+          
+          <div class="form-group form-check">
+            <input type="checkbox" name="user[terms_of_service]" id="user_terms_of_service" class="form-check-input" required>
+            <label for="user_terms_of_service" class="form-check-label">
+              I agree to Tramate's <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a>
+            </label>
+          </div>
+          
+          <div class="alert alert-danger d-none" id="step1-errors"></div>
+          
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-block">Continue</button>
+          </div>
+        </form>
       </div>
-    <% end %>
-    
-    <%= form_with(model: @user, url: "/auth/register", method: :post, class: "auth-form") do |form| %>
-      <div class="form-group">
-        <%= form.label :email, "Email" %>
-        <%= form.email_field :email, class: "form-control", placeholder: "your@email.com", required: true, autofocus: true %>
+
+      <!-- Step 2: Channel selection -->
+      <div class="registration-step" id="step2">
+        <h2 class="step-title">Choose a Channel</h2>
+        <p class="step-description">Select a signal channel to connect to your Tramate account.</p>
+        
+        <div class="channels-list" id="channelsList">
+          <div class="spinner-container">
+            <div class="spinner"></div>
+            <p>Loading channels...</p>
+          </div>
+        </div>
+        
+        <div class="alert alert-danger d-none" id="step2-errors"></div>
+        
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline-secondary" onclick="previousStep(1)">Back</button>
+          <button type="button" class="btn btn-primary" id="continueToStep3" disabled>Continue</button>
+        </div>
       </div>
-      
-      <div class="form-group">
-        <%= form.label :password, "Password" %>
-        <%= form.password_field :password, class: "form-control", required: true %>
-        <small class="form-text text-muted">Minimum 8 characters</small>
+
+      <!-- Step 3: Discord validation -->
+      <div class="registration-step" id="step3">
+        <h2 class="step-title">Verify Discord Membership</h2>
+        <p class="step-description">Please enter your Discord username to verify your membership in the selected channel.</p>
+        
+        <div class="selected-channel-info" id="selectedChannelInfo">
+          <div class="channel-badge">
+            <span id="selectedChannelName"></span>
+          </div>
+        </div>
+        
+        <form id="discordVerificationForm">
+          <div class="form-group">
+            <label for="discord_username">Discord Username</label>
+            <div class="input-group">
+              <input type="text" name="discord_username" id="discord_username" class="form-control" placeholder="username#1234" required>
+              <div class="input-group-append">
+                <button class="btn btn-outline-primary" type="button" id="verifyDiscordBtn">Verify</button>
+              </div>
+            </div>
+            <small class="form-text text-muted">Enter your complete Discord username including the # number</small>
+          </div>
+          
+          <div class="verification-status d-none" id="verificationStatus">
+            <!-- Will be filled by JavaScript -->
+          </div>
+          
+          <div class="alert alert-danger d-none" id="step3-errors"></div>
+          
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline-secondary" onclick="previousStep(2)">Back</button>
+            <button type="submit" class="btn btn-primary" id="continueToStep4" disabled>Continue</button>
+          </div>
+        </form>
       </div>
-      
-      <div class="form-group">
-        <%= form.label :password_confirmation, "Confirm Password" %>
-        <%= form.password_field :password_confirmation, class: "form-control", required: true %>
+
+      <!-- Step 4: Binance Connection -->
+      <div class="registration-step" id="step4">
+        <h2 class="step-title">Connect Binance Account</h2>
+        <p class="step-description">Provide your Binance API keys to enable automated trading.</p>
+        
+        <form id="binanceConnectionForm">
+          <div class="form-group">
+            <label for="binance_api_key">Binance API Key</label>
+            <input type="text" name="binance_api_key" id="binance_api_key" class="form-control" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="binance_api_secret">Binance API Secret</label>
+            <input type="password" name="binance_api_secret" id="binance_api_secret" class="form-control" required>
+          </div>
+          
+          <div class="alert alert-info">
+            <strong>Note:</strong> Your API keys should have trading permissions enabled, but withdraw permissions disabled for security.
+            <a href="https://www.binance.com/en/my/settings/api-management" target="_blank">Create API keys on Binance</a>
+          </div>
+          
+          <div class="alert alert-danger d-none" id="step4-errors"></div>
+          
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline-secondary" onclick="previousStep(3)">Back</button>
+            <button type="submit" class="btn btn-primary">Complete Registration</button>
+          </div>
+        </form>
       </div>
-      
-      <div class="form-group form-check">
-        <%= form.check_box :terms_of_service, class: "form-check-input", required: true %>
-        <%= form.label :terms_of_service, class: "form-check-label" do %>
-          I agree to Tramate's <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a>
-        <% end %>
+
+      <!-- Success message -->
+      <div class="registration-step" id="registration-success">
+        <div class="success-icon">✓</div>
+        <h2 class="step-title">Registration Complete!</h2>
+        <p class="step-description">Your account has been created and connected successfully.</p>
+        <p>You'll be redirected to your dashboard in a moment...</p>
       </div>
-      
-      <div class="form-actions">
-        <%= form.submit "Create Account", class: "btn btn-primary btn-block" %>
-      </div>
-    <% end %>
-    
-    <div class="auth-links">
-      <p>Already have an account? <%= link_to "Log in", "/auth/login" %></p>
     </div>
   </div>
 </div>
 
 <style>
-.auth-container {
+.registration-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 80vh;
-  padding: 20px;
+  padding: 40px 20px;
   background-color: #f5f5f5;
 }
 
-.auth-form-container {
+.registration-content {
   width: 100%;
-  max-width: 450px;
-  padding: 30px;
+  max-width: 600px;
   background-color: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  padding: 40px;
 }
 
-.auth-logo {
+.registration-title {
   text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #222831;
+  margin-bottom: 5px;
+}
+
+.registration-subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.progress-steps {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.step {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  position: relative;
+  z-index: 1;
+}
+
+.step.active {
+  background-color: #00ADB5;
+  color: white;
+}
+
+.step.completed {
+  background-color: #2ed573;
+  color: white;
+}
+
+.step-line {
+  flex-grow: 1;
+  height: 3px;
+  background-color: #e0e0e0;
+  max-width: 60px;
+  position: relative;
+  z-index: 0;
+}
+
+.step-line.active {
+  background-color: #00ADB5;
+}
+
+.registration-step {
+  display: none;
+}
+
+.registration-step.active {
+  display: block;
+}
+
+.step-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #222831;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.step-description {
+  text-align: center;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.form-group {
   margin-bottom: 20px;
 }
 
-.auth-form-container h2 {
-  text-align: center;
-  margin-bottom: 30px;
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 5px;
   color: #222831;
 }
 
-.auth-form .form-group {
-  margin-bottom: 20px;
-}
-
-.auth-form .form-control {
-  height: 50px;
+.form-control {
+  width: 100%;
+  height: 48px;
+  padding: 10px 15px;
+  font-size: 16px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  padding: 10px 15px;
+  background-color: #fff;
 }
 
-.auth-form .btn-primary {
-  background-color: #00ADB5;
+.form-control:focus {
+  outline: none;
   border-color: #00ADB5;
-  height: 50px;
+  box-shadow: 0 0 0 2px rgba(0,173,181,0.2);
+}
+
+.form-check {
+  display: flex;
+  align-items: flex-start;
+}
+
+.form-check-input {
+  margin-top: 0.2rem;
+  margin-right: 10px;
+  width: 18px;
+  height: 18px;
+}
+
+.form-check-label {
+  font-size: 14px;
+}
+
+.btn {
+  height: 48px;
+  border-radius: 4px;
   font-size: 16px;
   font-weight: 500;
-  margin-top: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  border: none;
 }
 
-.auth-form .btn-primary:hover {
-  background-color: #008a91;
-  border-color: #008a91;
+.btn-primary {
+  background-color: #00ADB5;
+  color: white;
 }
 
-.auth-links {
-  text-align: center;
-  margin-top: 25px;
+.btn-primary:hover {
+  background-color: #008B92;
 }
 
-.auth-links a {
+.btn-primary:disabled {
+  background-color: #99D6DA;
+  cursor: not-allowed;
+}
+
+.btn-outline-secondary {
+  background-color: transparent;
+  border: 1px solid #666;
+  color: #666;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #f0f0f0;
+}
+
+.btn-outline-primary {
+  background-color: transparent;
+  border: 1px solid #00ADB5;
   color: #00ADB5;
-  text-decoration: none;
 }
 
-.auth-links a:hover {
-  text-decoration: underline;
+.btn-outline-primary:hover {
+  background-color: rgba(0, 173, 181, 0.1);
+}
+
+.btn-block {
+  width: 100%;
+  display: block;
+}
+
+.form-actions {
+  margin-top: 30px;
+  display: flex;
+  gap: 15px;
+  justify-content: space-between;
+}
+
+.form-text {
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
 }
 
 .alert {
   padding: 12px 15px;
+  border-radius: 4px;
   margin-bottom: 20px;
   border: 1px solid transparent;
-  border-radius: 4px;
 }
 
 .alert-danger {
-  color: #721c24;
-  background-color: #f8d7da;
-  border-color: #f5c6cb;
+  background-color: #FFE9E9;
+  color: #D2001A;
+  border-color: #FECACA;
 }
 
-.form-text {
-  display: block;
-  margin-top: 5px;
+.alert-info {
+  background-color: #E7F5FF;
+  color: #0369A1;
+  border-color: #BAE6FD;
+}
+
+.d-none {
+  display: none !important;
+}
+
+.channels-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.channel-card {
+  border: 2px solid #eee;
+  border-radius: 8px;
+  padding: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.channel-card:hover {
+  border-color: #00ADB5;
+}
+
+.channel-card.selected {
+  border-color: #00ADB5;
+  background-color: rgba(0, 173, 181, 0.05);
+}
+
+.channel-card h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  color: #222831;
+}
+
+.channel-card p {
+  margin: 0;
+  color: #666;
   font-size: 14px;
-  color: #6c757d;
+}
+
+.channel-badge {
+  display: inline-block;
+  background-color: #00ADB5;
+  color: white;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.selected-channel-info {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.input-group {
+  display: flex;
+  width: 100%;
+}
+
+.input-group .form-control {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  flex-grow: 1;
+}
+
+.input-group-append {
+  display: flex;
+}
+
+.input-group-append .btn {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  height: 48px;
+}
+
+.verification-status {
+  padding: 15px;
+  border-radius: 4px;
+  margin-top: 15px;
+}
+
+.verification-status.success {
+  background-color: rgba(46, 213, 115, 0.1);
+  color: #2ed573;
+  border: 1px solid rgba(46, 213, 115, 0.3);
+}
+
+.verification-status.error {
+  background-color: rgba(255, 71, 87, 0.1);
+  color: #ff4757;
+  border: 1px solid rgba(255, 71, 87, 0.3);
+}
+
+.verification-status p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.verification-status .icon {
+  margin-right: 10px;
+  font-size: 20px;
+}
+
+.verification-status a {
+  color: #00ADB5;
+  text-decoration: underline;
+}
+
+#registration-success {
+  text-align: center;
+}
+
+.success-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #2ed573;
+  color: white;
+  font-size: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 150px;
+  width: 100%;
+  grid-column: 1 / -1;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0, 173, 181, 0.2);
+  border-radius: 50%;
+  border-top-color: #00ADB5;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 576px) {
+  .registration-content {
+    padding: 25px;
+  }
+  
+  .channels-list {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Global variables
+  let userId = null;
+  let selectedChannelId = null;
+  let discordVerified = false;
+
+  // Step 1: User details form submission
+  const userDetailsForm = document.getElementById('userDetailsForm');
+  userDetailsForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Get form data
+    const formData = new FormData(userDetailsForm);
+    const userData = {
+      user: {
+        full_name: formData.get('user[full_name]'),
+        email: formData.get('user[email]'),
+        password: formData.get('user[password]'),
+        password_confirmation: formData.get('user[password_confirmation]'),
+        terms_of_service: formData.get('user[terms_of_service]') === 'on'
+      }
+    };
+    
+    // Submit form via AJAX
+    fetch('/auth/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify(userData)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Store user ID for later steps
+        userId = data.user_id;
+        
+        // Mark step 1 as completed and proceed to step 2
+        document.querySelector('.step[data-step="1"]').classList.add('completed');
+        document.querySelector('.step-line:first-of-type').classList.add('active');
+        nextStep(2);
+        
+        // Load available channels
+        loadChannels();
+      } else {
+        // Show error messages
+        const errorsList = document.getElementById('step1-errors');
+        errorsList.innerHTML = data.errors.map(error => `<div>${error}</div>`).join('');
+        errorsList.classList.remove('d-none');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      document.getElementById('step1-errors').textContent = 'An unexpected error occurred. Please try again.';
+      document.getElementById('step1-errors').classList.remove('d-none');
+    });
+  });
+
+  // Load available channels
+  function loadChannels() {
+    fetch('/auth/get_channels')
+      .then(response => response.json())
+      .then(data => {
+        const channelsList = document.getElementById('channelsList');
+        
+        if (data.channels && data.channels.length > 0) {
+          channelsList.innerHTML = '';
+          
+          data.channels.forEach(channel => {
+            const channelCard = document.createElement('div');
+            channelCard.className = 'channel-card';
+            channelCard.dataset.channelId = channel.id;
+            channelCard.innerHTML = `
+              <h3>${channel.name}</h3>
+              <p>${channel.description || 'Join this trading signals channel.'}</p>
+            `;
+            
+            // Add click event to select channel
+            channelCard.addEventListener('click', function() {
+              // Remove selection from other cards
+              document.querySelectorAll('.channel-card').forEach(card => {
+                card.classList.remove('selected');
+              });
+              
+              // Select this card
+              this.classList.add('selected');
+              selectedChannelId = this.dataset.channelId;
+              
+              // Enable continue button
+              document.getElementById('continueToStep3').disabled = false;
+            });
+            
+            channelsList.appendChild(channelCard);
+          });
+        } else {
+          channelsList.innerHTML = '<div class="alert alert-info" style="grid-column: 1 / -1;">No channels available at the moment. Please try again later.</div>';
+        }
+      })
+      .catch(error => {
+        console.error('Error loading channels:', error);
+        const channelsList = document.getElementById('channelsList');
+        channelsList.innerHTML = '<div class="alert alert-danger" style="grid-column: 1 / -1;">Failed to load channels. Please refresh and try again.</div>';
+      });
+  }
+
+  // Continue to Step 3
+  document.getElementById('continueToStep3').addEventListener('click', function() {
+    if (selectedChannelId) {
+      // Update the selected channel info
+      const selectedChannel = document.querySelector(`.channel-card[data-channel-id="${selectedChannelId}"]`);
+      const channelName = selectedChannel.querySelector('h3').textContent;
+      document.getElementById('selectedChannelName').textContent = channelName;
+      
+      // Mark step 2 as completed and proceed to step 3
+      document.querySelector('.step[data-step="2"]').classList.add('completed');
+      document.querySelector('.step-line:nth-of-type(3)').classList.add('active');
+      nextStep(3);
+    }
+  });
+
+  // Verify Discord username
+  document.getElementById('verifyDiscordBtn').addEventListener('click', function() {
+    const discordUsername = document.getElementById('discord_username').value;
+    
+    if (!discordUsername) {
+      document.getElementById('step3-errors').textContent = 'Please enter your Discord username.';
+      document.getElementById('step3-errors').classList.remove('d-none');
+      return;
+    }
+    
+    // Show loading state
+    this.disabled = true;
+    this.textContent = 'Verifying...';
+    
+    // Verify Discord username
+    fetch('/auth/verify_discord_username', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify({
+        discord_username: discordUsername,
+        channel_id: selectedChannelId
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      const verificationStatus = document.getElementById('verificationStatus');
+      verificationStatus.classList.remove('d-none', 'success', 'error');
+      
+      if (data.success) {
+        // Username verified
+        verificationStatus.classList.add('success');
+        verificationStatus.innerHTML = '<p><span class="icon">✓</span> Username verified successfully!</p>';
+        
+        // Enable continue button
+        document.getElementById('continueToStep4').disabled = false;
+        discordVerified = true;
+      } else {
+        // Username not found in channel
+        verificationStatus.classList.add('error');
+        verificationStatus.innerHTML = `
+          <p><span class="icon">✗</span> ${data.message}</p>
+          <p>Please join the channel first: <a href="${data.invite_link}" target="_blank">Join here</a></p>
+          <p>Already joined? Please wait a moment and try again.</p>
+        `;
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      document.getElementById('step3-errors').textContent = 'Failed to verify Discord username. Please try again.';
+      document.getElementById('step3-errors').classList.remove('d-none');
+    })
+    .finally(() => {
+      // Reset button
+      const verifyBtn = document.getElementById('verifyDiscordBtn');
+      verifyBtn.disabled = false;
+      verifyBtn.textContent = 'Verify';
+    });
+  });
+
+  // Continue to Step 4 (Discord form)
+  document.getElementById('discordVerificationForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (discordVerified) {
+      // Mark step 3 as completed and proceed to step 4
+      document.querySelector('.step[data-step="3"]').classList.add('completed');
+      nextStep(4);
+    } else {
+      document.getElementById('step3-errors').textContent = 'Please verify your Discord username first.';
+      document.getElementById('step3-errors').classList.remove('d-none');
+    }
+  });
+
+  // Binance Connection form
+  document.getElementById('binanceConnectionForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const apiKey = document.getElementById('binance_api_key').value;
+    const apiSecret = document.getElementById('binance_api_secret').value;
+    const discordUsername = document.getElementById('discord_username').value;
+    
+    // Submit the connection info
+    fetch('/auth/update_connection_info', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        discord_id: discordUsername,
+        binance_api_key: apiKey,
+        binance_api_secret: apiSecret
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Show success message
+        nextStep('registration-success');
+        
+        // Redirect to dashboard after a delay
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 3000);
+      } else {
+        document.getElementById('step4-errors').innerHTML = data.errors.join('<br>');
+        document.getElementById('step4-errors').classList.remove('d-none');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      document.getElementById('step4-errors').textContent = 'Failed to save Binance API keys. Please try again.';
+      document.getElementById('step4-errors').classList.remove('d-none');
+    });
+  });
+
+  // Helper functions for navigation
+  function nextStep(step) {
+    // Hide all steps
+    document.querySelectorAll('.registration-step').forEach(el => {
+      el.classList.remove('active');
+    });
+    
+    // Show the target step
+    if (typeof step === 'number') {
+      document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
+      document.getElementById(`step${step}`).classList.add('active');
+    } else {
+      document.getElementById(step).classList.add('active');
+    }
+  }
+
+  function previousStep(step) {
+    document.querySelectorAll('.registration-step').forEach(el => {
+      el.classList.remove('active');
+    });
+    document.getElementById(`step${step}`).classList.add('active');
+  }
+});
+</script>

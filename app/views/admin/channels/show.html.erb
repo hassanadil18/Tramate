@@ -1,0 +1,232 @@
+<div class="admin-dashboard">
+  <div class="admin-header">
+    <div class="back-link">
+      <%= link_to admin_channels_path do %>
+        <i class="fas fa-arrow-left"></i> Back to Channels
+      <% end %>
+    </div>
+    <h1><%= @channel.name %></h1>
+    <p class="admin-subtitle">Channel Details</p>
+  </div>
+
+  <!-- Channel Stats -->
+  <div class="stats-container">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value"><%= @channel.channel_accesses.count %></div>
+        <div class="stat-label">Subscribers</div>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-signal"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value"><%= @channel.signals.count %></div>
+        <div class="stat-label">Total Signals</div>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-chart-line"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value"><%= @channel.signals.where(status: "completed").count %></div>
+        <div class="stat-label">Successful Trades</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Channel Details -->
+  <div class="dashboard-sections">
+    <!-- Basic Info -->
+    <div class="dashboard-section">
+      <div class="section-header">
+        <h2>Channel Information</h2>
+        <div class="section-actions">
+          <%= link_to edit_admin_channel_path(@channel), class: "btn btn-primary" do %>
+            <i class="fas fa-edit"></i> Edit Channel
+          <% end %>
+        </div>
+      </div>
+      
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Channel Type</label>
+          <span class="status-badge <%= @channel.channel_type.downcase %>">
+            <%= @channel.channel_type %>
+          </span>
+        </div>
+        
+        <div class="info-item">
+          <label>Status</label>
+          <span class="status-badge <%= @channel.status.downcase %>">
+            <%= @channel.status %>
+          </span>
+        </div>
+        
+        <div class="info-item">
+          <label>Created</label>
+          <span><%= @channel.created_at.strftime("%b %d, %Y") %></span>
+        </div>
+        
+        <div class="info-item">
+          <label>Last Updated</label>
+          <span><%= @channel.updated_at.strftime("%b %d, %Y") %></span>
+        </div>
+      </div>
+      
+      <div class="description-box">
+        <label>Description</label>
+        <p><%= @channel.description.present? ? @channel.description : "No description provided" %></p>
+      </div>
+    </div>
+
+    <!-- Recent Signals -->
+    <div class="dashboard-section">
+      <div class="section-header">
+        <h2>Recent Signals</h2>
+        <%= link_to "View All", admin_channel_signals_path(@channel), class: "view-all-link" %>
+      </div>
+      
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Symbol</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @channel.signals.order(created_at: :desc).limit(5).each do |signal| %>
+              <tr>
+                <td><%= signal.id %></td>
+                <td><%= signal.parsed_data&.dig('symbol') || 'N/A' %></td>
+                <td>
+                  <span class="trade-type <%= signal.parsed_data&.dig('side')&.downcase %>">
+                    <%= signal.parsed_data&.dig('side') || 'N/A' %>
+                  </span>
+                </td>
+                <td>
+                  <span class="status-badge <%= signal.status.downcase %>">
+                    <%= signal.status %>
+                  </span>
+                </td>
+                <td><%= signal.created_at.strftime("%b %d, %H:%M") %></td>
+                <td>
+                  <%= link_to admin_signal_path(signal), class: "action-button view" do %>
+                    <i class="fas fa-eye"></i>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Subscribers -->
+    <div class="dashboard-section">
+      <div class="section-header">
+        <h2>Channel Subscribers</h2>
+        <%= link_to "View All", admin_channel_subscribers_path(@channel), class: "view-all-link" %>
+      </div>
+      
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Access Type</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @channel.channel_accesses.includes(:user).order(created_at: :desc).limit(5).each do |access| %>
+              <tr>
+                <td><%= access.user.email %></td>
+                <td><%= access.access_type %></td>
+                <td><%= access.start_date.strftime("%b %d, %Y") %></td>
+                <td><%= access.end_date.strftime("%b %d, %Y") %></td>
+                <td>
+                  <span class="status-badge <%= access.status.downcase %>">
+                    <%= access.status %>
+                  </span>
+                </td>
+                <td>
+                  <%= link_to admin_user_path(access.user), class: "action-button view" do %>
+                    <i class="fas fa-eye"></i>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .info-item {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 6px;
+  }
+  
+  .info-item label {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 5px;
+  }
+  
+  .info-item span {
+    font-size: 14px;
+    color: #333;
+  }
+  
+  .description-box {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 6px;
+  }
+  
+  .description-box label {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 5px;
+  }
+  
+  .description-box p {
+    margin: 0;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.5;
+  }
+  
+  .section-actions {
+    display: flex;
+    gap: 10px;
+  }
+</style> 

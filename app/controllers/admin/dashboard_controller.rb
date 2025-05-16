@@ -4,13 +4,7 @@ module Admin
     before_action :authenticate_admin!
 
     def index
-      # Dashboard overview statistics for admin
-      @total_users = User.count
-      @total_channels = Channel.count
-      @total_trades = Trade.count
-      @recent_users = User.order(created_at: :desc).limit(5)
-      @recent_trades = Trade.order(created_at: :desc).limit(5)
-      @recent_payments = Payment.order(created_at: :desc).limit(5)
+      # The view will handle the data fetching directly
     end
 
     def users
@@ -31,6 +25,10 @@ module Admin
     def trades
       # Trade management for admin
       @trades = Trade.includes(:user, :channel).order(created_at: :desc).page(params[:page]).per(20)
+    end
+
+    def logs
+      @logs = SystemLog.order(created_at: :desc).page(params[:page]).per(50)
     end
 
     private

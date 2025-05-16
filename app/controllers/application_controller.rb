@@ -1,8 +1,14 @@
 class ApplicationController < ActionController::Base
+  include Loggable
+
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 
   helper_method :current_user, :user_signed_in?
+
+  protect_from_forgery with: :exception
+
+  before_action :authenticate_user!
 
   protected
 
@@ -15,8 +21,9 @@ class ApplicationController < ActionController::Base
   end
 
   def authenticate_user!
-    unless user_signed_in?
-      redirect_to auth_login_path, alert: "You need to sign in or sign up before continuing."
+    unless current_user
+      flash[:alert] = "Please log in to continue."
+      redirect_to auth_login_path
     end
   end
 end

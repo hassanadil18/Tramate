@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_13_182440) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_16_151324) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -57,6 +57,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_13_182440) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["channel_id"], name: "index_signals_on_channel_id"
+  end
+
+  create_table "system_logs", force: :cascade do |t|
+    t.string "level", null: false
+    t.text "message", null: false
+    t.jsonb "context"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_system_logs_on_created_at"
+    t.index ["level"], name: "index_system_logs_on_level"
   end
 
   create_table "trades", force: :cascade do |t|
@@ -106,6 +116,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_13_182440) do
     t.string "subscription_status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "full_name"
+    t.boolean "admin", default: false
     t.index ["binance_api_key"], name: "index_users_on_binance_api_key", unique: true
     t.index ["discord_id"], name: "index_users_on_discord_id", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true

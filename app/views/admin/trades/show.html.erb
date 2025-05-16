@@ -1,0 +1,503 @@
+<div class="admin-dashboard">
+  <div class="admin-header">
+    <div class="back-link">
+      <%= link_to admin_trades_path do %>
+        <i class="fas fa-arrow-left"></i> Back to Trades
+      <% end %>
+    </div>
+    <h1>Trade Details #<%= @trade.id %></h1>
+    <% if @trade.needs_review %>
+      <div class="review-badge">
+        <i class="fas fa-exclamation-triangle"></i>
+        Needs Review: <%= @trade.review_reason %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="trade-details-container">
+    <!-- Trade Status Card -->
+    <div class="detail-card status-card">
+      <div class="status-indicator <%= @trade.status.downcase if @trade.status %>">
+        <i class="fas fa-<%= 
+          case @trade.status
+          when 'completed' then 'check-circle'
+          when 'pending' then 'hourglass-half'
+          when 'failed' then 'times-circle'
+          else 'question-circle'
+          end
+        %>"></i>
+        <div class="status-text"><%= @trade.status.capitalize if @trade.status %></div>
+      </div>
+      
+      <div class="trade-meta">
+        <div class="meta-item">
+          <span class="meta-label">Created:</span>
+          <span class="meta-value"><%= @trade.created_at.strftime("%b %d, %Y %H:%M:%S") %></span>
+        </div>
+        <% if @trade.timestamp %>
+          <div class="meta-item">
+            <span class="meta-label">Executed:</span>
+            <span class="meta-value"><%= @trade.timestamp.strftime("%b %d, %Y %H:%M:%S") %></span>
+          </div>
+        <% end %>
+        <% if @trade.binance_trade_id %>
+          <div class="meta-item">
+            <span class="meta-label">Binance ID:</span>
+            <span class="meta-value"><%= @trade.binance_trade_id %></span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Key Information -->
+    <div class="details-section">
+      <h2 class="section-title">Key Information</h2>
+      <div class="detail-cards">
+        <div class="detail-card">
+          <h3>User</h3>
+          <div class="detail-content">
+            <div class="detail-item">
+              <span class="detail-label">Name:</span>
+              <span class="detail-value"><%= @user.full_name %></span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Email:</span>
+              <span class="detail-value"><%= @user.email %></span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">User ID:</span>
+              <span class="detail-value"><%= @user.id %></span>
+            </div>
+            <div class="detail-actions">
+              <%= link_to "View User Profile", admin_user_path(@user), class: "btn btn-sm btn-primary" %>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-card">
+          <h3>Signal</h3>
+          <div class="detail-content">
+            <% if @signal %>
+              <div class="detail-item">
+                <span class="detail-label">Channel:</span>
+                <span class="detail-value"><%= @channel&.name || 'N/A' %></span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Signal ID:</span>
+                <span class="detail-value"><%= @signal.id %></span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Received:</span>
+                <span class="detail-value"><%= @signal.created_at.strftime("%b %d, %Y %H:%M:%S") %></span>
+              </div>
+            <% else %>
+              <div class="detail-item">
+                <span class="detail-value">Signal data not available</span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="detail-card">
+          <h3>Trade Details</h3>
+          <div class="detail-content">
+            <% if @signal&.parsed_data %>
+              <div class="detail-item">
+                <span class="detail-label">Symbol:</span>
+                <span class="detail-value"><%= @signal.parsed_data['symbol'] || 'N/A' %></span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Side:</span>
+                <span class="detail-value trade-type <%= @signal.parsed_data['side']&.downcase %>">
+                  <%= @signal.parsed_data['side'] || 'N/A' %>
+                </span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Amount:</span>
+                <span class="detail-value"><%= @trade.amount || 'N/A' %></span>
+              </div>
+            <% else %>
+              <div class="detail-item">
+                <span class="detail-value">Trade details not available</span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Technical Details -->
+    <div class="details-section">
+      <h2 class="section-title">Technical Details</h2>
+      
+      <div class="tabs-container">
+        <div class="tabs">
+          <div class="tab active" data-tab="pre-trade">Pre-Trade Data</div>
+          <div class="tab" data-tab="post-trade">Post-Trade Data</div>
+          <% if @trade.error_data.present? %>
+            <div class="tab" data-tab="error">Error Data</div>
+          <% end %>
+          <% if @trade.take_profit_data.present? %>
+            <div class="tab" data-tab="take-profit">Take Profit</div>
+          <% end %>
+          <% if @trade.stop_loss_data.present? %>
+            <div class="tab" data-tab="stop-loss">Stop Loss</div>
+          <% end %>
+        </div>
+        
+        <div class="tab-content">
+          <div class="tab-pane active" id="pre-trade">
+            <% if @trade.pre_trade_data.present? %>
+              <pre class="json-data"><%= JSON.pretty_generate(@trade.pre_trade_data) %></pre>
+            <% else %>
+              <div class="no-data">No pre-trade data available</div>
+            <% end %>
+          </div>
+          
+          <div class="tab-pane" id="post-trade">
+            <% if @trade.post_trade_data.present? %>
+              <pre class="json-data"><%= JSON.pretty_generate(@trade.post_trade_data) %></pre>
+            <% else %>
+              <div class="no-data">No post-trade data available</div>
+            <% end %>
+          </div>
+          
+          <% if @trade.error_data.present? %>
+            <div class="tab-pane" id="error">
+              <pre class="json-data"><%= JSON.pretty_generate(@trade.error_data) %></pre>
+            </div>
+          <% end %>
+          
+          <% if @trade.take_profit_data.present? %>
+            <div class="tab-pane" id="take-profit">
+              <pre class="json-data"><%= JSON.pretty_generate(@trade.take_profit_data) %></pre>
+            </div>
+          <% end %>
+          
+          <% if @trade.stop_loss_data.present? %>
+            <div class="tab-pane" id="stop-loss">
+              <pre class="json-data"><%= JSON.pretty_generate(@trade.stop_loss_data) %></pre>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Actions -->
+    <div class="details-section">
+      <h2 class="section-title">Admin Actions</h2>
+      
+      <div class="admin-actions">
+        <% if @trade.needs_review %>
+          <%= form_with(url: admin_trade_update_path(@trade), method: :patch, class: "admin-form") do |form| %>
+            <%= form.hidden_field :needs_review, value: false %>
+            <%= form.submit "Mark as Reviewed", class: "btn btn-success" %>
+          <% end %>
+        <% else %>
+          <%= form_with(url: admin_trade_update_path(@trade), method: :patch, class: "admin-form") do |form| %>
+            <%= form.hidden_field :needs_review, value: true %>
+            <div class="form-group">
+              <%= form.label :review_reason, "Reason:" %>
+              <%= form.text_field :review_reason, class: "form-input" %>
+            </div>
+            <%= form.submit "Flag for Review", class: "btn btn-warning" %>
+          <% end %>
+        <% end %>
+
+        <div class="admin-notes">
+          <%= form_with(url: admin_trade_update_path(@trade), method: :patch, class: "admin-form") do |form| %>
+            <div class="form-group">
+              <%= form.label :notes, "Admin Notes:" %>
+              <%= form.text_area :notes, class: "form-textarea", rows: 3, value: @trade.notes %>
+            </div>
+            <%= form.submit "Save Notes", class: "btn btn-primary" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Tab switching functionality
+    const tabs = document.querySelectorAll('.tab');
+    
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function() {
+        // Remove active class from all tabs
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        
+        // Add active class to clicked tab
+        this.classList.add('active');
+        
+        // Show corresponding tab content
+        const tabId = this.getAttribute('data-tab');
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+  });
+</script>
+
+<style>
+  /* Trade Details Specific Styles */
+  .back-link {
+    margin-bottom: 10px;
+  }
+  
+  .back-link a {
+    color: #666;
+    text-decoration: none;
+    font-size: 14px;
+  }
+  
+  .back-link a:hover {
+    color: #333;
+  }
+  
+  .review-badge {
+    display: inline-block;
+    background: #fff4db;
+    color: #e69500;
+    padding: 6px 12px;
+    border-radius: 4px;
+    margin-top: 10px;
+    font-weight: 500;
+  }
+  
+  .review-badge i {
+    margin-right: 5px;
+  }
+  
+  .trade-details-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .details-section {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .detail-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  
+  .detail-card {
+    background: #f9f9f9;
+    border-radius: 6px;
+    padding: 15px;
+  }
+  
+  .detail-card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #444;
+  }
+  
+  .detail-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .detail-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+  }
+  
+  .detail-label {
+    font-weight: 500;
+    color: #666;
+  }
+  
+  .status-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+  }
+  
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  
+  .status-indicator.completed {
+    color: #18a853;
+  }
+  
+  .status-indicator.pending {
+    color: #e69500;
+  }
+  
+  .status-indicator.failed {
+    color: #e63a52;
+  }
+  
+  .status-indicator i {
+    margin-right: 10px;
+    font-size: 28px;
+  }
+  
+  .trade-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .meta-item {
+    font-size: 14px;
+  }
+  
+  .meta-label {
+    font-weight: 500;
+    color: #666;
+    margin-right: 5px;
+  }
+  
+  /* Tabs */
+  .tabs-container {
+    border: 1px solid #eee;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  
+  .tabs {
+    display: flex;
+    background: #f5f5f5;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .tab {
+    padding: 12px 20px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .tab.active {
+    background: white;
+    color: #333;
+    border-bottom: 2px solid #0066ff;
+  }
+  
+  .tab:hover:not(.active) {
+    background: #eee;
+  }
+  
+  .tab-content {
+    padding: 15px;
+    background: white;
+    min-height: 200px;
+    max-height: 500px;
+    overflow: auto;
+  }
+  
+  .tab-pane {
+    display: none;
+  }
+  
+  .tab-pane.active {
+    display: block;
+  }
+  
+  .json-data {
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 10px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    overflow: auto;
+  }
+  
+  .no-data {
+    padding: 30px;
+    text-align: center;
+    color: #888;
+    font-style: italic;
+  }
+  
+  /* Admin Actions */
+  .admin-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .admin-form {
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 6px;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-input, 
+  .form-textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+  }
+  
+  /* Buttons */
+  .btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+  }
+  
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  
+  .btn-primary {
+    background: #0066ff;
+    color: white;
+  }
+  
+  .btn-success {
+    background: #18a853;
+    color: white;
+  }
+  
+  .btn-warning {
+    background: #e69500;
+    color: white;
+  }
+  
+  .detail-actions {
+    margin-top: 15px;
+  }
+</style> 

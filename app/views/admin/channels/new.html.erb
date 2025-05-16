@@ -1,0 +1,14 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-8">
+    <%= link_to admin_channels_path, class: "text-blue-600 hover:text-blue-900" do %>
+      <i class="fas fa-arrow-left mr-2"></i>Back to Channels
+    <% end %>
+  </div>
+
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Add New Channel</h1>
+    <p class="mt-2 text-sm text-gray-600">Create a new trading channel</p>
+  </div>
+
+  <%= render 'form', channel: @channel %>
+</div> 

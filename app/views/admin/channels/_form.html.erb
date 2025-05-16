@@ -1,0 +1,131 @@
+<%= form_with(model: [:admin, @channel], class: "space-y-8") do |f| %>
+  <% if @channel.errors.any? %>
+    <div class="rounded-md bg-red-50 p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <i class="fas fa-exclamation-circle text-red-400"></i>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">
+            <%= pluralize(@channel.errors.count, "error") %> prohibited this channel from being saved:
+          </h3>
+          <div class="mt-2 text-sm text-red-700">
+            <ul class="list-disc pl-5 space-y-1">
+              <% @channel.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+        <!-- Basic Information -->
+        <div class="sm:col-span-6">
+          <h3 class="text-lg font-medium leading-6 text-gray-900">Basic Information</h3>
+          <p class="mt-1 text-sm text-gray-500">Enter the basic details about the channel.</p>
+        </div>
+
+        <div class="sm:col-span-3">
+          <%= f.label :name, class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= f.text_field :name, class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+          </div>
+        </div>
+
+        <div class="sm:col-span-3">
+          <%= f.label :channel_type, class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= f.select :channel_type,
+                options_for_select([['Telegram', 'telegram'], ['Discord', 'discord'], ['Webhook', 'webhook']], @channel.channel_type),
+                {},
+                class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+          </div>
+        </div>
+
+        <div class="sm:col-span-6">
+          <%= f.label :description, class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= f.text_area :description, rows: 3, class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+          </div>
+        </div>
+
+        <!-- Channel Settings -->
+        <div class="sm:col-span-6">
+          <h3 class="text-lg font-medium leading-6 text-gray-900">Channel Settings</h3>
+          <p class="mt-1 text-sm text-gray-500">Configure the channel's settings and integration details.</p>
+        </div>
+
+        <div class="sm:col-span-3">
+          <%= f.label :status, class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= f.select :status,
+                options_for_select([['Active', 'active'], ['Inactive', 'inactive']], @channel.status),
+                {},
+                class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+          </div>
+        </div>
+
+        <div class="sm:col-span-3">
+          <%= f.label :webhook_url, class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= f.url_field :webhook_url, class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+          </div>
+        </div>
+
+        <div class="sm:col-span-3">
+          <%= f.label :api_key, class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= f.text_field :api_key, class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+          </div>
+        </div>
+
+        <!-- Signal Configuration -->
+        <div class="sm:col-span-6">
+          <h3 class="text-lg font-medium leading-6 text-gray-900">Signal Configuration</h3>
+          <p class="mt-1 text-sm text-gray-500">Configure how signals are processed for this channel.</p>
+        </div>
+
+        <div class="sm:col-span-6">
+          <%= f.label :signal_format, class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= f.select :signal_format,
+                options_for_select([['Standard', 'standard'], ['Custom', 'custom']], @channel.signal_format),
+                {},
+                class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+          </div>
+          <p class="mt-2 text-sm text-gray-500">Select the format of signals received from this channel.</p>
+        </div>
+
+        <div class="sm:col-span-6">
+          <%= f.label :signal_template, class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= f.text_area :signal_template, rows: 4, class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md font-mono" %>
+          </div>
+          <p class="mt-2 text-sm text-gray-500">Define the template for parsing signals. Use JSON format for custom templates.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+      <%= link_to "Cancel", admin_channels_path, class: "btn-secondary mr-3" %>
+      <%= f.submit class: "btn-primary" %>
+    </div>
+  </div>
+<% end %>
+
+<% content_for :styles do %>
+<style>
+  .btn-primary {
+    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;
+  }
+</style>
+<% end %> 

@@ -1,0 +1,348 @@
+<div class="admin-dashboard">
+  <div class="admin-header">
+    <h1>Channel Management</h1>
+    <p class="admin-subtitle">Manage trading signal channels and their configurations</p>
+  </div>
+
+  <div class="admin-actions">
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addChannelModal">
+      <i class="fa fa-plus"></i> Add New Channel
+    </button>
+    <button type="button" class="btn btn-secondary">
+      <i class="fa fa-refresh"></i> Refresh Data
+    </button>
+  </div>
+
+  <div class="admin-section">
+    <div class="section-header">
+      <h2>All Channels</h2>
+      <div class="filters">
+        <input type="text" placeholder="Search channels..." class="search-input">
+        <select class="filter-select">
+          <option value="all">All Types</option>
+          <option value="discord">Discord</option>
+          <option value="telegram">Telegram</option>
+          <option value="api">API</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Users</th>
+            <th>Signals (7d)</th>
+            <th>Success Rate</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @channels&.any? %>
+            <% @channels.each do |channel| %>
+              <tr>
+                <td>
+                  <div class="channel-info">
+                    <div class="channel-avatar"><%= channel.name[0].upcase %></div>
+                    <span class="channel-name"><%= channel.name %></span>
+                  </div>
+                </td>
+                <td><%= channel.channel_type %></td>
+                <td><%= channel.user_channel_accesses&.count || 0 %></td>
+                <td><%= channel.signals.where('created_at > ?', 7.days.ago).count %></td>
+                <td>
+                  <% success_rate = channel.signals.where('created_at > ?', 30.days.ago).where(status: 'success').count.to_f / 
+                                   [channel.signals.where('created_at > ?', 30.days.ago).count, 1].max * 100 %>
+                  <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: <%= success_rate %>%;"
+                         aria-valuenow="<%= success_rate %>" aria-valuemin="0" aria-valuemax="100">
+                      <%= success_rate.to_i %>%
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="status-badge <%= channel.active? ? 'active' : 'inactive' %>">
+                    <%= channel.active? ? 'Active' : 'Inactive' %>
+                  </span>
+                </td>
+                <td><%= channel.created_at.strftime("%b %d, %Y") %></td>
+                <td>
+                  <div class="action-buttons">
+                    <%= link_to "Edit", "#", class: "btn btn-sm btn-outline-primary", 
+                        data: { toggle: "modal", target: "#editChannelModal#{channel.id}" } %>
+                    <%= link_to "View Signals", "#", class: "btn btn-sm btn-outline-secondary" %>
+                    <%= link_to channel.active? ? "Disable" : "Enable", "#", 
+                        class: "btn btn-sm #{channel.active? ? 'btn-outline-danger' : 'btn-outline-success'}" %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="8" class="text-center">No channels found.</td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="pagination-container">
+      <%= paginate @channels if defined?(paginate) %>
+    </div>
+  </div>
+</div>
+
+<!-- Add Channel Modal -->
+<div class="modal fade" id="addChannelModal" tabindex="-1" role="dialog" aria-labelledby="addChannelModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addChannelModalLabel">Add New Channel</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <%= form_with(model: [:admin, Channel.new], local: true, class: "admin-form") do |form| %>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <%= form.label :name, "Channel Name" %>
+              <%= form.text_field :name, class: "form-control", placeholder: "Enter channel name", required: true %>
+            </div>
+            <div class="form-group col-md-6">
+              <%= form.label :channel_type, "Channel Type" %>
+              <%= form.select :channel_type, 
+                options_for_select([['Discord', 'discord'], ['Telegram', 'telegram'], ['API', 'api']]), 
+                {}, { class: "form-control", required: true } %>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <%= form.label :description, "Description" %>
+            <%= form.text_area :description, class: "form-control", rows: 3, placeholder: "Enter channel description" %>
+          </div>
+          
+          <div id="discord-fields" class="channel-specific-fields">
+            <div class="form-group">
+              <%= form.label :discord_channel_id, "Discord Channel ID" %>
+              <%= form.text_field :discord_channel_id, class: "form-control", placeholder: "Enter Discord channel ID" %>
+            </div>
+            <div class="form-group">
+              <%= form.label :discord_guild_id, "Discord Guild ID" %>
+              <%= form.text_field :discord_guild_id, class: "form-control", placeholder: "Enter Discord guild ID" %>
+            </div>
+          </div>
+          
+          <div id="telegram-fields" class="channel-specific-fields d-none">
+            <div class="form-group">
+              <%= form.label :telegram_channel_id, "Telegram Channel ID" %>
+              <%= form.text_field :telegram_channel_id, class: "form-control", placeholder: "Enter Telegram channel ID" %>
+            </div>
+          </div>
+          
+          <div id="api-fields" class="channel-specific-fields d-none">
+            <div class="form-group">
+              <%= form.label :api_url, "API URL" %>
+              <%= form.text_field :api_url, class: "form-control", placeholder: "Enter API endpoint URL" %>
+            </div>
+            <div class="form-group">
+              <%= form.label :api_key, "API Key" %>
+              <%= form.text_field :api_key, class: "form-control", placeholder: "Enter API key (if required)" %>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <div class="custom-control custom-switch">
+              <%= form.check_box :active, class: "custom-control-input", id: "activeSwitch" %>
+              <%= form.label :active, "Channel Active", class: "custom-control-label", for: "activeSwitch" %>
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <%= form.submit "Add Channel", class: "btn btn-primary" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Toggle channel-specific fields based on selected channel type
+  document.addEventListener('DOMContentLoaded', function() {
+    const channelTypeSelect = document.querySelector('select[name="channel[channel_type]"]');
+    const channelFields = {
+      discord: document.getElementById('discord-fields'),
+      telegram: document.getElementById('telegram-fields'),
+      api: document.getElementById('api-fields')
+    };
+    
+    function toggleFields() {
+      const selectedType = channelTypeSelect.value;
+      
+      Object.keys(channelFields).forEach(type => {
+        if (type === selectedType) {
+          channelFields[type].classList.remove('d-none');
+        } else {
+          channelFields[type].classList.add('d-none');
+        }
+      });
+    }
+    
+    if (channelTypeSelect) {
+      channelTypeSelect.addEventListener('change', toggleFields);
+      toggleFields(); // Initialize on page load
+    }
+  });
+</script>
+
+<style>
+  .admin-actions {
+    margin-bottom: 30px;
+    display: flex;
+    gap: 15px;
+  }
+  
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .btn-primary {
+    background-color: #00ADB5;
+    border-color: #00ADB5;
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    background-color: #008a91;
+    border-color: #008a91;
+  }
+  
+  .btn-secondary {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #212529;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #e9ecef;
+  }
+  
+  .filters {
+    display: flex;
+    gap: 15px;
+  }
+  
+  .search-input {
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    width: 250px;
+  }
+  
+  .filter-select {
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+  }
+  
+  .channel-info {
+    display: flex;
+    align-items: center;
+  }
+  
+  .channel-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #3498db;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-right: 10px;
+  }
+  
+  .channel-name {
+    font-weight: 500;
+  }
+  
+  .progress {
+    height: 8px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .progress-bar {
+    background-color: #00ADB5;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 10px;
+  }
+  
+  .d-none {
+    display: none !important;
+  }
+  
+  .status-badge.active {
+    background-color: rgba(46, 213, 115, 0.15);
+    color: #2ed573;
+  }
+  
+  .status-badge.inactive {
+    background-color: rgba(108, 117, 125, 0.15);
+    color: #6c757d;
+  }
+  
+  .admin-form .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .admin-form label {
+    font-weight: 500;
+    margin-bottom: 8px;
+    display: block;
+  }
+  
+  .admin-form .form-control {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+  }
+  
+  .admin-form .form-control:focus {
+    border-color: #00ADB5;
+    box-shadow: 0 0 0 0.2rem rgba(0, 173, 181, 0.25);
+  }
+  
+  .admin-form .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 30px;
+  }
+  
+  .pagination-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+  }
+</style>

@@ -1,0 +1,189 @@
+<div class="admin-dashboard">
+  <div class="admin-header">
+    <h1>User Management</h1>
+    <p class="admin-subtitle">Manage and monitor user accounts</p>
+  </div>
+
+  <!-- User Stats -->
+  <div class="stats-container">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value"><%= User.count %></div>
+        <div class="stat-label">Total Users</div>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-user-shield"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value"><%= User.where(admin: true).count %></div>
+        <div class="stat-label">Admin Users</div>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-user-plus"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value"><%= User.where("created_at >= ?", 7.days.ago).count %></div>
+        <div class="stat-label">New This Week</div>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-user-check"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value"><%= User.where(subscription_status: "active").count %></div>
+        <div class="stat-label">Active Subscriptions</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-container">
+    <%= form_with url: admin_users_path, method: :get, class: "filters-form" do |f| %>
+      <div class="filter-group">
+        <%= f.label :email, "Email:" %>
+        <%= f.text_field :email, value: params[:email], class: "filter-input", placeholder: "Search by email" %>
+      </div>
+      
+      <div class="filter-group">
+        <%= f.label :admin, "Account Type:" %>
+        <%= f.select :admin, 
+          options_for_select([
+            ["All Users", ""], 
+            ["Admin Users", "true"], 
+            ["Regular Users", "false"]
+          ], params[:admin]), {}, { class: "filter-select" } %>
+      </div>
+      
+      <%= f.submit "Apply Filters", class: "btn btn-primary" %>
+      <%= link_to "Clear Filters", admin_users_path, class: "btn btn-secondary" %>
+      <%= link_to "Export CSV", admin_users_path(format: :csv, **request.query_parameters), class: "btn btn-success" %>
+    <% end %>
+  </div>
+
+  <!-- Users Table -->
+  <div class="admin-section">
+    <div class="section-header">
+      <h2>User List</h2>
+      <div class="total-count">
+        <%= page_entries_info @users, entry_name: 'user' %>
+      </div>
+    </div>
+    
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Discord ID</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Registered</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @users.each do |user| %>
+            <tr>
+              <td><%= user.id %></td>
+              <td><%= user.full_name %></td>
+              <td><%= user.email %></td>
+              <td><%= user.discord_id || '-' %></td>
+              <td>
+                <span class="status-badge <%= user.admin? ? 'admin' : 'user' %>">
+                  <%= user.admin? ? 'Admin' : 'User' %>
+                </span>
+              </td>
+              <td>
+                <span class="status-badge <%= user.subscription_status&.downcase || 'inactive' %>">
+                  <%= user.subscription_status&.capitalize || 'Inactive' %>
+                </span>
+              </td>
+              <td><%= user.created_at.strftime("%b %d, %Y") %></td>
+              <td class="actions-cell">
+                <%= link_to admin_user_path(user), class: "action-button view" do %>
+                  <i class="fas fa-eye"></i>
+                <% end %>
+                
+                <%= link_to edit_admin_user_path(user), class: "action-button edit" do %>
+                  <i class="fas fa-pencil-alt"></i>
+                <% end %>
+                
+                <%= button_to admin_toggle_admin_path(user), method: :post, class: "action-button #{user.admin? ? 'remove-admin' : 'make-admin'}", data: { confirm: "Are you sure you want to #{user.admin? ? 'remove' : 'grant'} admin privileges for this user?" } do %>
+                  <i class="fas fa-<%= user.admin? ? 'user-minus' : 'user-shield' %>"></i>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="pagination-container">
+      <%= paginate @users %>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Additional styling for user management */
+  .filter-input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #f9f9f9;
+    width: 100%;
+  }
+  
+  .status-badge.user {
+    background-color: #e6f7ff;
+    color: #0066cc;
+  }
+  
+  .status-badge.admin {
+    background-color: #e6e6ff;
+    color: #5c00e6;
+  }
+  
+  .status-badge.active {
+    background-color: #e6f7ea;
+    color: #18a853;
+  }
+  
+  .status-badge.pending {
+    background-color: #fff4db;
+    color: #e69500;
+  }
+  
+  .status-badge.inactive {
+    background-color: #f0f0f0;
+    color: #888;
+  }
+  
+  .actions-cell {
+    display: flex;
+    gap: 5px;
+  }
+  
+  .action-button.make-admin {
+    background-color: #e6e6ff;
+    color: #5c00e6;
+  }
+  
+  .action-button.remove-admin {
+    background-color: #ffecee;
+    color: #e63a52;
+  }
+</style> 

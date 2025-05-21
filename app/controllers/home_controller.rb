@@ -3,6 +3,9 @@ class HomeController < ApplicationController
   # It is responsible for rendering the home page and redirecting users
   # to the dashboard if they are already signed in.
 
+  # Skip authentication for the home page
+  skip_before_action :authenticate_user!, only: [:index]
+
   # Public landing page controller
   def index
     # Landing page for visitors

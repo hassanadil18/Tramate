@@ -1,7 +1,7 @@
 class AuthController < ApplicationController
   # Skip any authentication requirements for these actions
   # Uncomment when authentication is implemented
-  # skip_before_action :authenticate_user!, only: [:login, :register, :authenticate, :verify_discord_username, :get_channels]
+  skip_before_action :authenticate_user!, only: [:login, :register, :authenticate, :verify_discord_username, :get_channels]
   protect_from_forgery except: [ :verify_discord_username ]
 
   def login

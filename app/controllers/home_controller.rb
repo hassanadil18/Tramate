@@ -8,8 +8,12 @@ class HomeController < ApplicationController
 
   # Public landing page controller
   def index
-    # Landing page for visitors
-    # Only redirect if the user is signed in
-    redirect_to dashboard_path if user_signed_in? rescue nil
+    if user_signed_in?
+      if current_user.admin?
+        redirect_to admin_root_path
+      else
+        redirect_to dashboard_path
+      end
+    end
   end
 end

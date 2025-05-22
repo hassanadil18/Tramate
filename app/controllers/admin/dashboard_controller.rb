@@ -1,10 +1,34 @@
 module Admin
   class DashboardController < ApplicationController
-    before_action :authenticate_user!
-    before_action :authenticate_admin!
+    before_action :require_admin
+    layout 'admin'
 
     def index
-      # The view will handle the data fetching directly
+      # Overview statistics
+      @users_count = User.count
+      @active_subscriptions = Subscription.where(user_id: User.pluck(:id)).where(status: 'active').count
+      @total_trades = Trade.count
+      @completed_trades = Trade.completed.count
+      @failed_trades = Trade.failed.count
+      @channels_count = Channel.count
+      
+      # Success rate
+      total_executed = @completed_trades + @failed_trades
+      @success_rate = total_executed > 0 ? (@completed_trades.to_f / total_executed * 100).round : 0
+      
+      # Recent trades
+      @recent_trades = Trade.order(created_at: :desc).limit(10)
+      
+      # Recent users
+      @recent_users = User.order(created_at: :desc).limit(5)
+      
+      # Revenue stats - from subscriptions
+      @revenue_this_month = Payment.where(status: 'completed')
+                                .where('created_at >= ?', Time.current.beginning_of_month)
+                                .sum(:amount)
+      
+      # Get system logs
+      @recent_logs = SystemLog.order(created_at: :desc).limit(5)
     end
 
     def users
@@ -28,15 +52,15 @@ module Admin
     end
 
     def logs
-      @logs = SystemLog.order(created_at: :desc).page(params[:page]).per(50)
+      @logs = SystemLog.order(created_at: :desc).paginate(page: params[:page], per_page: 50)
     end
 
     private
 
-    def authenticate_admin!
+    def require_admin
       unless current_user&.admin?
-        flash[:alert] = "You are not authorized to access this section."
-        redirect_to root_path
+        flash[:alert] = "You do not have permission to access this page"
+        redirect_to dashboard_path
       end
     end
   end

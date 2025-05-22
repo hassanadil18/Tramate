@@ -34,3 +34,5 @@
 /config/master.key
 .env
 .env
+
+/config/credentials/development.key

@@ -9,119 +9,113 @@
     <p class="admin-subtitle">Monitor system activity and events</p>
   </div>
 
-  <!-- Log Filters -->
-  <div class="filters-container">
-    <%= form_with url: admin_logs_path, method: :get, class: "filters-form" do |f| %>
-      <div class="filter-group">
-        <%= f.label :level, "Log Level:" %>
-        <%= f.select :level, 
-          options_for_select([
-            ["All Levels", ""], 
-            ["Error", "error"], 
-            ["Warning", "warning"], 
-            ["Info", "info"], 
-            ["Debug", "debug"]
-          ], params[:level]), {}, { class: "filter-select" } %>
+  <!-- System Logs Page -->
+  <div class="card">
+    <div class="card-header">
+      <div class="header-left">
+        <span class="icon"></span>
+        <h4>System Logs</h4>
       </div>
       
-      <div class="filter-group">
-        <%= f.label :date, "Date:" %>
-        <%= f.date_field :date, value: params[:date] || Date.today, class: "filter-input" %>
-      </div>
-      
-      <%= f.submit "Apply Filters", class: "btn btn-primary" %>
-      <%= link_to "Clear Filters", admin_logs_path, class: "btn btn-secondary" %>
-    <% end %>
-  </div>
-
-  <!-- Logs Table -->
-  <div class="admin-section">
-    <div class="section-header">
-      <h2>System Activity</h2>
-      <div class="total-count">
-        <%= page_entries_info @logs, entry_name: 'log entry' %>
+      <!-- Filter controls -->
+      <div style="display: flex; gap: 15px;">
+        <%= form_tag admin_logs_path, method: :get, class: "filter-form", style: "display: flex; gap: 10px;" do %>
+          <select name="level" class="search-box" style="width: auto;">
+            <option value="">All Levels</option>
+            <option value="info" <%= 'selected' if params[:level] == 'info' %>>Info</option>
+            <option value="warn" <%= 'selected' if params[:level] == 'warn' %>>Warnings</option>
+            <option value="error" <%= 'selected' if params[:level] == 'error' %>>Errors</option>
+          </select>
+          
+          <input type="date" name="date" value="<%= params[:date] %>" class="search-box" style="width: auto;">
+          
+          <button type="submit" class="primary-btn" style="padding: 8px 15px; font-size: 14px;">
+            <i class="fas fa-filter"></i> Filter
+          </button>
+        <% end %>
       </div>
     </div>
     
-    <div class="table-responsive">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Timestamp</th>
-            <th>Level</th>
-            <th>Message</th>
-            <th>Context</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% @logs.each do |log| %>
-            <tr class="log-entry <%= log.level.downcase %>">
-              <td><%= log.created_at.strftime("%b %d, %Y %H:%M:%S") %></td>
-              <td>
-                <span class="log-level <%= log.level.downcase %>">
-                  <%= log.level %>
-                </span>
-              </td>
-              <td><%= log.message %></td>
-              <td>
-                <% if log.context.present? %>
-                  <button class="btn btn-sm btn-info view-context" data-context="<%= log.context %>">
-                    View Context
-                  </button>
-                <% end %>
-              </td>
+    <div class="table-container">
+      <% if @logs.present? %>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Level</th>
+              <th>Message</th>
+              <th>Source</th>
+              <th>Context</th>
+              <th>Timestamp</th>
+              <th>Actions</th>
             </tr>
-          <% end %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <% @logs.each do |log| %>
+              <tr>
+                <td><%= log.id %></td>
+                <td>
+                  <% if log.level == "error" %>
+                    <span class="badge-status badge-inactive">Error</span>
+                  <% elsif log.level == "warn" %>
+                    <span class="badge-status badge-pending">Warning</span>
+                  <% else %>
+                    <span class="badge-status badge-active">Info</span>
+                  <% end %>
+                </td>
+                <td><%= log.message.truncate(60) %></td>
+                <td><%= log.source %></td>
+                <td>
+                  <% if log.context.present? %>
+                    <button class="btn-action btn-view" onclick="toggleDetails('log-<%= log.id %>')">
+                      <i class="fas fa-code"></i> View
+                    </button>
+                  <% else %>
+                    N/A
+                  <% end %>
+                </td>
+                <td><%= log.created_at.strftime("%Y-%m-%d %H:%M:%S") %></td>
+                <td>
+                  <div class="action-buttons">
+                    <%= link_to admin_log_path(log), class: "btn-action btn-view" do %>
+                      <i class="fas fa-eye"></i>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+              <% if log.context.present? %>
+                <tr id="log-<%= log.id %>" style="display: none;">
+                  <td colspan="7">
+                    <div style="background-color: #f8f9fa; padding: 10px; border-radius: 5px; max-height: 200px; overflow: auto;">
+                      <pre><%= JSON.pretty_generate(log.context) rescue log.context.to_s %></pre>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p>No logs found matching your criteria.</p>
+      <% end %>
     </div>
     
-    <div class="pagination-container">
-      <%= paginate @logs %>
-    </div>
-  </div>
-</div>
-
-<!-- Context Modal -->
-<div id="contextModal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>Log Context</h3>
-      <button class="close-modal">&times;</button>
-    </div>
-    <div class="modal-body">
-      <pre class="context-data"></pre>
+    <!-- Pagination -->
+    <div style="margin-top: 20px; display: flex; justify-content: center;">
+      <%= will_paginate @logs, class: "pagination", style: "display: flex; list-style: none; gap: 10px;" %>
     </div>
   </div>
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('contextModal');
-    const contextData = modal.querySelector('.context-data');
-    const closeBtn = modal.querySelector('.close-modal');
-    
-    // View context buttons
-    document.querySelectorAll('.view-context').forEach(button => {
-      button.addEventListener('click', function() {
-        const context = JSON.parse(this.dataset.context);
-        contextData.textContent = JSON.stringify(context, null, 2);
-        modal.style.display = 'block';
-      });
-    });
-    
-    // Close modal
-    closeBtn.addEventListener('click', function() {
-      modal.style.display = 'none';
-    });
-    
-    // Close modal when clicking outside
-    window.addEventListener('click', function(event) {
-      if (event.target === modal) {
-        modal.style.display = 'none';
-      }
-    });
-  });
+  function toggleDetails(id) {
+    const element = document.getElementById(id);
+    if (element.style.display === 'none') {
+      element.style.display = 'table-row';
+    } else {
+      element.style.display = 'none';
+    }
+  }
 </script>
 
 <style>

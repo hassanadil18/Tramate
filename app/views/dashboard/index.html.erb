@@ -169,7 +169,7 @@
       </div>
       
       <div class="table-responsive">
-        <% if @trades&.any? %>
+        <% if @trades.present? %>
           <table class="data-table">
             <thead>
               <tr>
@@ -211,7 +211,7 @@
         <%= link_to "View All", "/dashboard/channels", class: "view-all-link" %>
       </div>
       
-      <% if @channels&.any? %>
+      <% if @channels.present? %>
         <div class="channels-grid">
           <% @channels.each do |channel| %>
             <div class="channel-card">
@@ -267,7 +267,7 @@
         <%= link_to "Manage API", "/dashboard/api_connections", class: "view-all-link" %>
       </div>
       
-      <% if @connected_apis&.any? %>
+      <% if @connected_apis.present? %>
         <div class="api-connections">
           <% @connected_apis.each do |api| %>
             <div class="api-connection-card">
@@ -721,3 +721,221 @@
     }
   }
 </style>
+
+<!-- Hero Banner -->
+<section class="hero">
+  <div class="hero-text">
+    <h3>Welcome to your trading dashboard</h3>
+    <p>
+      <% if @api_connected %>
+        Your API is connected and automated trading is active.
+        <% if @subscription %>
+          You're on the <%= @subscription.name %> plan with
+          <% if @subscription.unlimited_trades? %>
+            unlimited trades.
+          <% else %>
+            <%= @trades_remaining %> trades remaining.
+          <% end %>
+        <% end %>
+      <% else %>
+        Connect your Binance API to start automated trading.
+      <% end %>
+    </p>
+    <% unless @api_connected %>
+      <%= link_to "Connect API", api_credentials_path, class: "hero-btn" %>
+    <% end %>
+  </div>
+</section>
+
+<div class="dashboard-grid">
+  <!-- Trading Stats -->
+  <div class="card">
+    <div class="card-header">
+      <div class="header-left">
+        <span class="icon"></span>
+        <h4>Trading Statistics</h4>
+      </div>
+    </div>
+    <div class="dashboard-grid" style="margin-top: 10px;">
+      <div class="card" style="box-shadow: none; background-color: #f8f9fa;">
+        <div class="large-text"><%= @trades_count[:completed] %></div>
+        <div class="status positive">Completed Trades</div>
+      </div>
+      <div class="card" style="box-shadow: none; background-color: #f8f9fa;">
+        <div class="large-text"><%= @trades_count[:pending] %></div>
+        <div class="status">Pending Trades</div>
+      </div>
+      <div class="card" style="box-shadow: none; background-color: #f8f9fa;">
+        <div class="large-text"><%= @trades_count[:failed] %></div>
+        <div class="status negative">Failed Trades</div>
+      </div>
+      <div class="card" style="box-shadow: none; background-color: #f8f9fa;">
+        <div class="large-text"><%= @success_rate %>%</div>
+        <div class="status positive">Success Rate</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subscription Info -->
+  <div class="card">
+    <div class="card-header">
+      <div class="header-left">
+        <span class="icon"></span>
+        <h4>Subscription</h4>
+      </div>
+      <%= link_to "Upgrade", subscriptions_path, class: "primary-btn", style: "padding: 8px 15px; font-size: 14px;" %>
+    </div>
+    <% if @subscription %>
+      <div style="margin-top: 15px;">
+        <p><strong>Plan:</strong> <%= @subscription.name %></p>
+        <p><strong>Status:</strong> <span class="status positive">Active</span></p>
+        <p>
+          <strong>Trades:</strong>
+          <% if @subscription.unlimited_trades? %>
+            Unlimited
+          <% else %>
+            <%= @trades_remaining %> remaining of <%= @subscription.trade_limit %>
+          <% end %>
+        </p>
+        <% if current_user.subscription_end_date %>
+          <p><strong>Valid until:</strong> <%= current_user.subscription_end_date.strftime("%b %d, %Y") %></p>
+        <% end %>
+      </div>
+    <% else %>
+      <p style="margin-top: 15px;">No active subscription. Please select a subscription plan.</p>
+    <% end %>
+  </div>
+
+  <!-- Recent Trades -->
+  <div class="card grid-col-span-2">
+    <div class="card-header">
+      <div class="header-left">
+        <span class="icon"></span>
+        <h4>Recent Trades</h4>
+      </div>
+      <%= link_to "View All", trades_path, class: "primary-btn", style: "padding: 8px 15px; font-size: 14px;" %>
+    </div>
+    <div class="table-container">
+      <% if @recent_trades.present? %>
+        <table>
+          <thead>
+            <tr>
+              <th>Coin</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Price</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @recent_trades.each do |trade| %>
+              <tr>
+                <td><%= trade.coin %></td>
+                <td><%= trade.order_side %></td>
+                <td><%= trade.amount %></td>
+                <td><%= trade.execution_price %></td>
+                <td>
+                  <% if trade.status == "completed" %>
+                    <span class="badge-status badge-active">Completed</span>
+                  <% elsif trade.status == "failed" %>
+                    <span class="badge-status badge-inactive">Failed</span>
+                  <% else %>
+                    <span class="badge-status badge-pending"><%= trade.status.capitalize %></span>
+                  <% end %>
+                </td>
+                <td><%= trade.created_at.strftime("%b %d, %H:%M") %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p>No trades yet. Trades will appear here once you have connected your API.</p>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Your Channels -->
+  <div class="card">
+    <div class="card-header">
+      <div class="header-left">
+        <span class="icon"></span>
+        <h4>Your Channels</h4>
+      </div>
+      <%= link_to "View All", channels_path, class: "primary-btn", style: "padding: 8px 15px; font-size: 14px;" %>
+    </div>
+    <% if @user_channels.present? %>
+      <div style="margin-top: 15px;">
+        <% @user_channels.each do |channel| %>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
+            <div>
+              <p><strong><%= channel.name %></strong></p>
+              <p style="color: #666; font-size: 14px;"><%= channel.description.truncate(30) %></p>
+            </div>
+            <span class="badge-status badge-active">Active</span>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p style="margin-top: 15px;">No channels subscribed yet. Add a channel to start receiving trading signals.</p>
+    <% end %>
+  </div>
+
+  <!-- Available Channels -->
+  <div class="card">
+    <div class="card-header">
+      <div class="header-left">
+        <span class="icon"></span>
+        <h4>Available Channels</h4>
+      </div>
+    </div>
+    <% if @available_channels.present? %>
+      <div style="margin-top: 15px;">
+        <% @available_channels.each do |channel| %>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
+            <div>
+              <p><strong><%= channel.name %></strong></p>
+              <p style="color: #666; font-size: 14px;"><%= channel.description.truncate(30) %></p>
+            </div>
+            <%= link_to "Add", channels_path(channel_id: channel.id), class: "primary-btn", style: "padding: 5px 15px; font-size: 12px;" %>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p style="margin-top: 15px;">No additional channels available.</p>
+    <% end %>
+  </div>
+
+  <!-- API Status -->
+  <div class="card">
+    <div class="card-header">
+      <div class="header-left">
+        <span class="icon"></span>
+        <h4>API Connection</h4>
+      </div>
+    </div>
+    <div style="margin-top: 15px; text-align: center;">
+      <% if @api_connected %>
+        <div style="font-size: 48px; color: #16C79A; margin-bottom: 15px;">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <p><strong>API Connected</strong></p>
+        <p style="color: #666; margin-top: 5px;">Your Binance API is connected and trading is enabled</p>
+        <%= link_to "Manage API Keys", api_credentials_path, class: "primary-btn", style: "margin-top: 15px; width: 100%;" %>
+      <% else %>
+        <div style="font-size: 48px; color: #ff4a57; margin-bottom: 15px;">
+          <i class="fas fa-times-circle"></i>
+        </div>
+        <p><strong>API Not Connected</strong></p>
+        <p style="color: #666; margin-top: 5px;">Connect your Binance API to start automated trading</p>
+        <%= link_to "Connect API", new_api_credential_path, class: "primary-btn", style: "margin-top: 15px; width: 100%;" %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add any JavaScript for charts or interactive elements
+  });
+</script>

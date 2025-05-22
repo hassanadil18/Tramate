@@ -5,218 +5,261 @@
     <p class="admin-subtitle">System overview and management</p>
   </div>
 
-  <!-- System Stats -->
-  <div class="stats-container">
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-users"></i>
+  <!-- Overview Cards -->
+  <div class="dashboard-grid">
+    <!-- Users Card -->
+    <div class="card">
+      <div class="card-header">
+        <div class="header-left">
+          <span class="icon"></span>
+          <h4>Total Users</h4>
+        </div>
       </div>
-      <div class="stat-info">
-        <div class="stat-value"><%= User.count %></div>
-        <div class="stat-label">Total Users</div>
-      </div>
-    </div>
-    
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-exchange-alt"></i>
-      </div>
-      <div class="stat-info">
-        <div class="stat-value"><%= Trade.count %></div>
-        <div class="stat-label">Total Trades</div>
+      <div class="large-text"><%= @users_count %></div>
+      <div class="status">
+        <%= link_to "View All Users", admin_users_path, style: "color: #00ADB5; text-decoration: none;" %>
       </div>
     </div>
-    
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-broadcast-tower"></i>
+
+    <!-- Active Subscriptions -->
+    <div class="card">
+      <div class="card-header">
+        <div class="header-left">
+          <span class="icon"></span>
+          <h4>Active Subscriptions</h4>
+        </div>
       </div>
-      <div class="stat-info">
-        <div class="stat-value"><%= Channel.count %></div>
-        <div class="stat-label">Active Channels</div>
+      <div class="large-text"><%= @active_subscriptions %></div>
+      <div class="status">
+        <%= link_to "View All Subscriptions", admin_subscriptions_path, style: "color: #00ADB5; text-decoration: none;" %>
       </div>
     </div>
-    
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-credit-card"></i>
+
+    <!-- Trades Stats -->
+    <div class="card">
+      <div class="card-header">
+        <div class="header-left">
+          <span class="icon"></span>
+          <h4>Total Trades</h4>
+        </div>
       </div>
-      <div class="stat-info">
-        <div class="stat-value"><%= Payment.where(status: "completed").sum(:amount) %></div>
-        <div class="stat-label">Total Revenue</div>
+      <div class="large-text"><%= @total_trades %></div>
+      <div class="status">
+        <span class="positive"><%= @completed_trades %> completed</span> |
+        <span class="negative"><%= @failed_trades %> failed</span>
+      </div>
+    </div>
+
+    <!-- Success Rate -->
+    <div class="card">
+      <div class="card-header">
+        <div class="header-left">
+          <span class="icon"></span>
+          <h4>Success Rate</h4>
+        </div>
+      </div>
+      <div class="large-text"><%= @success_rate %>%</div>
+      <div class="status positive">
+        <%= @completed_trades %> of <%= @completed_trades + @failed_trades %> trades successful
       </div>
     </div>
   </div>
 
-  <!-- Quick Actions -->
-  <div class="quick-actions">
-    <h2>Quick Actions</h2>
-    <div class="action-buttons">
-      <%= link_to admin_users_path, class: "action-button" do %>
-        <i class="fas fa-users"></i>
-        <span>Manage Users</span>
-      <% end %>
-      
-      <%= link_to admin_trades_path, class: "action-button" do %>
-        <i class="fas fa-exchange-alt"></i>
-        <span>View Trades</span>
-      <% end %>
-      
-      <%= link_to admin_channels_path, class: "action-button" do %>
-        <i class="fas fa-broadcast-tower"></i>
-        <span>Manage Channels</span>
-      <% end %>
-      
-      <%= link_to admin_payments_path, class: "action-button" do %>
-        <i class="fas fa-credit-card"></i>
-        <span>View Payments</span>
-      <% end %>
-      
-      <%= link_to admin_logs_path, class: "action-button" do %>
-        <i class="fas fa-list"></i>
-        <span>System Logs</span>
-      <% end %>
+  <div style="display: flex; gap: 20px; margin-top: 20px;">
+    <!-- Monthly Revenue -->
+    <div class="card" style="flex: 1;">
+      <div class="card-header">
+        <div class="header-left">
+          <span class="icon"></span>
+          <h4>Monthly Revenue</h4>
+        </div>
+      </div>
+      <div class="large-text">$<%= @revenue_this_month %></div>
+      <div class="status positive">From subscription payments</div>
+
+      <div style="margin-top: 20px;">
+        <h4 style="margin-bottom: 10px;">Revenue Breakdown</h4>
+        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
+          <div style="width: 12px; height: 12px; background-color: #00ADB5; border-radius: 2px;"></div>
+          <span>Premium Subscriptions</span>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <div style="width: 12px; height: 12px; background-color: #FF5722; border-radius: 2px;"></div>
+          <span>Intermediate Subscriptions</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Channels Summary -->
+    <div class="card" style="flex: 1;">
+      <div class="card-header">
+        <div class="header-left">
+          <span class="icon"></span>
+          <h4>Channels</h4>
+        </div>
+      </div>
+      <div class="large-text"><%= @channels_count %></div>
+      <div class="status">
+        <%= link_to "Manage Channels", admin_channels_path, style: "color: #00ADB5; text-decoration: none;" %>
+      </div>
+
+      <div style="margin-top: 20px; margin-bottom: 10px;">
+        <h4>Channel Activity</h4>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="background-color: #f8f9fa; padding: 10px; border-radius: 5px;">
+          <strong>Most Active: </strong> Channel name with most subscribers
+        </div>
+        <div style="background-color: #f8f9fa; padding: 10px; border-radius: 5px;">
+          <strong>Newest: </strong> Most recently added channel
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Recent Activity -->
-  <div class="dashboard-sections">
-    <!-- Recent Trades -->
-    <div class="dashboard-section">
-      <div class="section-header">
-        <h2>Recent Trades</h2>
-        <%= link_to "View All", admin_trades_path, class: "view-all-link" %>
+  <!-- Recent Trades -->
+  <div class="card" style="margin-top: 20px;">
+    <div class="card-header">
+      <div class="header-left">
+        <span class="icon"></span>
+        <h4>Recent Trades</h4>
       </div>
-      
-      <div class="table-responsive">
-        <table class="admin-table">
+      <%= link_to "View All", admin_trades_path, class: "primary-btn", style: "padding: 8px 15px; font-size: 14px;" %>
+    </div>
+    <div class="table-container">
+      <% if @recent_trades.present? %>
+        <table>
           <thead>
             <tr>
               <th>ID</th>
               <th>User</th>
-              <th>Symbol</th>
+              <th>Coin</th>
               <th>Type</th>
-              <th>Status</th>
-              <th>Created</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% Trade.includes(:user, signal: :channel).order(created_at: :desc).limit(5).each do |trade| %>
-              <% signal = trade.signal %>
-              <% trading_pair = signal&.parsed_data&.dig('symbol') || 'N/A' %>
-              <% trade_type = signal&.parsed_data&.dig('side') || 'N/A' %>
-              
-              <tr class="<%= 'needs-review' if trade.needs_review %>">
-                <td><%= trade.id %></td>
-                <td><%= trade.user.email %></td>
-                <td><%= trading_pair %></td>
-                <td>
-                  <span class="trade-type <%= trade_type.downcase if trade_type %>">
-                    <%= trade_type %>
-                  </span>
-                </td>
-                <td>
-                  <span class="status-badge <%= trade.status.downcase if trade.status %>">
-                    <%= trade.status %>
-                  </span>
-                </td>
-                <td><%= trade.created_at.strftime("%b %d, %H:%M") %></td>
-                <td>
-                  <%= link_to admin_trade_path(trade), class: "action-button view" do %>
-                    <i class="fas fa-eye"></i>
-                  <% end %>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Recent Users -->
-    <div class="dashboard-section">
-      <div class="section-header">
-        <h2>Recent Users</h2>
-        <%= link_to "View All", admin_users_path, class: "view-all-link" %>
-      </div>
-      
-      <div class="table-responsive">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Type</th>
-              <th>Registered</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% User.order(created_at: :desc).limit(5).each do |user| %>
-              <tr>
-                <td><%= user.id %></td>
-                <td><%= user.full_name %></td>
-                <td><%= user.email %></td>
-                <td>
-                  <span class="status-badge <%= user.admin? ? 'admin' : 'user' %>">
-                    <%= user.admin? ? 'Admin' : 'User' %>
-                  </span>
-                </td>
-                <td><%= user.created_at.strftime("%b %d, %Y") %></td>
-                <td>
-                  <%= link_to admin_user_path(user), class: "action-button view" do %>
-                    <i class="fas fa-eye"></i>
-                  <% end %>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Recent Payments -->
-    <div class="dashboard-section">
-      <div class="section-header">
-        <h2>Recent Payments</h2>
-        <%= link_to "View All", admin_payments_path, class: "view-all-link" %>
-      </div>
-      
-      <div class="table-responsive">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>User</th>
               <th>Amount</th>
               <th>Status</th>
               <th>Date</th>
-              <th>Action</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <% Payment.includes(:user).order(created_at: :desc).limit(5).each do |payment| %>
+            <% @recent_trades.each do |trade| %>
               <tr>
-                <td><%= payment.id %></td>
-                <td><%= payment.user.email %></td>
-                <td><%= number_to_currency(payment.amount) %></td>
+                <td><%= trade.id %></td>
+                <td><%= trade.user.full_name %></td>
+                <td><%= trade.coin %></td>
+                <td><%= trade.order_side %></td>
+                <td><%= trade.amount %></td>
                 <td>
-                  <span class="status-badge <%= payment.status.downcase %>">
-                    <%= payment.status %>
-                  </span>
-                </td>
-                <td><%= payment.created_at.strftime("%b %d, %Y") %></td>
-                <td>
-                  <%= link_to admin_payment_path(payment), class: "action-button view" do %>
-                    <i class="fas fa-eye"></i>
+                  <% if trade.status == "completed" %>
+                    <span class="badge-status badge-active">Completed</span>
+                  <% elsif trade.status == "failed" %>
+                    <span class="badge-status badge-inactive">Failed</span>
+                  <% else %>
+                    <span class="badge-status badge-pending"><%= trade.status.capitalize %></span>
                   <% end %>
+                </td>
+                <td><%= trade.created_at.strftime("%b %d, %H:%M") %></td>
+                <td>
+                  <div class="action-buttons">
+                    <%= link_to admin_trade_path(trade), class: "btn-action btn-view" do %>
+                      <i class="fas fa-eye"></i>
+                    <% end %>
+                  </div>
                 </td>
               </tr>
             <% end %>
           </tbody>
         </table>
+      <% else %>
+        <p>No trades recorded yet.</p>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Recent Users and System Logs -->
+  <div style="display: flex; gap: 20px; margin-top: 20px;">
+    <!-- Recent Users -->
+    <div class="card" style="flex: 1;">
+      <div class="card-header">
+        <div class="header-left">
+          <span class="icon"></span>
+          <h4>Recent Users</h4>
+        </div>
+      </div>
+      <div class="table-container">
+        <% if @recent_users.present? %>
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Subscription</th>
+                <th>Joined</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @recent_users.each do |user| %>
+                <tr>
+                  <td><%= user.full_name %></td>
+                  <td><%= user.email %></td>
+                  <td>
+                    <% if user.subscription %>
+                      <span class="badge-status badge-active"><%= user.subscription.name %></span>
+                    <% else %>
+                      <span class="badge-status badge-inactive">None</span>
+                    <% end %>
+                  </td>
+                  <td><%= user.created_at.strftime("%b %d, %Y") %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        <% else %>
+          <p>No users registered yet.</p>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- System Logs -->
+    <div class="card" style="flex: 1;">
+      <div class="card-header">
+        <div class="header-left">
+          <span class="icon"></span>
+          <h4>System Logs</h4>
+        </div>
+        <%= link_to "View All", admin_logs_path, class: "primary-btn", style: "padding: 8px 15px; font-size: 14px;" %>
+      </div>
+      <div class="table-container">
+        <% if @recent_logs.present? %>
+          <table>
+            <thead>
+              <tr>
+                <th>Level</th>
+                <th>Message</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @recent_logs.each do |log| %>
+                <tr>
+                  <td>
+                    <% if log.level == "error" %>
+                      <span class="badge-status badge-inactive">Error</span>
+                    <% elsif log.level == "warn" %>
+                      <span class="badge-status badge-pending">Warning</span>
+                    <% else %>
+                      <span class="badge-status badge-active">Info</span>
+                    <% end %>
+                  </td>
+                  <td><%= log.message.truncate(40) %></td>
+                  <td><%= log.created_at.strftime("%H:%M:%S") %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        <% else %>
+          <p>No system logs recorded yet.</p>
+        <% end %>
       </div>
     </div>
   </div>

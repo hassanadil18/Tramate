@@ -1,31 +1,42 @@
 class SystemLog < ApplicationRecord
   # Validations
-  validates :level, presence: true, inclusion: { in: %w[error warning info debug] }
+  validates :level, presence: true, inclusion: { in: ['info', 'warn', 'error', 'debug'] }
   validates :message, presence: true
   
   # Scopes
-  scope :error, -> { where(level: 'error') }
-  scope :warning, -> { where(level: 'warning') }
+  scope :recent, -> { order(created_at: :desc) }
+  scope :errors, -> { where(level: 'error') }
+  scope :warnings, -> { where(level: 'warn') }
   scope :info, -> { where(level: 'info') }
-  scope :debug, -> { where(level: 'debug') }
-  
+
   # Class methods for logging
-  def self.log_error(message, context = nil)
-    create(level: 'error', message: message, context: context)
+  def self.log_info(message, source = nil, context = nil)
+    create(level: 'info', message: message, source: source, context: context)
   end
-  
-  def self.log_warning(message, context = nil)
-    create(level: 'warning', message: message, context: context)
+
+  def self.log_warning(message, source = nil, context = nil)
+    create(level: 'warn', message: message, source: source, context: context)
   end
-  
-  def self.log_info(message, context = nil)
-    create(level: 'info', message: message, context: context)
+
+  def self.log_error(message, source = nil, context = nil)
+    create(level: 'error', message: message, source: source, context: context)
   end
-  
-  def self.log_debug(message, context = nil)
-    create(level: 'debug', message: message, context: context)
+
+  def self.log_debug(message, source = nil, context = nil)
+    return unless Rails.env.development? || Rails.env.test?
+    create(level: 'debug', message: message, source: source, context: context)
   end
-  
+
+  # Check if this is an error log
+  def error?
+    level == 'error'
+  end
+
+  # Check if this is a warning log
+  def warning?
+    level == 'warn'
+  end
+
   # Instance methods
   def context_data
     return {} if context.blank?

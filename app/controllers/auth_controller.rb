@@ -1,63 +1,49 @@
 class AuthController < ApplicationController
   # Skip any authentication requirements for these actions
   # Uncomment when authentication is implemented
-  skip_before_action :authenticate_user!, only: [:login, :register, :authenticate, :verify_discord_username, :get_channels]
+  skip_before_action :authenticate_user!, except: [:logout]
   protect_from_forgery except: [ :verify_discord_username ]
+  layout 'auth'
+
+  def login_form
+    redirect_to dashboard_path if user_signed_in?
+  end
+
+  def register_form
+    redirect_to dashboard_path if user_signed_in?
+    @user = User.new
+  end
 
   def login
-    # Login page view
-    # If already logged in, redirect to dashboard
-  end
-
-  def register
-    # Registration page view
-    # If already logged in, redirect to dashboard
-    @user = User.new
-    @channels = Channel.all
-  end
-
-  def authenticate
-    # Process login form submission
-    email = params[:email]
-    password = params[:password]
-
-    user = User.find_by(email: email.downcase)
-
-    if user && user.authenticate(password)
-      # Set session and redirect to dashboard
+    user = User.find_by(email: params[:email])
+    
+    if user && user.authenticate(params[:password])
       session[:user_id] = user.id
-      redirect_to dashboard_path, notice: "Successfully logged in!"
+      
+      if user.admin?
+        redirect_to admin_root_path, notice: "Welcome back, #{user.full_name}!"
+      else
+        redirect_to dashboard_path, notice: "Welcome back, #{user.full_name}!"
+      end
     else
-      # Show error and redirect back to login
       flash.now[:alert] = "Invalid email or password"
-      render :login
+      render :login_form
     end
   end
 
-  def create
-    # Process registration form submission
+  def register
     @user = User.new(user_params)
-
+    
     if @user.save
-      # Set session and redirect to dashboard
       session[:user_id] = @user.id
-
-      # If this is an AJAX request, return JSON
-      respond_to do |format|
-        format.html { redirect_to dashboard_path, notice: "Account successfully created!" }
-        format.json { render json: { success: true, user_id: @user.id } }
-      end
+      redirect_to dashboard_path, notice: "Welcome to Tramate, #{@user.full_name}!"
     else
-      # Show error and return errors for AJAX
-      respond_to do |format|
-        format.html { render :register }
-        format.json { render json: { success: false, errors: @user.errors.full_messages }, status: :unprocessable_entity }
-      end
+      flash.now[:alert] = "There was a problem with your registration."
+      render :register_form
     end
   end
 
   def logout
-    # Clear session and redirect to home
     session[:user_id] = nil
     redirect_to root_path, notice: "You have been logged out."
   end
@@ -116,7 +102,7 @@ class AuthController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:email, :password, :password_confirmation, :full_name, :terms_of_service)
+    params.require(:user).permit(:first_name, :last_name, :email, :password, :password_confirmation)
   end
 
   def connection_params

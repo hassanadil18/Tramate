@@ -17,13 +17,28 @@ class ApplicationController < ActionController::Base
   end
 
   def user_signed_in?
-    current_user.present?
+    !!current_user
   end
 
   def authenticate_user!
-    unless current_user
-      flash[:alert] = "Please log in to continue."
-      redirect_to auth_login_path
+    unless user_signed_in?
+      flash[:alert] = "You need to login first"
+      redirect_to auth_login_form_path
+    end
+  end
+
+  def require_admin
+    unless current_user&.admin?
+      flash[:alert] = "You do not have permission to access this page"
+      redirect_to dashboard_path
+    end
+  end
+
+  def set_layout_for_role
+    if current_user&.admin?
+      'admin'
+    else
+      'user'
     end
   end
 end

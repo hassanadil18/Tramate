@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tramate Dashboard</title>
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+  <%= stylesheet_link_tag "application", media: "all", "data-turbolinks-track": "reload" %>
+  <%= javascript_importmap_tags %>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Global Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Layout */
+    body {
+      display: flex;
+      background-color: #f4f6f9;
+      min-height: 100vh;
+      padding: 10px;
+      gap: 20px;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: 250px;
+      min-height: calc(100vh - 20px);
+      background-color: #3C00D8;
+      border-radius: 20px;
+      color: white;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .admin-tools {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 10px;
+    }
+
+    .sidebar nav ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 10px;
+    }
+
+    .sidebar nav ul li {
+      margin: 15px 0;
+    }
+
+    .sidebar nav ul li a {
+      text-decoration: none;
+      color: white;
+      display: block;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar nav ul li a:hover, .sidebar nav ul li a.active {
+      background-color: white;
+      color: #3C00D8;
+    }
+
+    .support {
+      text-align: center;
+      margin-top: auto;
+      margin-bottom: 20px;
+      background-color: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 15px;
+    }
+
+    .support p {
+      margin-bottom: 15px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .support button {
+      background-color: #00D0F6;
+      color: white;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+
+    .support button:hover {
+      background-color: #02afce;
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .content {
+      flex: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 100%;
+    }
+
+    /* ===== TOP NAVIGATION ===== */
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    /* User Info */
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .welcome-text {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .username {
+      font-size: 28px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    /* Top Right Elements */
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .primary-btn {
+      background-color: #3C00D8;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 5px 15px rgba(60, 0, 216, 0.3);
+      text-decoration: none;
+    }
+
+    .search-container {
+      position: relative;
+    }
+
+    .search-box {
+      padding: 12px 40px 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      width: 200px;
+      font-size: 14px;
+      background-color: white;
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+    }
+
+    .notification-icon {
+      position: relative;
+      font-size: 24px;
+      color: #555;
+      cursor: pointer;
+    }
+
+    .badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background-color: #3C00D8;
+      color: white;
+      font-size: 10px;
+      padding: 3px 6px;
+      border-radius: 50%;
+    }
+
+    /* Card Styles */
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .icon {
+      width: 12px;
+      height: 12px;
+      background-color: #3C00D8;
+      border-radius: 3px;
+      margin-right: 10px;
+    }
+
+    .card-header h4 {
+      font-size: 16px;
+      color: #333;
+    }
+
+    .large-text {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .status {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .positive {
+      color: #16C79A;
+    }
+
+    .negative {
+      color: #ff4a57;
+    }
+
+    /* Hero Section */
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(135deg, #02afce, #00D0F6);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 5px 15px rgba(0, 208, 246, 0.2);
+      color: white;
+    }
+
+    .hero-text h3 {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .hero-text p {
+      margin-bottom: 20px;
+      max-width: 600px;
+    }
+
+    .hero-btn {
+      background-color: white;
+      color: #02afce;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    /* Dashboard grid layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .grid-col-span-2 {
+      grid-column: span 2;
+    }
+
+    /* Charts */
+    .chart-container {
+      height: 250px;
+      margin-top: 20px;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    table th, table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    table th {
+      font-weight: bold;
+      color: #555;
+    }
+
+    .badge-status {
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .badge-active {
+      background-color: #e1f8ed;
+      color: #16C79A;
+    }
+
+    .badge-pending {
+      background-color: #FEF3C7;
+      color: #D97706;
+    }
+
+    .badge-inactive {
+      background-color: #FEE2E2;
+      color: #ff4a57;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      body {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        margin-bottom: 20px;
+        min-height: auto;
+      }
+      
+      .grid-col-span-2 {
+        grid-column: auto;
+      }
+    }
+
+    /* Flash messages */
+    .flash {
+      padding: 12px 15px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+    }
+
+    .flash-notice {
+      background-color: #E0F2FE;
+      color: #0284c7;
+      border: 1px solid #BAE6FD;
+    }
+
+    .flash-alert {
+      background-color: #FEE2E2;
+      color: #ef4444;
+      border: 1px solid #FECACA;
+    }
+
+    /* Subscription Badge */
+    .subscription-badge {
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+
+    .subscription-free {
+      background-color: #e1f8ed;
+      color: #16C79A;
+    }
+
+    .subscription-premium {
+      background-color: #ede9fe;
+      color: #8b5cf6;
+    }
+
+    .subscription-intermediate {
+      background-color: #FEF3C7;
+      color: #D97706;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo-container">
+      <h2 class="logo">Tramate.</h2>
+    </div>
+    <nav>
+      <p class="admin-tools">Trading Dashboard</p>
+      <ul>
+        <li><a href="<%= dashboard_path %>" class="<%= 'active' if current_page?(dashboard_path) %>">
+          <i class="fas fa-th-large"></i> Overview
+        </a></li>
+        <li><a href="<%= trades_path %>" class="<%= 'active' if controller_name == 'trades' %>">
+          <i class="fas fa-chart-line"></i> My Trades
+        </a></li>
+        <li><a href="<%= channels_path %>" class="<%= 'active' if controller_name == 'channels' %>">
+          <i class="fas fa-bullhorn"></i> Channels
+        </a></li>
+        <li><a href="<%= api_credentials_path %>" class="<%= 'active' if controller_name == 'api_credentials' %>">
+          <i class="fas fa-key"></i> API Settings
+        </a></li>
+        <li><a href="<%= payments_path %>" class="<%= 'active' if controller_name == 'payments' %>">
+          <i class="fas fa-wallet"></i> Payments
+        </a></li>
+        <li><a href="<%= subscriptions_path %>" class="<%= 'active' if controller_name == 'subscriptions' %>">
+          <i class="fas fa-credit-card"></i> Subscription
+        </a></li>
+      </ul>
+    </nav>
+    <div class="support">
+      <p>Having trouble with automatic trading? Our support team is here to help!</p>
+      <button onclick="window.location.href='mailto:support@tramate.com'">Contact Support</button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="content">
+    <!-- Top Navigation -->
+    <header class="top-nav">
+      <div class="user-info">
+        <span class="welcome-text">Welcome Back,</span>
+        <h3 class="username"><%= current_user.full_name %></h3>
+        <% if current_user.subscription %>
+          <span class="subscription-badge subscription-<%= current_user.subscription.name.downcase %>">
+            <%= current_user.subscription.name %> Plan
+          </span>
+        <% end %>
+      </div>
+      <div class="top-right">
+        <div class="search-container">
+          <span class="search-icon"><i class="fas fa-search"></i></span>
+          <input type="text" placeholder="Search" class="search-box">
+        </div>
+        <div class="notification-icon">
+          <i class="fas fa-bell"></i>
+          <span class="badge">2</span>
+        </div>
+        <%= link_to "Logout", auth_logout_path, class: "primary-btn" %>
+      </div>
+    </header>
+
+    <!-- Flash Messages -->
+    <% if flash[:notice] %>
+      <div class="flash flash-notice">
+        <%= flash[:notice] %>
+      </div>
+    <% end %>
+    
+    <% if flash[:alert] %>
+      <div class="flash flash-alert">
+        <%= flash[:alert] %>
+      </div>
+    <% end %>
+
+    <!-- Content Area -->
+    <%= yield %>
+  </main>
+</body>
+</html> 

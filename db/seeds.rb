@@ -7,3 +7,8 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+
+# Create default subscription plans
+puts "Creating default subscription plans..."
+Subscription.create_default_plans
+puts "Created #{Subscription.count} subscription plans"

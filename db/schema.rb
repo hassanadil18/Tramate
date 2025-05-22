@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_22_133905) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_22_195256) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -57,6 +57,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_22_133905) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["channel_id"], name: "index_signals_on_channel_id"
+  end
+
+  create_table "subscriptions", force: :cascade do |t|
+    t.string "name"
+    t.decimal "price", precision: 10, scale: 2, default: "0.0"
+    t.text "description"
+    t.integer "trade_limit"
+    t.bigint "user_id"
+    t.string "status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_subscriptions_on_user_id"
   end
 
   create_table "system_logs", force: :cascade do |t|
@@ -118,6 +130,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_22_133905) do
     t.datetime "updated_at", null: false
     t.string "full_name"
     t.boolean "admin", default: false
+    t.integer "subscription_id"
+    t.integer "trades_count"
+    t.datetime "subscription_start_date"
+    t.datetime "subscription_end_date"
     t.index ["binance_api_key"], name: "index_users_on_binance_api_key", unique: true
     t.index ["discord_id"], name: "index_users_on_discord_id", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
@@ -126,6 +142,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_22_133905) do
   add_foreign_key "api_credentials", "users"
   add_foreign_key "payments", "users"
   add_foreign_key "signals", "channels"
+  add_foreign_key "subscriptions", "users"
   add_foreign_key "trades", "signals"
   add_foreign_key "trades", "users"
   add_foreign_key "user_channel_accesses", "channels"

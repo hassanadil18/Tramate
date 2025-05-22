@@ -1,0 +1,165 @@
+<div class="payment-container">
+  <div class="payment-content">
+    <h1 class="payment-title">Complete Your Subscription</h1>
+    
+    <div class="plan-summary">
+      <h2><%= @subscription.name %> Plan</h2>
+      <div class="plan-details">
+        <div class="plan-price">
+          <% if @subscription.price.zero? %>
+            <span class="price">FREE</span>
+          <% else %>
+            <span class="price">$<%= @subscription.price %></span>
+            <span class="period">/month</span>
+          <% end %>
+        </div>
+        <div class="plan-features">
+          <% if @subscription.trade_limit.nil? %>
+            <p><strong>Unlimited</strong> trades</p>
+          <% else %>
+            <p><strong><%= @subscription.trade_limit %></strong> trades per month</p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    
+    <% if @subscription.price.zero? %>
+      <div class="payment-success">
+        <p>Your free plan is ready to be activated!</p>
+        <%= button_to "Activate Free Plan", subscription_path(@subscription), method: :post, class: "btn btn-primary btn-activate" %>
+      </div>
+    <% else %>
+      <div class="payment-form">
+        <h3>Payment Details</h3>
+        
+        <div class="checkout-widget">
+          <% if @payment_link %>
+            <div class="checkout-iframe-container">
+              <iframe src="<%= @payment_link %>" frameborder="0" allowtransparency="true" width="100%" height="550"></iframe>
+            </div>
+          <% else %>
+            <div class="checkout-error">
+              <p>There was an error initializing the payment gateway. Please try again later.</p>
+              <%= link_to "Back to Plans", subscriptions_path, class: "btn btn-secondary" %>
+            </div>
+          <% end %>
+        </div>
+        
+        <div class="payment-notes">
+          <p><i class="fas fa-lock"></i> Your payment information is secure and encrypted.</p>
+          <p>You will be charged $<%= @subscription.price %> for a 1-month subscription.</p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+.payment-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.payment-content {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+}
+
+.payment-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #222831;
+  margin-bottom: 30px;
+}
+
+.plan-summary {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.plan-summary h2 {
+  margin-top: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #222831;
+}
+
+.plan-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.plan-price .price {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.plan-price .period {
+  font-size: 16px;
+  color: #666;
+}
+
+.payment-form h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.checkout-iframe-container {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.payment-notes {
+  margin-top: 20px;
+  color: #666;
+  font-size: 14px;
+}
+
+.payment-notes p {
+  margin-bottom: 5px;
+}
+
+.payment-success {
+  text-align: center;
+  padding: 20px;
+}
+
+.btn-activate {
+  background-color: #00ADB5;
+  color: white;
+  padding: 12px 30px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  border: none;
+  cursor: pointer;
+  margin-top: 15px;
+}
+
+.btn-activate:hover {
+  background-color: #008C93;
+}
+
+@media (max-width: 576px) {
+  .plan-details {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .plan-price {
+    margin-bottom: 10px;
+  }
+}
+</style>

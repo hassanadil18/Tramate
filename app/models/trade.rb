@@ -1,7 +1,7 @@
 class Trade < ApplicationRecord
   # Relationships
   belongs_to :user
-  belongs_to :signal
+  belongs_to :signal, optional: true
 
   # Modern JSON attributes
   attribute :pre_trade_data, :json
@@ -12,7 +12,9 @@ class Trade < ApplicationRecord
 
 
   # Validations
-  validates :status, presence: true, inclusion: { in: %w[pending executing executed completed failed canceled skipped] }
+  validates :user_id, presence: true
+  validates :status, presence: true, inclusion: { in: ['pending', 'completed', 'failed', 'cancelled'] }
+  validates :coin, presence: true
   validates :amount, numericality: { greater_than: 0 }, allow_nil: true
 
   # Scopes
@@ -66,6 +68,19 @@ class Trade < ApplicationRecord
       review_reason: reason,
       review_requested_at: Time.current
     )
+  end
+
+  # Methods
+  def successful?
+    status == 'completed'
+  end
+  
+  def failed?
+    status == 'failed'
+  end
+  
+  def pending?
+    status == 'pending'
   end
 
   private

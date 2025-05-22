@@ -1,51 +1,49 @@
 Rails.application.routes.draw do
-  # Landing page (public)
-  root "home#index"
+  # Root route - redirects to login if not authenticated, dashboard if authenticated
+  root to: "home#index"
 
   # Authentication routes
-  get "auth/login" => "auth#login"
-  get "auth/register" => "auth#register"
-  post "auth/authenticate" => "auth#authenticate"
-  post "auth/create" => "auth#create"
-  get "auth/logout" => "auth#logout"
+  get '/login', to: 'auth#login_form', as: 'auth_login_form'
+  post '/login', to: 'auth#login', as: 'auth_login'
+  get '/register', to: 'auth#register_form', as: 'auth_register_form'
+  post '/register', to: 'auth#register', as: 'auth_register'
+  get '/logout', to: 'auth#logout', as: 'auth_logout'
+
+  # User dashboard
+  get '/dashboard', to: 'dashboard#index', as: 'dashboard'
+
+  # User resources
+  resources :trades, only: [:index, :show]
+  resources :channels, only: [:index, :show, :create, :destroy]
+  resources :api_credentials
+  resources :subscriptions, only: [:index, :show] do
+    post 'select', on: :member
+    get 'payment', on: :member
+    post 'process_payment', on: :member
+    get 'success', on: :member
+  end
+  resources :payments, only: [:index, :show]
+  
+  # Admin namespace
+  namespace :admin do
+    # Admin dashboard
+    get '/', to: 'dashboard#index', as: :root
+    get '/dashboard', to: 'dashboard#index', as: ''
+    get '/logs', to: 'dashboard#logs', as: 'logs'
+    get '/logs/:id', to: 'dashboard#show_log', as: 'log'
+
+    # Admin resources
+    resources :users
+    resources :trades
+    resources :channels
+    resources :subscriptions
+    resources :payments
+  end
 
   # API endpoints for registration process
   post "auth/verify_discord_username" => "auth#verify_discord_username"
   get "auth/get_channels" => "auth#get_channels"
   post "auth/update_connection_info" => "auth#update_connection_info"
-
-  # Dashboard routes (protected)
-  get "dashboard" => "dashboard#index"
-
-  # API credentials routes
-  resources :api_credentials
-
-  # Channel routes
-  resources :channels, only: [ :index, :show ]
-
-  # Payments routes
-  resources :payments
-
-  # Trades routes
-  resources :trades, only: [ :index, :show ]
-
-  # Admin routes namespace
-  namespace :admin do
-    get "/" => "dashboard#index"
-    resources :users
-    resources :channels
-    resources :payments
-    resources :trades, only: [ :index, :show ]
-    get "logs" => "dashboard#logs"
-
-    # Additional admin routes for user management
-    post "users/:id/toggle_admin" => "users#toggle_admin", as: :toggle_admin
-    patch "trades/:id/update" => "trades#update", as: :trade_update
-
-    # Additional admin routes for channel management
-    post "channels/:id/activate" => "channels#activate", as: :activate_channel
-    post "channels/:id/deactivate" => "channels#deactivate", as: :deactivate_channel
-  end
 
   # Health check
   get "up" => "rails/health#show", as: :rails_health_check
@@ -63,5 +61,8 @@ Rails.application.routes.draw do
 
     get "step4" => "registration#step4", as: :registration_step4
     post "step4" => "registration#submit_step4"
+    
+    get "subscription" => "registration#subscription", as: :subscription
+    post "subscription" => "registration#submit_subscription"
   end
 end

@@ -1,11 +1,33 @@
 class DashboardController < ApplicationController
   before_action :authenticate_user!
+  layout 'user'
 
   def index
-    # Dashboard data for authenticated users
-    @trades = current_user.trades.order(created_at: :desc).limit(5) if defined?(current_user.trades)
-    @channels = current_user.channels.includes(:signals).limit(5) if defined?(current_user.channels)
-    @connected_apis = current_user.api_credentials.active
+    @subscription = current_user.subscription
+    
+    # Get user's recent trades
+    @recent_trades = current_user.trades.recent.limit(5)
+    
+    # Count trades by status
+    @trades_count = {
+      completed: current_user.trades.completed.count,
+      pending: current_user.trades.pending.count,
+      failed: current_user.trades.failed.count
+    }
+    
+    # Calculate success rate
+    total_executed = @trades_count[:completed] + @trades_count[:failed]
+    @success_rate = total_executed > 0 ? (@trades_count[:completed].to_f / total_executed * 100).round : 0
+    
+    # Get available/subscribed channels
+    @user_channels = current_user.channels
+    @available_channels = Channel.where.not(id: @user_channels.pluck(:id)).limit(3)
+    
+    # Calculate trades remaining in subscription
+    @trades_remaining = current_user.trades_remaining
+    
+    # Get API connection status
+    @api_connected = current_user.has_valid_binance_credentials?
   end
 
   def settings

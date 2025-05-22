@@ -7,7 +7,7 @@ class Signal < ApplicationRecord
     validates :message_content, presence: true
 
   # Store parsed_data as JSON
-  serialize :parsed_data, JSON
+  attribute :parsed_data, :json
 
   # Methods to help with signal processing
   def process_signal

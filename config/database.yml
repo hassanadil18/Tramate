@@ -17,6 +17,7 @@ default: &default
   encoding: unicode
   # For details on connection pooling, see Rails configuration guide
   # https://guides.rubyonrails.org/configuring.html#database-pooling
+  # In production, this should match or exceed the number of threads × workers
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
 

@@ -11,6 +11,7 @@
 </section>
 
 <!-- Features section -->
+<% cache 'home_features', expires_in: 12.hours do %>
 <section class="features-section" id="features">
   <div class="container">
     <h2 class="section-title">Why Choose Tramate</h2>
@@ -41,6 +42,7 @@
     </div>
   </div>
 </section>
+<% end %>
 
 <!-- How it works section -->
 <section class="how-it-works" id="how-it-works">
@@ -137,6 +139,7 @@
 </section>
 
 <!-- Testimonials -->
+<% cache 'home_testimonials', expires_in: 24.hours do %>
 <section class="testimonials-section">
   <div class="container">
     <h2 class="section-title">What Our Users Say</h2>
@@ -163,8 +166,10 @@
     </div>
   </div>
 </section>
+<% end %>
 
 <!-- Pricing -->
+<% cache 'home_pricing', expires_in: 24.hours do %>
 <section class="pricing-section" id="pricing">
   <div class="container">
     <h2 class="section-title">Simple, Transparent Pricing</h2>
@@ -229,6 +234,7 @@
     </div>
   </div>
 </section>
+<% end %>
 
 <!-- FAQ Section -->
 <section class="faq-section">

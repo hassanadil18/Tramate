@@ -27,6 +27,10 @@
 threads_count = ENV.fetch("RAILS_MAX_THREADS", 3)
 threads threads_count, threads_count
 
+# Increase workers in production for better throughput
+workers_count = ENV.fetch("WEB_CONCURRENCY") { Rails.env.production? ? 2 : 0 }
+workers workers_count if workers_count > 0
+
 # Specifies the `port` that Puma will listen on to receive requests; default is 3000.
 port ENV.fetch("PORT", 3000)
 

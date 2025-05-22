@@ -3,12 +3,13 @@ class Trade < ApplicationRecord
   belongs_to :user
   belongs_to :signal
 
-  # Store JSON data for trade tracking
-  serialize :pre_trade_data, JSON
-  serialize :post_trade_data, JSON
-  serialize :error_data, JSON
-  serialize :take_profit_data, JSON
-  serialize :stop_loss_data, JSON
+  # Modern JSON attributes
+  attribute :pre_trade_data, :json
+  attribute :post_trade_data, :json
+  attribute :error_data, :json
+  attribute :take_profit_data, :json
+  attribute :stop_loss_data, :json
+
 
   # Validations
   validates :status, presence: true, inclusion: { in: %w[pending executing executed completed failed canceled skipped] }

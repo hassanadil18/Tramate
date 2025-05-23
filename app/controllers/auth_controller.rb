@@ -1,29 +1,34 @@
 class AuthController < ApplicationController
   # Skip any authentication requirements for these actions
   # Uncomment when authentication is implemented
-  skip_before_action :authenticate_user!, except: [:logout]
+  skip_before_action :authenticate_user!, only: [:login, :register, :authenticate, :verify_discord_username, :get_channels]
   protect_from_forgery except: [ :verify_discord_username ]
-  layout 'auth'
-
-  def login_form
-    redirect_to dashboard_path if user_signed_in?
-    render :login
-  end
-
-  def register_form
-    redirect_to dashboard_path if user_signed_in?
-    @user = User.new
-    render :register
-  end
 
   def login
-    user = User.find_by(email: params[:email])
-    
-    if user && user.authenticate(params[:password])
+    # Login page view
+    # If already logged in, redirect to dashboard
+  end
+
+  def register
+    # Registration page view
+    # If already logged in, redirect to dashboard
+    @user = User.new
+    @channels = Channel.all
+  end
+
+  def authenticate
+    # Process login form submission
+    email = params[:email]
+    password = params[:password]
+
+    user = User.find_by(email: email.downcase)
+
+    if user && user.authenticate(password)
+      # Set session and redirect to dashboard
       session[:user_id] = user.id
-      redirect_to dashboard_path, notice: "Successfully logged in!"
       # Send login notification email
       UserMailer.login_notification(user).deliver_later
+      redirect_to dashboard_path, notice: "Successfully logged in!"
     else
       # Show error and redirect back to login
       flash.now[:alert] = "Invalid email or password"
@@ -31,15 +36,17 @@ class AuthController < ApplicationController
     end
   end
 
-  def register
+  def create
+    # Process registration form submission
     @user = User.new(user_params)
-    
-    if @user.save
-      session[:user_id] = @user.id
 
-      # If this is an AJAX request, return JSON
+    if @user.save
+      # Set session and redirect to dashboard
+      session[:user_id] = @user.id
       # Send signup notification email
       UserMailer.signup_notification(@user).deliver_later
+
+      # If this is an AJAX request, return JSON
       respond_to do |format|
         format.html { redirect_to dashboard_path, notice: "Account successfully created!" }
         format.json { render json: { success: true, user_id: @user.id } }
@@ -54,6 +61,7 @@ class AuthController < ApplicationController
   end
 
   def logout
+    # Clear session and redirect to home
     session[:user_id] = nil
     redirect_to root_path, notice: "You have been logged out."
   end
@@ -95,11 +103,10 @@ class AuthController < ApplicationController
       # Create API credential if Binance keys are provided
       if params[:binance_api_key].present? && params[:binance_api_secret].present?
         api_cred = user.api_credentials.new(
-          platform: "binance",
+          provider: "binance",
           api_key: params[:binance_api_key],
           api_secret: params[:binance_api_secret],
-          label: "Binance API",
-          active: true
+          status: "active"
         )
         api_cred.save
       end
@@ -113,12 +120,7 @@ class AuthController < ApplicationController
   private
 
   def user_params
-    # If first_name and last_name are provided, combine them into full_name
-    if params[:user][:first_name].present? && params[:user][:last_name].present?
-      params[:user][:full_name] = "#{params[:user][:first_name]} #{params[:user][:last_name]}"
-    end
-    
-    params.require(:user).permit(:full_name, :email, :password, :password_confirmation, :terms_of_service)
+    params.require(:user).permit(:email, :password, :password_confirmation, :full_name, :terms_of_service)
   end
 
   def connection_params

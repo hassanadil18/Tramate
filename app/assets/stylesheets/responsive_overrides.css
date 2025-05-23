@@ -1,0 +1,31 @@
+/* Responsive overrides for fixing channel module and other components */
+/* Fix for channels container */
+.channels-container { display: flex !important; flex-wrap: wrap !important; justify-content: center; gap: 20px; width: 100%; box-sizing: border-box; overflow-x: hidden; }
+/* Fix for channel cards */
+.channel-card { flex: 0 0 calc(33.333% - 20px) !important; max-width: calc(33.333% - 20px) !important; box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; }
+/* Fix for channel content */
+.channel-name, .channel-description { word-break: break-word; overflow-wrap: break-word; width: 100%; }
+/* Media queries for responsive behavior */
+@media (max-width: 992px) { .channel-card { flex: 0 0 calc(50% - 15px) !important; max-width: calc(50% - 15px) !important; } }
+@media (max-width: 768px) { .channel-card { flex: 0 0 100% !important; max-width: 100% !important; margin-bottom: 15px; } }
+@media (max-width: 576px) { .channel-name { font-size: 24px; } .channel-description { font-size: 14px; } }
+/* Fix for action buttons */
+.channel-action, .channels-action { margin-top: 15px; text-align: center; width: 100%; }
+/* Admin dashboard fixes */
+.admin-dashboard { width: 100%; max-width: 100%; overflow-x: hidden; }
+.stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; width: 100%; box-sizing: border-box; }
+.action-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; width: 100%; }
+.table-responsive { overflow-x: auto; width: 100%; }
+.table-responsive table { min-width: 650px; }
+/* Mobile responsive fixes */
+@media (max-width: 768px) { .stats-container { grid-template-columns: 1fr; } .action-buttons { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 576px) { .action-buttons { grid-template-columns: 1fr; } }
+/* Extra small device fixes */
+@media (max-width: 580px) { .channel-card { padding: 15px; } .channel-name { font-size: 20px; } .channel-description { font-size: 13px; } .stat-value { font-size: 20px; } }
+@media (max-width: 480px) { .container { padding: 0 8px; } .channel-card { padding: 12px; } .channel-name { font-size: 18px; } .channel-stats { flex-direction: column; gap: 10px; } .stat { margin-bottom: 5px; } }
+/* General overflow prevention */
+* { max-width: 100%; box-sizing: border-box; }
+.channels-section, .dashboard-section, .admin-dashboard, .dashboard-container { width: 100%; max-width: 100%; overflow-x: hidden; }
+.channel-action .btn, .channels-action .btn { padding: 8px 16px; font-size: 14px; width: auto; max-width: 100%; }
+@media (max-width: 480px) { .channel-action .btn, .channels-action .btn { padding: 6px 12px; font-size: 13px; } }
+@media (max-width: 560px) { .channels-container { gap: 10px; } .channel-card { flex: 0 0 100% !important; max-width: 100% !important; margin-right: 0; margin-left: 0; } }

@@ -2,14 +2,6 @@
 
 A platform to connect Discord and Binance for automated trading based on signals.
 
-## Project Overview
-
-Tramate is a Rails-based web application that allows users to:
-- Connect to Discord servers to receive trading signals
-- Connect to Binance accounts for automated cryptocurrency trading
-- Execute trades automatically based on signals from Discord channels
-- Manage subscriptions and track trading performance
-
 ## Technology Stack
 
 - **Backend**: Ruby on Rails
@@ -17,15 +9,6 @@ Tramate is a Rails-based web application that allows users to:
 - **Deployment**: Docker and Kamal
 - **APIs**: Discord and Binance integrations
 - **Authentication**: Custom user authentication system
-
-## Project Structure
-
-- **app/models**: Core data models for users, signals, trades, channels, and API credentials
-- **app/controllers**: Application logic for user authentication, dashboard, and admin functions
-- **app/services**: Service classes for Discord bot integration and Binance trading API
-- **app/views**: User interfaces for the web application
-- **config**: Application configuration files
-- **db/migrate**: Database schema and migrations
 
 ## Features Implemented
 
@@ -97,3 +80,38 @@ The project follows standard Rails conventions with additional services for thir
 4. Performance tracking and reporting
 
 
+
+
+## Email Notifications
+
+Tramate now supports email notifications for login and signup events. To configure email delivery:
+
+### Development Environment
+
+In development, emails are displayed in the browser using the `letter_opener` gem instead of being sent. This allows for easy testing without configuring an actual email provider.
+
+1. Run `bundle install` to install the letter_opener gem
+2. Start the Rails server
+3. When a user logs in or signs up, the email will be displayed in a new browser tab
+
+### Production Environment
+
+For production, you need to set up SMTP credentials for Gmail or another email provider:
+
+1. Edit your credentials file:
+   ```
+   EDITOR=nano rails credentials:edit
+   ```
+
+2. Add your SMTP credentials in this format:
+   ```yaml
+   smtp:
+     user_name: your_email@gmail.com
+     password: your_app_password
+   ```
+
+   Note: For Gmail, you need to use an App Password, not your regular Gmail password. You can generate one at https://myaccount.google.com/apppasswords
+
+3. Deploy your application with the updated credentials
+
+The system will automatically send email notifications when users log in or create new accounts.

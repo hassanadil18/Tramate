@@ -21,13 +21,11 @@ class AuthController < ApplicationController
     
     if user && user.authenticate(params[:password])
       session[:user_id] = user.id
-      
-      if user.admin?
-        redirect_to admin_root_path, notice: "Welcome back, #{user.full_name}!"
-      else
-        redirect_to dashboard_path, notice: "Welcome back, #{user.full_name}!"
-      end
+      redirect_to dashboard_path, notice: "Successfully logged in!"
+      # Send login notification email
+      UserMailer.login_notification(user).deliver_later
     else
+      # Show error and redirect back to login
       flash.now[:alert] = "Invalid email or password"
       render :login
     end
@@ -38,10 +36,20 @@ class AuthController < ApplicationController
     
     if @user.save
       session[:user_id] = @user.id
-      redirect_to dashboard_path, notice: "Welcome to Tramate, #{@user.full_name}!"
+
+      # If this is an AJAX request, return JSON
+      # Send signup notification email
+      UserMailer.signup_notification(@user).deliver_later
+      respond_to do |format|
+        format.html { redirect_to dashboard_path, notice: "Account successfully created!" }
+        format.json { render json: { success: true, user_id: @user.id } }
+      end
     else
-      flash.now[:alert] = "There was a problem with your registration."
-      render :register
+      # Show error and return errors for AJAX
+      respond_to do |format|
+        format.html { render :register }
+        format.json { render json: { success: false, errors: @user.errors.full_messages }, status: :unprocessable_entity }
+      end
     end
   end
 

@@ -1,19 +1,28 @@
 module Admin
-  class ChannelsController < ApplicationController
-    before_action :authenticate_user!
-    before_action :authenticate_admin!
+  class ChannelsController < BaseController
     before_action :set_channel, only: [:show, :edit, :update, :destroy]
 
     def index
-      @channels = Channel.includes(:signals, :channel_accesses)
-                        .order(created_at: :desc)
-                        .page(params[:page]).per(20)
+      @channels = Channel.includes(:trade_signals, :user_channel_accesses)
+      
+      # Apply filters if present
+      @channels = @channels.where(channel_type: params[:channel_type]) if params[:channel_type].present?
+      @channels = @channels.where(status: params[:status]) if params[:status].present?
+      @channels = @channels.where("name ILIKE ? OR description ILIKE ?", "%#{params[:search]}%", "%#{params[:search]}%") if params[:search].present?
+      
+      # Sort and paginate
+      @channels = @channels.order(created_at: :desc).page(params[:page]).per(20)
+      
+      respond_to do |format|
+        format.html
+        format.csv { send_data Channel.to_csv, filename: "channels-#{Date.today}.csv" }
+      end
     end
 
     def show
-      @signals = @channel.signals.order(created_at: :desc).limit(50)
-      @trades = Trade.joins(:signal)
-                     .where(signals: { channel_id: @channel.id })
+      @signals = @channel.trade_signals.order(created_at: :desc).limit(50)
+      @trades = Trade.joins(:trade_signal)
+                     .where(trade_signals: { channel_id: @channel.id })
                      .includes(:user)
                      .order(created_at: :desc)
                      .limit(20)
@@ -71,15 +80,12 @@ module Admin
         :api_key,
         :description,
         :signal_format,
-        :signal_template
+        :signal_template,
+        :discord_channel_id,
+        :price_per_month,
+        :tramate_resell_enabled,
+        :logo_url
       )
-    end
-
-    def authenticate_admin!
-      unless current_user&.admin?
-        flash[:alert] = "You are not authorized to access this section."
-        redirect_to root_path
-      end
     end
   end
 end

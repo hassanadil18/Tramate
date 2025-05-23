@@ -26,6 +26,9 @@ gem "attr_encrypted", "~> 4.2.0"
 # Payment processing with Checkout.com
 gem "checkout_sdk"
 
+# Pagination
+gem "kaminari"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 

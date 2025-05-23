@@ -12,3 +12,6 @@
 puts "Creating default subscription plans..."
 Subscription.create_default_plans
 puts "Created #{Subscription.count} subscription plans"
+
+# Load notifications seed file
+load File.join(Rails.root, 'db', 'seeds', 'notifications.rb')

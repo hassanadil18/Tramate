@@ -380,6 +380,96 @@
       color: #FF5722;
       border: 1px solid #FECACA;
     }
+    
+    /* Notification Dropdown */
+    .notification-dropdown {
+      position: absolute;
+      top: 40px;
+      right: 0;
+      width: 300px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      overflow: hidden;
+    }
+    
+    .notification-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .notification-header h4 {
+      margin: 0;
+      font-size: 16px;
+    }
+    
+    .notification-header a {
+      color: #00ADB5;
+      font-size: 12px;
+      text-decoration: none;
+    }
+    
+    .notification-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .notification-item {
+      padding: 12px 15px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.3s;
+    }
+    
+    .notification-item:hover {
+      background: #f9f9f9;
+    }
+    
+    .notification-content {
+      flex: 1;
+    }
+    
+    .notification-content p {
+      margin: 0 0 5px;
+      font-size: 14px;
+    }
+    
+    .notification-content small {
+      color: #999;
+      font-size: 12px;
+    }
+    
+    .mark-read {
+      background: none;
+      border: none;
+      color: #00ADB5;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .notification-footer {
+      padding: 12px 15px;
+      text-align: center;
+      border-top: 1px solid #eee;
+    }
+    
+    .notification-footer a {
+      color: #00ADB5;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    
+    .no-notifications {
+      padding: 20px;
+      text-align: center;
+      color: #999;
+    }
   </style>
 </head>
 <body>
@@ -433,9 +523,39 @@
           <span class="search-icon"><i class="fas fa-search"></i></span>
           <input type="text" placeholder="Search" class="search-box">
         </div>
-        <div class="notification-icon">
+        <div class="notification-icon" id="notification-bell">
           <i class="fas fa-bell"></i>
-          <span class="badge">2</span>
+          <span class="badge" id="notification-count"><%= current_user.notifications.unread.count %></span>
+          <div class="notification-dropdown" id="notification-dropdown" style="display: none;">
+            <div class="notification-header">
+              <h4>Notifications</h4>
+              <% if current_user.notifications.unread.any? %>
+                <a href="#" id="mark-all-read">Mark all as read</a>
+              <% end %>
+            </div>
+            <div class="notification-list" id="notification-list">
+              <% if current_user.notifications.unread.recent.limit(5).any? %>
+                <% current_user.notifications.unread.recent.limit(5).each do |notification| %>
+                  <div class="notification-item" data-id="<%= notification.id %>">
+                    <div class="notification-content">
+                      <p><%= notification.message %></p>
+                      <small><%= time_ago_in_words(notification.created_at) %> ago</small>
+                    </div>
+                    <button class="mark-read" data-id="<%= notification.id %>">
+                      <i class="fas fa-check"></i>
+                    </button>
+                  </div>
+                <% end %>
+              <% else %>
+                <div class="no-notifications">
+                  <p>No new notifications</p>
+                </div>
+              <% end %>
+            </div>
+            <div class="notification-footer">
+              <a href="<%= admin_notifications_path %>">View all notifications</a>
+            </div>
+          </div>
         </div>
         <%= link_to "Logout", auth_logout_path, class: "primary-btn" %>
       </div>
@@ -457,5 +577,93 @@
     <!-- Content Area -->
     <%= yield %>
   </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Notification bell click handler
+      const notificationBell = document.getElementById('notification-bell');
+      const notificationDropdown = document.getElementById('notification-dropdown');
+      
+      if (notificationBell) {
+        notificationBell.addEventListener('click', function(e) {
+          e.stopPropagation();
+          notificationDropdown.style.display = notificationDropdown.style.display === 'none' ? 'block' : 'none';
+        });
+      }
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function(e) {
+        if (notificationDropdown && notificationDropdown.style.display === 'block' && 
+            !notificationBell.contains(e.target)) {
+          notificationDropdown.style.display = 'none';
+        }
+      });
+      
+      // Mark individual notification as read
+      const markReadButtons = document.querySelectorAll('.mark-read');
+      markReadButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const notificationId = this.getAttribute('data-id');
+          const notificationItem = this.closest('.notification-item');
+          
+          fetch(`/admin/notifications/${notificationId}/mark_as_read`, {
+            method: 'POST',
+            headers: {
+              'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              notificationItem.remove();
+              updateNotificationCount();
+              
+              // If no more notifications, show the empty state
+              if (document.querySelectorAll('.notification-item').length === 0) {
+                document.getElementById('notification-list').innerHTML = 
+                  '<div class="no-notifications"><p>No new notifications</p></div>';
+                document.getElementById('mark-all-read')?.remove();
+              }
+            }
+          });
+        });
+      });
+      
+      // Mark all as read
+      const markAllReadButton = document.getElementById('mark-all-read');
+      if (markAllReadButton) {
+        markAllReadButton.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          fetch('/admin/notifications/mark_all_as_read', {
+            method: 'POST',
+            headers: {
+              'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              document.getElementById('notification-list').innerHTML = 
+                '<div class="no-notifications"><p>No new notifications</p></div>';
+              document.getElementById('notification-count').textContent = '0';
+              markAllReadButton.remove();
+            }
+          });
+        });
+      }
+      
+      // Update notification count
+      function updateNotificationCount() {
+        const countElement = document.getElementById('notification-count');
+        const currentCount = parseInt(countElement.textContent);
+        countElement.textContent = Math.max(0, currentCount - 1);
+      }
+    });
+  </script>
 </body>
 </html> 

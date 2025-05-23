@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_22_195256) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_23_142735) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -35,7 +35,30 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_22_195256) do
     t.boolean "tramate_resell_enabled", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "status", default: "active"
+    t.string "channel_type", default: "discord"
+    t.string "logo_url"
+    t.string "signal_format", default: "standard"
+    t.text "signal_template"
+    t.string "webhook_url"
+    t.string "api_key"
+    t.index ["channel_type"], name: "index_channels_on_channel_type"
     t.index ["discord_channel_id"], name: "index_channels_on_discord_channel_id", unique: true
+    t.index ["signal_format"], name: "index_channels_on_signal_format"
+    t.index ["status"], name: "index_channels_on_status"
+  end
+
+  create_table "notifications", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.text "message", null: false
+    t.boolean "read", default: false
+    t.string "notification_type"
+    t.datetime "read_at"
+    t.json "data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["read"], name: "index_notifications_on_read"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
   create_table "payments", force: :cascade do |t|
@@ -46,17 +69,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_22_195256) do
     t.datetime "status_updated_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "notes"
     t.index ["payment_gateway_id"], name: "index_payments_on_payment_gateway_id", unique: true
     t.index ["user_id"], name: "index_payments_on_user_id"
-  end
-
-  create_table "signals", force: :cascade do |t|
-    t.bigint "channel_id", null: false
-    t.text "message_content", null: false
-    t.json "parsed_data"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["channel_id"], name: "index_signals_on_channel_id"
   end
 
   create_table "subscriptions", force: :cascade do |t|
@@ -77,13 +92,23 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_22_195256) do
     t.jsonb "context"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "source"
     t.index ["created_at"], name: "index_system_logs_on_created_at"
     t.index ["level"], name: "index_system_logs_on_level"
   end
 
+  create_table "trade_signals", force: :cascade do |t|
+    t.bigint "channel_id", null: false
+    t.text "message_content", null: false
+    t.json "parsed_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["channel_id"], name: "index_trade_signals_on_channel_id"
+  end
+
   create_table "trades", force: :cascade do |t|
     t.bigint "user_id", null: false
-    t.bigint "signal_id", null: false
+    t.bigint "trade_signal_id", null: false
     t.string "binance_trade_id"
     t.string "status", null: false
     t.decimal "amount", precision: 15, scale: 8
@@ -99,7 +124,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_22_195256) do
     t.string "review_reason"
     t.datetime "review_requested_at"
     t.index ["binance_trade_id"], name: "index_trades_on_binance_trade_id", unique: true
-    t.index ["signal_id"], name: "index_trades_on_signal_id"
+    t.index ["trade_signal_id"], name: "index_trades_on_trade_signal_id"
     t.index ["user_id"], name: "index_trades_on_user_id"
   end
 
@@ -140,10 +165,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_22_195256) do
   end
 
   add_foreign_key "api_credentials", "users"
+  add_foreign_key "notifications", "users"
   add_foreign_key "payments", "users"
-  add_foreign_key "signals", "channels"
   add_foreign_key "subscriptions", "users"
-  add_foreign_key "trades", "signals"
+  add_foreign_key "trade_signals", "channels"
+  add_foreign_key "trades", "trade_signals"
   add_foreign_key "trades", "users"
   add_foreign_key "user_channel_accesses", "channels"
   add_foreign_key "user_channel_accesses", "payments"

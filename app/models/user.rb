@@ -7,6 +7,7 @@ class User < ApplicationRecord
   has_many :user_channel_accesses
   has_many :channels, through: :user_channel_accesses, dependent: :destroy
   has_many :api_credentials, dependent: :destroy
+  has_many :notifications, dependent: :destroy
   belongs_to :subscription, optional: true
 
   # Validations
@@ -26,6 +27,29 @@ class User < ApplicationRecord
   # Callbacks
   before_save :downcase_email
   before_create :set_default_subscription
+  
+  # Class methods
+  def self.to_csv
+    require 'csv'
+    
+    CSV.generate(headers: true) do |csv|
+      # Define headers
+      csv << ['ID', 'Name', 'Email', 'Discord ID', 'Admin Status', 'Subscription Status', 'Registration Date']
+      
+      # Add data rows
+      all.each do |user|
+        csv << [
+          user.id,
+          user.full_name,
+          user.email,
+          user.discord_id || '-',
+          user.admin? ? 'Admin' : 'User',
+          user.subscription_status&.capitalize || 'Inactive',
+          user.created_at.strftime("%Y-%m-%d")
+        ]
+      end
+    end
+  end
 
   # Method to check if user has valid Binance credentials
   def has_valid_binance_credentials?

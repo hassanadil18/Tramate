@@ -1,8 +1,5 @@
 module Admin
-  class DashboardController < ApplicationController
-    before_action :require_admin
-    layout 'admin'
-
+  class DashboardController < BaseController
     def index
       # Overview statistics
       @users_count = User.count
@@ -38,7 +35,7 @@ module Admin
 
     def channels
       # Channel management for admin
-      @channels = Channel.includes(:signals).order(created_at: :desc).page(params[:page]).per(20)
+      @channels = Channel.includes(:trade_signals).order(created_at: :desc).page(params[:page]).per(20)
     end
 
     def payments
@@ -48,20 +45,11 @@ module Admin
 
     def trades
       # Trade management for admin
-      @trades = Trade.includes(:user, :channel).order(created_at: :desc).page(params[:page]).per(20)
+      @trades = Trade.includes(:user).order(created_at: :desc).page(params[:page]).per(20)
     end
 
     def logs
-      @logs = SystemLog.order(created_at: :desc).paginate(page: params[:page], per_page: 50)
-    end
-
-    private
-
-    def require_admin
-      unless current_user&.admin?
-        flash[:alert] = "You do not have permission to access this page"
-        redirect_to dashboard_path
-      end
+      @logs = SystemLog.order(created_at: :desc).page(params[:page]).per(50)
     end
   end
 end

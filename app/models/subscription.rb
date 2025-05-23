@@ -11,6 +11,30 @@ class Subscription < ApplicationRecord
   scope :active, -> { where(status: 'active') }
   scope :available_plans, -> { where(user_id: nil) }
   
+  # Class methods for export
+  def self.to_csv
+    require 'csv'
+    
+    CSV.generate(headers: true) do |csv|
+      # Define headers
+      csv << ['ID', 'Name', 'Price', 'Description', 'Trade Limit', 'Status', 'User', 'Created At']
+      
+      # Add data rows
+      all.includes(:user).each do |sub|
+        csv << [
+          sub.id,
+          sub.name,
+          sub.price,
+          sub.description,
+          sub.trade_limit || 'Unlimited',
+          sub.status&.capitalize || 'N/A',
+          sub.user&.email || 'Template Plan',
+          sub.created_at.strftime("%Y-%m-%d")
+        ]
+      end
+    end
+  end
+  
   # Class methods to access standard plans
   def self.starter
     available_plans.find_by(name: 'Starter')

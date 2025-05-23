@@ -1,7 +1,7 @@
-class Signal < ApplicationRecord
+class TradeSignal < ApplicationRecord
     # Relationships
     belongs_to :channel
-    has_many :trades
+    has_many :trades, foreign_key: 'trade_signal_id'
 
     # Validations
     validates :message_content, presence: true

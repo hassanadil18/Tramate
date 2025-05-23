@@ -1,434 +1,296 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tramate - Automated Trading Platform</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
-    
-    body {
-      background-color: #f4f6f9;
-    }
-    
-    .landing-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 0;
-    }
-    
-    .logo {
-      font-size: 32px;
-      font-weight: bold;
-      color: #3C00D8;
-    }
-    
-    .nav-buttons {
-      display: flex;
-      gap: 15px;
-    }
-    
-    .btn {
-      padding: 12px 25px;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.3s ease;
-    }
-    
-    .btn-primary {
-      background-color: #3C00D8;
-      color: white;
-      border: none;
-    }
-    
-    .btn-secondary {
-      background-color: white;
-      color: #3C00D8;
-      border: 1px solid #3C00D8;
-    }
-    
-    .btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }
-    
-    .hero {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 80px 0;
-    }
-    
-    .hero-content {
-      max-width: 50%;
-    }
-    
-    .hero-title {
-      font-size: 48px;
-      font-weight: bold;
-      color: #333;
-      margin-bottom: 20px;
-      line-height: 1.2;
-    }
-    
-    .hero-subtitle {
-      font-size: 20px;
-      color: #666;
-      margin-bottom: 30px;
-      line-height: 1.5;
-    }
-    
-    .hero-image {
-      width: 45%;
-    }
-    
-    .hero-image img {
-      width: 100%;
-      border-radius: 10px;
-    }
-    
-    .features {
-      padding: 80px 0;
-      text-align: center;
-    }
-    
-    .features-title {
-      font-size: 36px;
-      font-weight: bold;
-      color: #333;
-      margin-bottom: 50px;
-    }
-    
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 30px;
-    }
-    
-    .feature-card {
-      background-color: white;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-      text-align: left;
-    }
-    
-    .feature-icon {
-      font-size: 36px;
-      color: #3C00D8;
-      margin-bottom: 15px;
-    }
-    
-    .feature-title {
-      font-size: 22px;
-      font-weight: bold;
-      margin-bottom: 15px;
-    }
-    
-    .feature-desc {
-      color: #666;
-      line-height: 1.6;
-    }
-    
-    .pricing {
-      padding: 80px 0;
-      text-align: center;
-    }
-    
-    .pricing-title {
-      font-size: 36px;
-      font-weight: bold;
-      color: #333;
-      margin-bottom: 50px;
-    }
-    
-    .pricing-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 30px;
-    }
-    
-    .pricing-card {
-      background-color: white;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-      text-align: left;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .pricing-tag {
-      position: absolute;
-      top: 0;
-      right: 0;
-      background-color: #16C79A;
-      color: white;
-      padding: 5px 15px;
-      font-weight: bold;
-      border-bottom-left-radius: 10px;
-    }
-    
-    .pricing-header {
-      margin-bottom: 20px;
-    }
-    
-    .pricing-name {
-      font-size: 22px;
-      font-weight: bold;
-    }
-    
-    .pricing-price {
-      font-size: 36px;
-      font-weight: bold;
-    }
-    
-    .pricing-period {
-      color: #666;
-    }
-    
-    .pricing-features {
-      list-style: none;
-      margin-bottom: 25px;
-    }
-    
-    .pricing-features li {
-      margin: 10px 0;
-      display: flex;
-      align-items: center;
-    }
-    
-    .pricing-features li:before {
-      content: "✓";
-      color: #16C79A;
-      font-weight: bold;
-      margin-right: 10px;
-    }
-    
-    .pricing-btn {
-      width: 100%;
-      text-align: center;
-    }
-    
-    .footer {
-      background-color: #333;
-      color: white;
-      padding: 50px 0;
-    }
-    
-    .footer-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-    }
-    
-    .footer-section {
-      margin-bottom: 30px;
-      min-width: 200px;
-    }
-    
-    .footer-title {
-      font-size: 20px;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-    
-    .footer-links {
-      list-style: none;
-    }
-    
-    .footer-links li {
-      margin: 10px 0;
-    }
-    
-    .footer-links a {
-      color: #ccc;
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-    
-    .footer-links a:hover {
-      color: white;
-    }
-    
-    .copyright {
-      text-align: center;
-      padding: 20px 0;
-      color: #999;
-      border-top: 1px solid #444;
-      margin-top: 30px;
-      width: 100%;
-    }
-    
-    /* Responsive */
-    @media (max-width: 768px) {
-      .hero {
-        flex-direction: column;
-        text-align: center;
-      }
-      
-      .hero-content {
-        max-width: 100%;
-        margin-bottom: 40px;
-      }
-      
-      .hero-image {
-        width: 100%;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="landing-container">
-    <!-- Header -->
-    <header class="header">
-      <div class="logo">Tramate.</div>
-      <div class="nav-buttons">
-        <%= link_to "Login", auth_login_form_path, class: "btn btn-secondary" %>
-        <%= link_to "Register", auth_register_form_path, class: "btn btn-primary" %>
-      </div>
-    </header>
-
-    <!-- Hero Section -->
-    <section class="hero">
-      <div class="hero-content">
-        <h1 class="hero-title">Automated Trading Made Simple</h1>
-        <p class="hero-subtitle">Connect your preferred exchanges and let our platform handle your trades. Maximize your profits with our advanced algorithms and expert signals.</p>
-        <%= link_to "Start Trading Now", auth_register_form_path, class: "btn btn-primary" %>
-      </div>
-      <div class="hero-image">
-        <img src="https://via.placeholder.com/500x350" alt="Trading Dashboard">
-      </div>
-    </section>
-
-    <!-- Features Section -->
-    <section class="features">
-      <h2 class="features-title">Why Choose Tramate</h2>
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">🔒</div>
-          <h3 class="feature-title">Secure API Integration</h3>
-          <p class="feature-desc">Connect securely to your favorite exchanges without compromising your funds. Our platform uses read-only API keys.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">📊</div>
-          <h3 class="feature-title">Expert Trading Signals</h3>
-          <p class="feature-desc">Access verified trading signals from professional traders and execute them automatically.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">⚙️</div>
-          <h3 class="feature-title">Fully Automated</h3>
-          <p class="feature-desc">Set up once and let the platform handle the rest. Save time and eliminate emotional trading decisions.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Pricing Section -->
-    <section class="pricing">
-      <h2 class="pricing-title">Choose Your Plan</h2>
-      <div class="pricing-grid">
-        <div class="pricing-card">
-          <div class="pricing-header">
-            <h3 class="pricing-name">Starter</h3>
-            <div class="pricing-price">Free</div>
-            <div class="pricing-period">Forever</div>
-          </div>
-          <ul class="pricing-features">
-            <li>1 Trade per day</li>
-            <li>Basic signal access</li>
-            <li>Manual trade execution</li>
-            <li>Email support</li>
-          </ul>
-          <%= link_to "Get Started", auth_register_form_path, class: "btn btn-secondary pricing-btn" %>
-        </div>
-        
-        <div class="pricing-card">
-          <div class="pricing-tag">Popular</div>
-          <div class="pricing-header">
-            <h3 class="pricing-name">Intermediate</h3>
-            <div class="pricing-price">$5<span class="pricing-period">/month</span></div>
-          </div>
-          <ul class="pricing-features">
-            <li>20 Trades per month</li>
-            <li>Premium signal access</li>
-            <li>Automated trade execution</li>
-            <li>Priority email support</li>
-          </ul>
-          <%= link_to "Choose Plan", auth_register_form_path, class: "btn btn-primary pricing-btn" %>
-        </div>
-        
-        <div class="pricing-card">
-          <div class="pricing-header">
-            <h3 class="pricing-name">Premium</h3>
-            <div class="pricing-price">$15<span class="pricing-period">/month</span></div>
-          </div>
-          <ul class="pricing-features">
-            <li>Unlimited trades</li>
-            <li>All signal channels</li>
-            <li>Advanced automation</li>
-            <li>Priority support</li>
-          </ul>
-          <%= link_to "Choose Plan", auth_register_form_path, class: "btn btn-secondary pricing-btn" %>
-        </div>
-      </div>
-    </section>
+<!-- Landing page hero section -->
+<section class="hero-section">
+  <div class="container">
+    <h1 class="hero-title">Transform Your Trading with Tramate</h1>
+    <p class="hero-description">Automate your crypto trading by connecting signal providers directly to your exchange. No more manual trades, no more missed opportunities.</p>
+    <div class="hero-buttons">
+      <%= link_to "Get Started Free", "/auth/register", class: "btn btn-primary btn-large" %>
+      <%= link_to "See How It Works", "#how-it-works", class: "btn btn-secondary btn-large" %>
+    </div>
   </div>
+</section>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="footer-container">
-      <div class="footer-section">
-        <h3 class="footer-title">Tramate</h3>
-        <p>The future of automated trading.</p>
+<!-- Features section -->
+<% cache 'home_features', expires_in: 12.hours do %>
+<section class="features-section" id="features">
+  <div class="container">
+    <h2 class="section-title">Why Choose Tramate</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="feature-bolt"></i>
+        </div>
+        <h3 class="feature-title">Automated Trading</h3>
+        <p class="feature-description">Connect your Binance account and let our system execute trades automatically based on signals from your trusted channels.</p>
       </div>
       
-      <div class="footer-section">
-        <h3 class="footer-title">Quick Links</h3>
-        <ul class="footer-links">
-          <li><a href="#">Home</a></li>
-          <li><a href="#">Features</a></li>
-          <li><a href="#">Pricing</a></li>
-          <li><a href="#">Contact</a></li>
-        </ul>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="feature-shield"></i>
+        </div>
+        <h3 class="feature-title">Secure & Reliable</h3>
+        <p class="feature-description">Your API keys are encrypted and secure. We never have access to your funds - just trading permissions you control.</p>
       </div>
       
-      <div class="footer-section">
-        <h3 class="footer-title">Legal</h3>
-        <ul class="footer-links">
-          <li><a href="#">Privacy Policy</a></li>
-          <li><a href="#">Terms of Service</a></li>
-        </ul>
-      </div>
-      
-      <div class="footer-section">
-        <h3 class="footer-title">Support</h3>
-        <ul class="footer-links">
-          <li><a href="#">Help Center</a></li>
-          <li><a href="#">Contact Us</a></li>
-        </ul>
-      </div>
-      
-      <div class="copyright">
-        &copy; <%= Date.current.year %> Tramate. All rights reserved.
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="feature-chart"></i>
+        </div>
+        <h3 class="feature-title">Performance Tracking</h3>
+        <p class="feature-description">Track your trades, measure performance, and optimize your strategy over time with detailed analytics.</p>
       </div>
     </div>
-  </footer>
-</body>
-</html>
+  </div>
+</section>
+<% end %>
+
+<!-- How it works section -->
+<section class="how-it-works" id="how-it-works">
+  <div class="container">
+    <h2 class="section-title">How Tramate Works</h2>
+    <div class="steps-container">
+      <div class="step">
+        <div class="step-number">Step 1</div>
+        <div class="step-description">
+          <h3>Create Your Account</h3>
+          <p>Sign up to Tramate with your email and connect your Discord account to access your trading signal channels.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">Step 2</div>
+        <div class="step-description">
+          <h3>Connect Exchange</h3>
+          <p>Securely connect your Binance account using API keys with carefully limited permissions for your security.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">Step 3</div>
+        <div class="step-description">
+          <h3>Start Automated Trading</h3>
+          <p>Our system automatically executes trades based on signals from your Discord channels, with no manual intervention needed.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Channels showcase -->
+<section class="channels-section" id="channels">
+  <div class="container">
+    <h2 class="channels-title">Popular Signal Channels</h2>
+    <p class="channels-subtitle">Connect with these top-performing signal providers through Tramate</p>
+    
+    <div class="channels-container">
+      <div class="channel-card">
+        <h3 class="channel-name">Elite Crypto Signals</h3>
+        <p class="channel-description">Premium crypto signals with high accuracy rate and detailed market analysis</p>
+        <div class="channel-stats">
+          <div class="stat">
+            <span class="stat-value">92%</span>
+            <span class="stat-label">Win Rate</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">3.5x</span>
+            <span class="stat-label">ROI</span>
+          </div>
+        </div>
+        <div class="channels-action">
+          <%= link_to "Join Channel", "#", class: "btn btn-primary" %>
+        </div>
+      </div>
+      
+      <div class="channel-card">
+        <h3 class="channel-name">Crypto Alpha</h3>
+        <p class="channel-description">Specialized in spot and futures trading with detailed entry and exit points</p>
+        <div class="channel-stats">
+          <div class="stat">
+            <span class="stat-value">89%</span>
+            <span class="stat-label">Win Rate</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">2.8x</span>
+            <span class="stat-label">ROI</span>
+          </div>
+        </div>
+        <div class="channel-action">
+          <%= link_to "Join Channel", "#", class: "btn btn-primary" %>
+        </div>
+      </div>
+      
+      <div class="channel-card">
+        <h3 class="channel-name">Inspired Analyst</h3>
+        <p class="channel-description">Technical analysis and signals for both beginners and advanced traders</p>
+        <div class="channel-stats">
+          <div class="stat">
+            <span class="stat-value">86%</span>
+            <span class="stat-label">Win Rate</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">2.5x</span>
+            <span class="stat-label">ROI</span>
+          </div>
+        </div>
+        <div class="channel-action">
+          <%= link_to "Join Channel", "#", class: "btn btn-primary" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<% cache 'home_testimonials', expires_in: 24.hours do %>
+<section class="testimonials-section">
+  <div class="container">
+    <h2 class="section-title">What Our Users Say</h2>
+    <div class="testimonials-container">
+      <div class="testimonial">
+        <div class="testimonial-content">
+          <p>"Tramate has completely changed how I trade. I've increased my profits by 40% while spending 90% less time monitoring charts."</p>
+        </div>
+        <div class="testimonial-author">
+          <div class="author-name">Alex M.</div>
+          <div class="author-title">Crypto Trader, 2 years</div>
+        </div>
+      </div>
+      
+      <div class="testimonial">
+        <div class="testimonial-content">
+          <p>"I was skeptical at first, but after seeing how Tramate executes trades exactly according to my chosen signals, I'm a believer. Great platform!"</p>
+        </div>
+        <div class="testimonial-author">
+          <div class="author-name">Sarah J.</div>
+          <div class="author-title">Day Trader, 3 years</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<% end %>
+
+<!-- Pricing -->
+<% cache 'home_pricing', expires_in: 24.hours do %>
+<section class="pricing-section" id="pricing">
+  <div class="container">
+    <h2 class="section-title">Simple, Transparent Pricing</h2>
+    <div class="pricing-container">
+      <div class="pricing-card">
+        <div class="pricing-header">
+          <h3 class="pricing-title">Basic</h3>
+          <div class="pricing-price">$19<span>/month</span></div>
+        </div>
+        <div class="pricing-features">
+          <ul>
+            <li>Connect 1 signal channel</li>
+            <li>Connect 1 exchange account</li>
+            <li>Basic trade tracking</li>
+            <li>Email notifications</li>
+          </ul>
+        </div>
+        <div class="pricing-action">
+          <%= link_to "Get Started", "/auth/register", class: "btn btn-secondary" %>
+        </div>
+      </div>
+      
+      <div class="pricing-card featured">
+        <div class="pricing-badge">Most Popular</div>
+        <div class="pricing-header">
+          <h3 class="pricing-title">Pro</h3>
+          <div class="pricing-price">$39<span>/month</span></div>
+        </div>
+        <div class="pricing-features">
+          <ul>
+            <li>Connect 5 signal channels</li>
+            <li>Connect 2 exchange accounts</li>
+            <li>Advanced analytics</li>
+            <li>Priority support</li>
+            <li>Custom risk management</li>
+          </ul>
+        </div>
+        <div class="pricing-action">
+          <%= link_to "Get Started", "/auth/register", class: "btn btn-primary" %>
+        </div>
+      </div>
+      
+      <div class="pricing-card">
+        <div class="pricing-header">
+          <h3 class="pricing-title">Enterprise</h3>
+          <div class="pricing-price">$99<span>/month</span></div>
+        </div>
+        <div class="pricing-features">
+          <ul>
+            <li>Unlimited signal channels</li>
+            <li>Multiple exchange accounts</li>
+            <li>Advanced risk management</li>
+            <li>Dedicated account manager</li>
+            <li>API access</li>
+            <li>White-label options</li>
+          </ul>
+        </div>
+        <div class="pricing-action">
+          <%= link_to "Contact Sales", "#contact", class: "btn btn-secondary" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<% end %>
+
+<!-- FAQ Section -->
+<section class="faq-section">
+  <div class="container">
+    <h2 class="section-title">Frequently Asked Questions</h2>
+    <div class="faq-container">
+      <div class="faq-item">
+        <h3 class="faq-question">Is my cryptocurrency safe with Tramate?</h3>
+        <p class="faq-answer">Yes, Tramate never holds your cryptocurrency. We use API keys with specific trading permissions only, and you can revoke access at any time. Your funds remain in your exchange account.</p>
+      </div>
+      
+      <div class="faq-item">
+        <h3 class="faq-question">Which exchanges do you support?</h3>
+        <p class="faq-answer">Currently, we support Binance. We're working on adding more exchanges like Coinbase Pro, KuCoin, and others in the near future.</p>
+      </div>
+      
+      <div class="faq-item">
+        <h3 class="faq-question">How do I connect my signal channels?</h3>
+        <p class="faq-answer">Simply connect your Discord account during setup, and you'll be able to select which signal channels you want to automate. We'll handle the rest!</p>
+      </div>
+      
+      <div class="faq-item">
+        <h3 class="faq-question">What if I want to stop automated trading?</h3>
+        <p class="faq-answer">You can pause or disable automated trading at any time with a single click from your dashboard. You'll still have access to signals and can trade manually.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contact section -->
+<section class="cta-section" id="contact">
+  <div class="container">
+    <h2 class="cta-title">Ready to automate your trading?</h2>
+    <p class="cta-description">Get started today or contact us with any questions</p>
+    
+    <div class="cta-buttons">
+      <%= link_to "Sign Up Now", "/auth/register", class: "btn btn-primary btn-large" %>
+      <%= link_to "Contact Support", "#", class: "btn btn-secondary btn-large" %>
+    </div>
+    
+    <div class="contact-form">
+      <h3>Get in Touch</h3>
+      <form action="#" method="post">
+        <div class="form-group">
+          <input type="text" name="name" placeholder="Your Name" required>
+        </div>
+        <div class="form-group">
+          <input type="email" name="email" placeholder="Your Email" required>
+        </div>
+        <div class="form-group">
+          <textarea name="message" placeholder="Your Message" required></textarea>
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-primary">Send Message</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>

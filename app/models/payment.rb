@@ -16,6 +16,29 @@ class Payment < ApplicationRecord
   # Callbacks
   before_save :update_status_timestamp
   
+  # Class methods
+  def self.to_csv
+    require 'csv'
+    
+    CSV.generate(headers: true) do |csv|
+      # Define headers
+      csv << ['ID', 'User', 'Amount', 'Status', 'Payment Gateway ID', 'Date', 'Status Updated']
+      
+      # Add data rows
+      all.includes(:user).each do |payment|
+        csv << [
+          payment.id,
+          payment.user&.email || 'Unknown',
+          payment.amount,
+          payment.status.capitalize,
+          payment.payment_gateway_id,
+          payment.created_at.strftime("%Y-%m-%d"),
+          payment.status_updated_at&.strftime("%Y-%m-%d %H:%M") || 'N/A'
+        ]
+      end
+    end
+  end
+  
   private
   
   def update_status_timestamp

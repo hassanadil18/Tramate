@@ -1,7 +1,7 @@
 class Trade < ApplicationRecord
   # Relationships
   belongs_to :user
-  belongs_to :signal, optional: true
+  belongs_to :trade_signal, optional: true, foreign_key: 'trade_signal_id'
 
   # Modern JSON attributes
   attribute :pre_trade_data, :json
@@ -29,6 +29,33 @@ class Trade < ApplicationRecord
 
   # Callbacks
   before_create :set_timestamp
+  
+  # Class methods for export
+  def self.to_csv
+    require 'csv'
+    
+    CSV.generate(headers: true) do |csv|
+      # Define headers
+      csv << [
+        'ID', 'User', 'Status', 'Coin', 'Amount', 
+        'Signal ID', 'Execution Price', 'Created At'
+      ]
+      
+      # Add data rows
+      all.includes(:user).each do |trade|
+        csv << [
+          trade.id,
+          trade.user&.email || 'Unknown',
+          trade.status.capitalize,
+          trade.coin,
+          trade.amount,
+          trade.trade_signal_id,
+          trade.execution_price,
+          trade.created_at.strftime("%Y-%m-%d %H:%M")
+        ]
+      end
+    end
+  end
 
   # Returns trades with issues that admin should review
   def self.needs_review
@@ -50,13 +77,13 @@ class Trade < ApplicationRecord
 
   # Determine if trade executed correctly compared to signal
   def matches_signal?
-    return false unless signal && signal.parsed_data.present?
+    return false unless trade_signal && trade_signal.parsed_data.present?
 
     # Check if the coin, price range matches what we expected
-    correct_coin = coin.to_s.downcase == signal.parsed_data[:coin].to_s.downcase
+    correct_coin = coin.to_s.downcase == trade_signal.parsed_data[:coin].to_s.downcase
     price_within_range = execution_price &&
-                        (execution_price >= signal.parsed_data[:entry_price].to_f * 0.98) &&
-                        (execution_price <= signal.parsed_data[:entry_price].to_f * 1.02)
+                        (execution_price >= trade_signal.parsed_data[:entry_price].to_f * 0.98) &&
+                        (execution_price <= trade_signal.parsed_data[:entry_price].to_f * 1.02)
 
     correct_coin && price_within_range
   end

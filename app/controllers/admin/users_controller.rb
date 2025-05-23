@@ -1,7 +1,5 @@
 module Admin
-  class UsersController < ApplicationController
-    before_action :authenticate_user!
-    before_action :authenticate_admin!
+  class UsersController < BaseController
     before_action :set_user, only: [:show, :edit, :update, :toggle_admin]
 
     def index
@@ -57,13 +55,6 @@ module Admin
 
     def user_params
       params.require(:user).permit(:full_name, :email, :discord_id, :subscription_status, :admin)
-    end
-
-    def authenticate_admin!
-      unless current_user&.admin?
-        flash[:alert] = "You are not authorized to access this section."
-        redirect_to root_path
-      end
     end
   end
 end

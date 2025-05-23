@@ -19,12 +19,14 @@ module Loggable
       user_agent: request.user_agent
     }
     
+    source = "#{controller_name}##{action_name}"
+    
     if response.status >= 500
-      SystemLog.log_error("Server Error: #{response.status}", context)
+      SystemLog.log_error("Server Error: #{response.status}", source, context)
     elsif response.status >= 400
-      SystemLog.log_warning("Client Error: #{response.status}", context)
+      SystemLog.log_warning("Client Error: #{response.status}", source, context)
     else
-      SystemLog.log_info("Request completed: #{request.method} #{request.path}", context)
+      SystemLog.log_info("Request completed: #{request.method} #{request.path}", source, context)
     end
   end
 

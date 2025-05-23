@@ -3,11 +3,11 @@ Rails.application.routes.draw do
   root to: "home#index"
 
   # Authentication routes
-  get '/login', to: 'auth#login_form', as: 'auth_login_form'
-  post '/login', to: 'auth#login', as: 'auth_login'
-  get '/register', to: 'auth#register_form', as: 'auth_register_form'
-  post '/register', to: 'auth#register', as: 'auth_register'
-  get '/logout', to: 'auth#logout', as: 'auth_logout'
+  get '/auth/login', to: 'auth#login_form', as: 'auth_login_form'
+  post '/auth/login', to: 'auth#login', as: 'auth_login'
+  get '/auth/register', to: 'auth#register_form', as: 'auth_register_form'
+  post '/auth/register', to: 'auth#register', as: 'auth_register'
+  get '/auth/logout', to: 'auth#logout', as: 'auth_logout'
 
   # User dashboard
   get '/dashboard', to: 'dashboard#index', as: 'dashboard'
@@ -26,6 +26,17 @@ Rails.application.routes.draw do
   
   # Admin namespace
   namespace :admin do
+    # Admin notifications
+    resources :notifications, only: [:index] do
+      member do
+        post :mark_as_read
+      end
+      collection do
+        post :mark_all_as_read
+        get :fetch
+      end
+    end
+    
     # Admin dashboard
     get '/', to: 'dashboard#index', as: :root
     get '/dashboard', to: 'dashboard#index', as: ''
@@ -33,7 +44,9 @@ Rails.application.routes.draw do
     get '/logs/:id', to: 'dashboard#show_log', as: 'log'
 
     # Admin resources
-    resources :users
+    resources :users do
+      post :toggle_admin, on: :member
+    end
     resources :trades
     resources :channels
     resources :subscriptions

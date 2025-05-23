@@ -4,9 +4,14 @@
       <h1 class="text-3xl font-bold text-gray-900">Channel Management</h1>
       <p class="mt-2 text-sm text-gray-600">Manage and monitor trading channels</p>
     </div>
-    <%= link_to new_admin_channel_path, class: "btn-primary" do %>
-      <i class="fas fa-plus mr-2"></i>Add New Channel
-    <% end %>
+    <div class="flex space-x-2">
+      <%= link_to admin_channels_path(format: :csv), class: "btn-secondary" do %>
+        <i class="fas fa-file-csv mr-2"></i>Export CSV
+      <% end %>
+      <%= link_to new_admin_channel_path, class: "btn-primary" do %>
+        <i class="fas fa-plus mr-2"></i>Add New Channel
+      <% end %>
+    </div>
   </div>
 
   <!-- Statistics -->
@@ -42,7 +47,7 @@
         </div>
         <div class="ml-4">
           <p class="text-sm font-medium text-gray-600">Total Subscribers</p>
-          <p class="text-2xl font-semibold text-gray-900"><%= ChannelAccess.count %></p>
+          <p class="text-2xl font-semibold text-gray-900"><%= UserChannelAccess.count %></p>
         </div>
       </div>
     </div>
@@ -54,7 +59,7 @@
         </div>
         <div class="ml-4">
           <p class="text-sm font-medium text-gray-600">Total Signals</p>
-          <p class="text-2xl font-semibold text-gray-900"><%= Signal.count %></p>
+          <p class="text-2xl font-semibold text-gray-900"><%= TradeSignal.count %></p>
         </div>
       </div>
     </div>
@@ -142,10 +147,10 @@
                 </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%= channel.channel_accesses.count %>
+                <%= channel.user_channel_accesses.count %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%= channel.signals.count %>
+                <%= channel.trade_signals.count %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 <%= channel.created_at.strftime("%b %d, %Y") %>

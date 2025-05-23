@@ -1,11 +1,9 @@
 module Admin
-  class TradesController < ApplicationController
-    before_action :authenticate_user!
-    before_action :authenticate_admin!
+  class TradesController < BaseController
     before_action :set_trade, only: [ :show, :update ]
 
     def index
-      @trades = Trade.includes(:user, signal: :channel)
+      @trades = Trade.includes(:user, trade_signal: :channel)
                      .order(created_at: :desc)
                      .page(params[:page]).per(20)
 
@@ -19,7 +17,7 @@ module Admin
       end
 
       if params[:channel_id].present?
-        @trades = @trades.joins(signal: :channel).where(signals: { channel_id: params[:channel_id] })
+        @trades = @trades.joins(trade_signal: :channel).where(trade_signals: { channel_id: params[:channel_id] })
       end
 
       if params[:trade_type].present?
@@ -38,7 +36,7 @@ module Admin
     end
 
     def show
-      @signal = @trade.signal
+      @signal = @trade.trade_signal
       @channel = @signal&.channel
       @user = @trade.user
     end
@@ -59,13 +57,6 @@ module Admin
 
     def trade_params
       params.permit(:needs_review, :review_reason, :notes)
-    end
-
-    def authenticate_admin!
-      unless current_user&.admin?
-        flash[:alert] = "You are not authorized to access this section."
-        redirect_to root_path
-      end
     end
   end
 end

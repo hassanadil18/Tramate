@@ -7,11 +7,13 @@ class AuthController < ApplicationController
 
   def login_form
     redirect_to dashboard_path if user_signed_in?
+    render :login
   end
 
   def register_form
     redirect_to dashboard_path if user_signed_in?
     @user = User.new
+    render :register
   end
 
   def login
@@ -27,7 +29,7 @@ class AuthController < ApplicationController
       end
     else
       flash.now[:alert] = "Invalid email or password"
-      render :login_form
+      render :login
     end
   end
 
@@ -39,7 +41,7 @@ class AuthController < ApplicationController
       redirect_to dashboard_path, notice: "Welcome to Tramate, #{@user.full_name}!"
     else
       flash.now[:alert] = "There was a problem with your registration."
-      render :register_form
+      render :register
     end
   end
 
@@ -85,10 +87,11 @@ class AuthController < ApplicationController
       # Create API credential if Binance keys are provided
       if params[:binance_api_key].present? && params[:binance_api_secret].present?
         api_cred = user.api_credentials.new(
-          provider: "binance",
+          platform: "binance",
           api_key: params[:binance_api_key],
           api_secret: params[:binance_api_secret],
-          status: "active"
+          label: "Binance API",
+          active: true
         )
         api_cred.save
       end
@@ -102,7 +105,12 @@ class AuthController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:first_name, :last_name, :email, :password, :password_confirmation)
+    # If first_name and last_name are provided, combine them into full_name
+    if params[:user][:first_name].present? && params[:user][:last_name].present?
+      params[:user][:full_name] = "#{params[:user][:first_name]} #{params[:user][:last_name]}"
+    end
+    
+    params.require(:user).permit(:full_name, :email, :password, :password_confirmation, :terms_of_service)
   end
 
   def connection_params

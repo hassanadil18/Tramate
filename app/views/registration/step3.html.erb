@@ -1,0 +1,393 @@
+<div class="registration-container">
+  <div class="registration-sidebar">
+    <div class="logo-wrapper">
+      <h2 class="logo">Tramate.</h2>
+    </div>
+    
+    <div class="steps-container">
+      <div class="step-item completed">
+        <div class="step-number"><i class="fas fa-check"></i></div>
+        <div class="step-label">Create Account</div>
+      </div>
+      <div class="step-item completed">
+        <div class="step-number"><i class="fas fa-check"></i></div>
+        <div class="step-label">Connect Discord</div>
+      </div>
+      <div class="step-item active">
+        <div class="step-number">3</div>
+        <div class="step-label">API Setup</div>
+      </div>
+      <div class="step-item">
+        <div class="step-number">4</div>
+        <div class="step-label">Subscription</div>
+      </div>
+    </div>
+    
+    <div class="registration-info">
+      <h3>Connect your exchange</h3>
+      <p>By connecting your Binance account, we can execute trades on your behalf based on the signals you receive. Your API keys are encrypted and securely stored.</p>
+    </div>
+  </div>
+  
+  <div class="registration-form">
+    <h2>Connect Exchange API</h2>
+    <p class="form-subtitle">Link your Binance account to automate trades (optional)</p>
+    
+    <% if flash[:alert] %>
+      <div class="alert alert-danger"><%= flash[:alert] %></div>
+    <% end %>
+    
+    <div class="note-box">
+      <i class="fas fa-info-circle"></i>
+      <div>
+        <p><strong>Important:</strong> This step is optional but recommended for full automation.</p>
+        <p>Your API keys are encrypted and stored securely. We recommend creating API keys with trade-only permissions and no withdrawal access.</p>
+      </div>
+    </div>
+    
+    <%= form_with url: registration_step3_path, method: :post do |f| %>
+      <div class="form-group">
+        <div class="api-toggle">
+          <label class="toggle-label">
+            <input type="checkbox" id="enable-api" name="enable_api" 
+                   <%= 'checked' if session.dig(:registration, :binance_api_key).present? %>>
+            <span class="toggle-text">I want to connect my Binance account</span>
+          </label>
+        </div>
+      </div>
+      
+      <div id="api-form-container" <%= 'style="display: none;"' unless session.dig(:registration, :binance_api_key).present? %>>
+        <div class="instruction-steps">
+          <h4>How to create API keys on Binance:</h4>
+          <ol>
+            <li>Log in to your Binance account</li>
+            <li>Go to <strong>User Center</strong> > <strong>API Management</strong></li>
+            <li>Create a new API key (with trading permission only)</li>
+            <li>Enter your API Key and Secret below</li>
+          </ol>
+        </div>
+        
+        <div class="form-group">
+          <label for="binance_api_key">API Key</label>
+          <input type="text" name="binance_api_key" id="binance_api_key" class="form-control" 
+                 value="<%= session.dig(:registration, :binance_api_key) %>">
+        </div>
+        
+        <div class="form-group">
+          <label for="binance_api_secret">API Secret</label>
+          <input type="password" name="binance_api_secret" id="binance_api_secret" class="form-control">
+          <small class="form-text text-muted">Your API secret will be encrypted and stored securely.</small>
+        </div>
+      </div>
+      
+      <div class="button-group">
+        <a href="<%= registration_step2_path %>" class="btn btn-outline">Back</a>
+        <button type="submit" class="btn btn-primary">Continue to Subscription</button>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+  }
+  
+  .registration-container {
+    display: flex;
+    min-height: 100vh;
+  }
+  
+  .registration-sidebar {
+    width: 320px;
+    background-color: #00ADB5;
+    color: white;
+    padding: 40px 30px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .logo-wrapper {
+    margin-bottom: 60px;
+  }
+  
+  .logo {
+    font-size: 28px;
+    font-weight: 700;
+  }
+  
+  .steps-container {
+    margin-bottom: 40px;
+  }
+  
+  .step-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+    opacity: 0.7;
+  }
+  
+  .step-item.active {
+    opacity: 1;
+  }
+  
+  .step-item.completed {
+    opacity: 1;
+  }
+  
+  .step-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    font-weight: 600;
+  }
+  
+  .step-item.active .step-number {
+    background-color: white;
+    color: #00ADB5;
+  }
+  
+  .step-item.completed .step-number {
+    background-color: white;
+    color: #00ADB5;
+  }
+  
+  .step-label {
+    font-size: 16px;
+    font-weight: 500;
+  }
+  
+  .registration-info {
+    margin-top: auto;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+  }
+  
+  .registration-info h3 {
+    font-size: 18px;
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+  
+  .registration-info p {
+    font-size: 14px;
+    line-height: 1.5;
+    opacity: 0.9;
+  }
+  
+  .registration-form {
+    flex: 1;
+    padding: 60px;
+    max-width: 600px;
+  }
+  
+  h2 {
+    margin-top: 0;
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  .form-subtitle {
+    color: #666;
+    margin-bottom: 30px;
+  }
+  
+  .note-box {
+    display: flex;
+    background-color: #e1f5fe;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 25px;
+  }
+  
+  .note-box i {
+    font-size: 24px;
+    color: #039be5;
+    margin-right: 15px;
+    margin-top: 3px;
+  }
+  
+  .note-box p {
+    margin: 0 0 8px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  .note-box p:last-child {
+    margin-bottom: 0;
+  }
+  
+  .instruction-steps {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .instruction-steps h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .instruction-steps ol {
+    margin: 0;
+    padding-left: 20px;
+  }
+  
+  .instruction-steps li {
+    font-size: 14px;
+    margin-bottom: 5px;
+    line-height: 1.5;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+  }
+  
+  .form-text {
+    font-size: 13px;
+    color: #666;
+    margin-top: 5px;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+  }
+  
+  .form-control:focus {
+    border-color: #00ADB5;
+    outline: none;
+  }
+  
+  .api-toggle {
+    margin-bottom: 15px;
+  }
+  
+  .toggle-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  .toggle-label input {
+    margin-right: 10px;
+  }
+  
+  .button-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+  }
+  
+  .btn {
+    padding: 14px 20px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .btn-primary {
+    background-color: #00ADB5;
+    color: white;
+    border: none;
+  }
+  
+  .btn-primary:hover {
+    background-color: #008e96;
+  }
+  
+  .btn-outline {
+    background-color: transparent;
+    border: 1px solid #ddd;
+    color: #666;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .btn-outline:hover {
+    border-color: #ccc;
+    background-color: #f9f9f9;
+  }
+  
+  .alert {
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+  }
+  
+  .alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+  
+  @media (max-width: 992px) {
+    .registration-container {
+      flex-direction: column;
+    }
+    
+    .registration-sidebar {
+      width: 100%;
+      padding: 30px 20px;
+    }
+    
+    .registration-form {
+      padding: 30px 20px;
+    }
+    
+    .button-group {
+      flex-direction: column;
+    }
+    
+    .btn {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const enableApiCheckbox = document.getElementById('enable-api');
+    const apiFormContainer = document.getElementById('api-form-container');
+    
+    enableApiCheckbox.addEventListener('change', function() {
+      if (this.checked) {
+        apiFormContainer.style.display = 'block';
+      } else {
+        apiFormContainer.style.display = 'none';
+        document.getElementById('binance_api_key').value = '';
+        document.getElementById('binance_api_secret').value = '';
+      }
+    });
+  });
+</script> 

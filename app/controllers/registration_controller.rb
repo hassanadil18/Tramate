@@ -103,10 +103,11 @@ class RegistrationController < ApplicationController
       # Create API credentials if provided
       if session[:registration][:binance_api_key].present?
         @user.api_credentials.create(
-          provider: 'binance',
+          platform: 'binance',
           api_key: session[:registration][:binance_api_key],
           api_secret: session[:registration][:binance_api_secret],
-          status: 'active'
+          label: 'Binance API',
+          active: true
         )
       end
       

@@ -19,7 +19,34 @@ class User < ApplicationRecord
   validates :password, length: { minimum: 6 }, allow_nil: true
 
   # Virtual attributes
-  attr_accessor :terms_of_service, :discord_username, :password_confirmation
+  attr_accessor :terms_of_service, :discord_username, :password_confirmation, :first_name, :last_name
+
+  # First name accessor methods
+  def first_name
+    @first_name ||= full_name&.split(' ', 2)&.first
+  end
+  
+  def first_name=(value)
+    @first_name = value
+    update_full_name
+  end
+  
+  # Last name accessor methods 
+  def last_name
+    @last_name ||= full_name&.split(' ', 2)&.last
+  end
+  
+  def last_name=(value)
+    @last_name = value
+    update_full_name
+  end
+  
+  # Update full_name when first_name or last_name changes
+  def update_full_name
+    if @first_name.present? || @last_name.present?
+      self.full_name = [@first_name, @last_name].compact.join(' ')
+    end
+  end
 
   # Encrypt the Binance API secret
   attr_encrypted :binance_api_secret, key: Rails.application.credentials.secret_key_base&.first(32) || "x" * 32
@@ -53,7 +80,7 @@ class User < ApplicationRecord
 
   # Method to check if user has valid Binance credentials
   def has_valid_binance_credentials?
-    api_credentials.exists?(provider: 'binance', status: 'active')
+    api_credentials.exists?(platform: 'binance', active: true)
   end
   
   # Subscription-related methods

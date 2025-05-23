@@ -26,8 +26,8 @@ class AuthController < ApplicationController
     if user && user.authenticate(password)
       # Set session and redirect to dashboard
       session[:user_id] = user.id
-      # Send login notification email
-      UserMailer.login_notification(user).deliver_later
+      # Log login notification (instead of sending email)
+      Rails.logger.info "LOGIN NOTIFICATION: User #{user.email} logged in at #{Time.current}"
       redirect_to dashboard_path, notice: "Successfully logged in!"
     else
       # Show error and redirect back to login
@@ -43,8 +43,8 @@ class AuthController < ApplicationController
     if @user.save
       # Set session and redirect to dashboard
       session[:user_id] = @user.id
-      # Send signup notification email
-      UserMailer.signup_notification(@user).deliver_later
+      # Log signup notification (instead of sending email)
+      Rails.logger.info "SIGNUP NOTIFICATION: User #{@user.email} signed up at #{Time.current}"
 
       # If this is an AJAX request, return JSON
       respond_to do |format|

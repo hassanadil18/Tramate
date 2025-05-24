@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_23_142735) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_24_140117) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -42,8 +42,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_23_142735) do
     t.text "signal_template"
     t.string "webhook_url"
     t.string "api_key"
+    t.string "discord_invite_link"
+    t.string "discord_guild_id"
+    t.string "discord_webhook_url"
+    t.text "discord_bot_permissions"
     t.index ["channel_type"], name: "index_channels_on_channel_type"
     t.index ["discord_channel_id"], name: "index_channels_on_discord_channel_id", unique: true
+    t.index ["discord_guild_id"], name: "index_channels_on_discord_guild_id"
     t.index ["signal_format"], name: "index_channels_on_signal_format"
     t.index ["status"], name: "index_channels_on_status"
   end

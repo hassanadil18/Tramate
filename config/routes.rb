@@ -9,12 +9,21 @@ Rails.application.routes.draw do
   post '/auth/register', to: 'auth#register', as: 'auth_register'
   get '/auth/logout', to: 'auth#logout', as: 'auth_logout'
 
+  # Discord OAuth routes
+  get '/auth/discord', to: 'discord_auth#authorize', as: 'discord_auth'
+  get '/auth/discord/callback', to: 'discord_auth#callback', as: 'discord_callback'
+
   # User dashboard
   get '/dashboard', to: 'dashboard#index', as: 'dashboard'
 
   # User resources
   resources :trades, only: [:index, :show]
-  resources :channels, only: [:index, :show, :create, :destroy]
+  resources :channels, only: [:index, :show, :create, :destroy] do
+    member do
+      get 'verify_discord'
+      post 'complete_connection'
+    end
+  end
   resources :api_credentials
   resources :subscriptions, only: [:index, :show] do
     post 'select', on: :member
@@ -48,7 +57,12 @@ Rails.application.routes.draw do
       post :toggle_admin, on: :member
     end
     resources :trades
-    resources :channels
+    resources :channels do
+      member do
+        post :setup_discord_webhook
+        post :test_discord_connection
+      end
+    end
     resources :subscriptions
     resources :payments
   end
@@ -57,6 +71,12 @@ Rails.application.routes.draw do
   post "auth/verify_discord_username" => "auth#verify_discord_username"
   get "auth/get_channels" => "auth#get_channels"
   post "auth/update_connection_info" => "auth#update_connection_info"
+
+  # API namespace for external integrations
+  namespace :api do
+    # Discord webhook endpoint
+    post '/discord/webhook', to: 'discord_webhooks#receive'
+  end
 
   # Health check
   get "up" => "rails/health#show", as: :rails_health_check

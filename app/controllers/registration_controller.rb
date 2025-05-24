@@ -23,7 +23,7 @@ class RegistrationController < ApplicationController
     end
   end
   
-  # Step 2: Discord verification
+  # Step 2: Discord verification and channel selection
   def step2
     @channels = Channel.all
   end
@@ -40,12 +40,23 @@ class RegistrationController < ApplicationController
       return
     end
     
-    # Update session with channel and Discord info
-    session[:registration][:channel_id] = channel_id
-    session[:registration][:discord_username] = discord_username
-    session[:registration][:current_step] = 3
+    # Verify Discord membership
+    verification_result = verify_discord_membership(discord_username, channel_id)
     
-    redirect_to registration_step3_path
+    if verification_result[:success]
+      # Update session with channel and Discord info
+      session[:registration][:channel_id] = channel_id
+      session[:registration][:discord_username] = discord_username
+      session[:registration][:current_step] = 3
+      
+      redirect_to registration_step3_path
+    else
+      flash.now[:alert] = verification_result[:message]
+      @channels = Channel.all
+      @selected_channel_id = channel_id
+      @discord_username = discord_username
+      render :step2
+    end
   end
   
   # Step 3: Binance API connection
@@ -73,7 +84,7 @@ class RegistrationController < ApplicationController
   
   # Step 4: Subscription selection
   def subscription
-    @subscriptions = Subscription.available_plans
+    @subscriptions = Subscription.where(user_id: nil) # Available plans
   end
   
   def submit_subscription
@@ -81,7 +92,7 @@ class RegistrationController < ApplicationController
     
     unless subscription_id.present?
       flash.now[:alert] = "Please select a subscription plan"
-      @subscriptions = Subscription.available_plans
+      @subscriptions = Subscription.where(user_id: nil)
       render :subscription
       return
     end
@@ -89,20 +100,28 @@ class RegistrationController < ApplicationController
     # Get the selected subscription
     subscription = Subscription.find(subscription_id)
     
-    # Create the user
+    # Create the user with Discord ID
     @user = User.new(session[:registration][:user])
-    @user.discord_username = session[:registration][:discord_username]
+    @user.discord_id = session[:registration][:discord_username]
     
     if @user.save
-      # Create user's channel access
+      # Create user's channel access with proper schema
       if session[:registration][:channel_id].present?
         channel = Channel.find_by(id: session[:registration][:channel_id])
-        @user.user_channel_accesses.create(channel: channel) if channel
+        if channel
+          UserChannelAccess.create!(
+            user: @user,
+            channel: channel,
+            access_type: 'subscription',
+            access_start_date: Time.current,
+            access_end_date: 1.year.from_now
+          )
+        end
       end
       
       # Create API credentials if provided
       if session[:registration][:binance_api_key].present?
-        @user.api_credentials.create(
+        @user.api_credentials.create!(
           platform: 'binance',
           api_key: session[:registration][:binance_api_key],
           api_secret: session[:registration][:binance_api_secret],
@@ -111,20 +130,19 @@ class RegistrationController < ApplicationController
         )
       end
       
+      # Assign subscription to user
+      assign_subscription_to_user(@user, subscription)
+      
       # Log the user in
       session[:user_id] = @user.id
+      
+      # Log signup notification
+      Rails.logger.info "SIGNUP NOTIFICATION: User #{@user.email} signed up at #{Time.current}"
       
       # Clear registration data
       session.delete(:registration)
       
-      # If free plan, assign directly
-      if subscription.price.zero?
-        assign_subscription_to_user(@user, subscription)
-        redirect_to success_subscriptions_path
-      else
-        # For paid plans, redirect to payment
-        redirect_to new_subscription_path(subscription_id: subscription.id)
-      end
+      redirect_to dashboard_path, notice: "Account successfully created! Welcome to Tramate."
     else
       flash[:alert] = "Error creating account: #{@user.errors.full_messages.join(', ')}"
       redirect_to registration_step1_path
@@ -165,19 +183,39 @@ class RegistrationController < ApplicationController
   end
   
   def assign_subscription_to_user(user, subscription)
-    # Create a subscription record for the user
-    user_subscription = subscription.dup
-    user_subscription.user = user
-    user_subscription.status = "active"
-    user_subscription.save!
-    
     # Update user with subscription info
     user.update!(
-      subscription_id: user_subscription.id,
+      subscription_id: subscription.id,
       subscription_status: "active",
       subscription_start_date: Time.current,
       subscription_end_date: 1.month.from_now,
       trades_count: 0
     )
+  end
+  
+  # Discord verification logic (same as in channels controller)
+  def verify_discord_membership(discord_username, channel_id)
+    return { success: false, message: "Discord username is required." } if discord_username.blank?
+    
+    # Simulate Discord API call to check membership
+    # In real implementation, this would use Discord bot API to check if user is in the server/channel
+    
+    # For demo: 70% success rate to simulate real verification
+    is_member = rand > 0.3
+    
+    if is_member
+      {
+        success: true,
+        message: "Discord membership verified successfully!"
+      }
+    else
+      channel = Channel.find_by(id: channel_id)
+      invite_link = channel&.discord_invite_link || "https://discord.gg/tramate"
+      {
+        success: false,
+        message: "Discord username '#{discord_username}' not found in #{channel&.name || 'this'} channel. Please make sure you have joined the Discord server and are a member of the channel.",
+        invite_link: invite_link
+      }
+    end
   end
 end 

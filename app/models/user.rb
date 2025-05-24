@@ -13,7 +13,7 @@ class User < ApplicationRecord
   # Validations
   validates :email, presence: true, uniqueness: { case_sensitive: false }, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :full_name, presence: true
-  validates :discord_username, presence: true, allow_nil: true
+  validates :discord_username, presence: true, if: :discord_verification_required?
   validates :subscription_status, inclusion: { in: %w[active inactive pending] }, allow_nil: true
   validates :terms_of_service, acceptance: true
   validates :password, length: { minimum: 6 }, allow_nil: true
@@ -146,5 +146,10 @@ class User < ApplicationRecord
       self.subscription_status = 'active'
       self.trades_count = 0
     end
+  end
+
+  def discord_verification_required?
+    # Only require discord_username if it's explicitly being set or the user is fully registered
+    discord_username.present? || persisted?
   end
 end

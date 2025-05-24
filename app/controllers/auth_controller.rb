@@ -1,22 +1,20 @@
 class AuthController < ApplicationController
-  # Skip any authentication requirements for these actions
-  # Uncomment when authentication is implemented
-  skip_before_action :authenticate_user!, only: [:login, :register, :authenticate, :verify_discord_username, :get_channels]
+  # Skip authentication for these actions since they're for non-logged-in users
+  skip_before_action :authenticate_user!, only: [:login_form, :login, :register_form, :register, :verify_discord_username, :get_channels, :update_connection_info]
   protect_from_forgery except: [ :verify_discord_username ]
+  
+  # Use application layout for consistent header/footer
+  layout 'application'
 
-  def login
+  def login_form
     # Login page view
     # If already logged in, redirect to dashboard
+    if user_signed_in?
+      redirect_to dashboard_path
+    end
   end
 
-  def register
-    # Registration page view
-    # If already logged in, redirect to dashboard
-    @user = User.new
-    @channels = Channel.all
-  end
-
-  def authenticate
+  def login
     # Process login form submission
     email = params[:email]
     password = params[:password]
@@ -32,32 +30,23 @@ class AuthController < ApplicationController
     else
       # Show error and redirect back to login
       flash.now[:alert] = "Invalid email or password"
-      render :login
+      render :login_form
     end
   end
 
-  def create
-    # Process registration form submission
-    @user = User.new(user_params)
-
-    if @user.save
-      # Set session and redirect to dashboard
-      session[:user_id] = @user.id
-      # Log signup notification (instead of sending email)
-      Rails.logger.info "SIGNUP NOTIFICATION: User #{@user.email} signed up at #{Time.current}"
-
-      # If this is an AJAX request, return JSON
-      respond_to do |format|
-        format.html { redirect_to dashboard_path, notice: "Account successfully created!" }
-        format.json { render json: { success: true, user_id: @user.id } }
-      end
-    else
-      # Show error and return errors for AJAX
-      respond_to do |format|
-        format.html { render :register }
-        format.json { render json: { success: false, errors: @user.errors.full_messages }, status: :unprocessable_entity }
-      end
+  def register_form
+    # Registration page view
+    # If already logged in, redirect to dashboard
+    if user_signed_in?
+      redirect_to dashboard_path
     end
+    @user = User.new
+    @channels = Channel.all
+  end
+
+  def register
+    # Redirect to multi-step registration process instead of creating user directly
+    redirect_to registration_step1_path
   end
 
   def logout
@@ -127,3 +116,4 @@ class AuthController < ApplicationController
     params.permit(:discord_id, :binance_api_key, :binance_api_secret)
   end
 end
+

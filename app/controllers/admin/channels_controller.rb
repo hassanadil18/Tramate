@@ -1,6 +1,6 @@
 module Admin
   class ChannelsController < BaseController
-    before_action :set_channel, only: [:show, :edit, :update, :destroy]
+    before_action :set_channel, only: [:show, :edit, :update, :destroy, :setup_discord_webhook, :test_discord_connection]
 
     def index
       @channels = Channel.includes(:trade_signals, :user_channel_accesses)
@@ -30,6 +30,9 @@ module Admin
 
     def new
       @channel = Channel.new
+      # Set default values for Discord channels
+      @channel.channel_type = 'discord'
+      @channel.status = 'active'
     end
 
     def edit
@@ -40,6 +43,12 @@ module Admin
 
       if @channel.save
         SystemLog.log_info("Channel created: #{@channel.name}", { channel_id: @channel.id })
+        
+        # Auto-setup Discord webhook if it's a Discord channel
+        if @channel.channel_type == 'discord' && @channel.discord_channel_id.present?
+          setup_discord_webhook_for_channel(@channel)
+        end
+        
         redirect_to admin_channel_path(@channel), notice: 'Channel was successfully created.'
       else
         render :new
@@ -65,6 +74,42 @@ module Admin
       end
     end
 
+    # Setup Discord webhook for a channel
+    def setup_discord_webhook
+      discord_service = DiscordService.new
+      
+      result = discord_service.create_webhook(@channel.discord_channel_id, "Tramate-#{@channel.name}")
+      
+      if result[:success]
+        @channel.update!(
+          discord_webhook_url: result[:webhook_url]
+        )
+        
+        SystemLog.log_info("Discord webhook created for channel: #{@channel.name}", { 
+          channel_id: @channel.id,
+          webhook_url: result[:webhook_url]
+        })
+        
+        redirect_to admin_channel_path(@channel), notice: 'Discord webhook successfully created!'
+      else
+        redirect_to admin_channel_path(@channel), alert: "Failed to create Discord webhook: #{result[:error]}"
+      end
+    end
+
+    # Test Discord connection
+    def test_discord_connection
+      discord_service = DiscordService.new
+      
+      # Test by getting channel info
+      result = discord_service.get_channel_messages(@channel.discord_channel_id, 1)
+      
+      if result[:success]
+        redirect_to admin_channel_path(@channel), notice: 'Discord connection successful! Bot can access this channel.'
+      else
+        redirect_to admin_channel_path(@channel), alert: "Discord connection failed: #{result[:error]}"
+      end
+    end
+
     private
 
     def set_channel
@@ -82,10 +127,29 @@ module Admin
         :signal_format,
         :signal_template,
         :discord_channel_id,
+        :discord_guild_id,
+        :discord_webhook_url,
+        :discord_bot_permissions,
+        :discord_invite_link,
         :price_per_month,
         :tramate_resell_enabled,
         :logo_url
       )
+    end
+
+    def setup_discord_webhook_for_channel(channel)
+      return unless channel.discord_channel_id.present?
+      
+      discord_service = DiscordService.new
+      result = discord_service.create_webhook(channel.discord_channel_id, "Tramate-#{channel.name}")
+      
+      if result[:success]
+        channel.update(discord_webhook_url: result[:webhook_url])
+        SystemLog.log_info("Auto-created Discord webhook for channel: #{channel.name}", { 
+          channel_id: channel.id,
+          webhook_url: result[:webhook_url]
+        })
+      end
     end
   end
 end

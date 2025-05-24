@@ -3,7 +3,7 @@ class DashboardController < ApplicationController
   layout 'user'
 
   def index
-    @subscription = current_user.subscription
+    @subscription = current_user.subscription || Subscription.starter
     
     # Get user's recent trades
     @recent_trades = current_user.trades.recent.limit(5)

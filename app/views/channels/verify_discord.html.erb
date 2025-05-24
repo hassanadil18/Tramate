@@ -1,0 +1,582 @@
+<div class="discord-verification-page">
+  <div class="verification-container">
+    <div class="verification-header">
+      <div class="channel-info">
+        <div class="channel-icon-large">
+          <i class="fas fa-satellite"></i>
+        </div>
+        <div class="header-text">
+          <h1>Verify Discord Membership</h1>
+          <p class="subtitle">To connect to <strong><%= @channel.name %></strong>, we need to verify that you're a member of the Discord server.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flash messages -->
+    <% if notice %>
+      <div class="alert alert-success">
+        <%= notice %>
+      </div>
+    <% end %>
+    
+    <% if alert %>
+      <div class="alert alert-danger">
+        <%= alert %>
+      </div>
+    <% end %>
+
+    <div class="verification-content">
+      <div class="verification-form-section">
+        <div class="form-header">
+          <h2>Discord Username Verification</h2>
+          <p>Please enter your Discord username exactly as it appears in Discord (including #numbers if applicable).</p>
+        </div>
+
+        <form id="discordVerificationForm" action="<%= complete_connection_channel_path(@channel) %>" method="post">
+          <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+          
+          <div class="form-group">
+            <label for="discord_username">Discord Username</label>
+            <div class="input-group">
+              <div class="input-icon">
+                <i class="fab fa-discord"></i>
+              </div>
+              <input type="text" 
+                     name="discord_username" 
+                     id="discord_username" 
+                     class="form-control" 
+                     placeholder="username#1234" 
+                     required
+                     autocomplete="off">
+            </div>
+            <small class="form-text">
+              Enter your complete Discord username including the # and numbers (e.g., JohnDoe#1234)
+            </small>
+          </div>
+
+          <div class="verification-info">
+            <div class="info-card">
+              <div class="info-icon">
+                <i class="fas fa-info-circle"></i>
+              </div>
+              <div class="info-content">
+                <h4>How verification works</h4>
+                <ul>
+                  <li>We'll check if your Discord username is a member of the <strong><%= @channel.name %></strong> server</li>
+                  <li>You must have joined the Discord server before attempting verification</li>
+                  <li>Verification typically takes a few seconds</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="verification-status d-none" id="verificationStatus">
+            <!-- Will be filled by JavaScript -->
+          </div>
+
+          <div class="form-actions">
+            <%= link_to "Cancel", channels_path, class: "btn btn-secondary" %>
+            <button type="submit" class="btn btn-primary" id="verifyBtn">
+              <i class="fas fa-shield-alt"></i>
+              Verify Membership
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="help-section">
+        <h3>Need Help?</h3>
+        
+        <div class="help-card">
+          <h4><i class="fas fa-question-circle"></i> Not a member yet?</h4>
+          <p>You need to join the Discord server first before you can connect to this channel.</p>
+          <% if @channel.discord_invite_link.present? %>
+            <a href="<%= @channel.discord_invite_link %>" target="_blank" class="btn btn-discord">
+              <i class="fab fa-discord"></i>
+              Join Discord Server
+            </a>
+          <% else %>
+            <a href="https://discord.gg/tramate" target="_blank" class="btn btn-discord">
+              <i class="fab fa-discord"></i>
+              Join Discord Server
+            </a>
+          <% end %>
+        </div>
+
+        <div class="help-card">
+          <h4><i class="fas fa-user-circle"></i> How to find your Discord username</h4>
+          <div class="steps">
+            <div class="step">
+              <span class="step-number">1</span>
+              <span class="step-text">Open Discord and click on your profile picture</span>
+            </div>
+            <div class="step">
+              <span class="step-number">2</span>
+              <span class="step-text">Your username will be displayed (e.g., username#1234)</span>
+            </div>
+            <div class="step">
+              <span class="step-number">3</span>
+              <span class="step-text">Copy it exactly including the # and numbers</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="help-card">
+          <h4><i class="fas fa-exclamation-triangle"></i> Verification failed?</h4>
+          <ul>
+            <li>Make sure you've joined the Discord server</li>
+            <li>Check that your username is spelled correctly</li>
+            <li>Wait a few minutes after joining and try again</li>
+            <li>Make sure you're typing the full username with #numbers</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.discord-verification-page {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  min-height: calc(100vh - 160px);
+}
+
+.verification-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.verification-header {
+  background: linear-gradient(135deg, #7289da, #5865f2);
+  color: white;
+  padding: 40px;
+}
+
+.channel-info {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+.channel-icon-large {
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  flex-shrink: 0;
+}
+
+.header-text h1 {
+  margin: 0 0 10px 0;
+  font-size: 32px;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 18px;
+  opacity: 0.9;
+}
+
+.verification-content {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 40px;
+  padding: 40px;
+}
+
+.verification-form-section {
+  
+}
+
+.form-header {
+  margin-bottom: 30px;
+}
+
+.form-header h2 {
+  color: #222831;
+  margin-bottom: 10px;
+}
+
+.form-header p {
+  color: #666;
+  line-height: 1.6;
+}
+
+.form-group {
+  margin-bottom: 25px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #222831;
+}
+
+.input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 15px;
+  color: #7289da;
+  font-size: 18px;
+  z-index: 1;
+}
+
+.form-control {
+  width: 100%;
+  height: 50px;
+  padding: 12px 15px 12px 50px;
+  font-size: 16px;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  background-color: #fff;
+  transition: all 0.3s;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #7289da;
+  box-shadow: 0 0 0 3px rgba(114, 137, 218, 0.1);
+}
+
+.form-text {
+  font-size: 14px;
+  color: #666;
+  margin-top: 8px;
+}
+
+.verification-info {
+  margin-bottom: 30px;
+}
+
+.info-card {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  gap: 15px;
+}
+
+.info-icon {
+  color: #7289da;
+  font-size: 24px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.info-content h4 {
+  margin: 0 0 10px 0;
+  color: #222831;
+}
+
+.info-content ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.verification-status {
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+  border: 2px solid;
+}
+
+.verification-status.success {
+  background: #d4edda;
+  color: #155724;
+  border-color: #c3e6cb;
+}
+
+.verification-status.error {
+  background: #f8d7da;
+  color: #721c24;
+  border-color: #f5c6cb;
+}
+
+.form-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+}
+
+.btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  border: 2px solid;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s;
+  font-size: 16px;
+}
+
+.btn-primary {
+  background: #7289da;
+  color: white;
+  border-color: #7289da;
+}
+
+.btn-primary:hover {
+  background: #5865f2;
+  border-color: #5865f2;
+  text-decoration: none;
+  color: white;
+}
+
+.btn-primary:disabled {
+  background: #99aab5;
+  border-color: #99aab5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #6c757d;
+  border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+  background: #6c757d;
+  color: white;
+  text-decoration: none;
+}
+
+.btn-discord {
+  background: #7289da;
+  color: white;
+  border-color: #7289da;
+  font-size: 14px;
+  padding: 10px 16px;
+}
+
+.btn-discord:hover {
+  background: #5865f2;
+  border-color: #5865f2;
+  text-decoration: none;
+  color: white;
+}
+
+.help-section {
+  background: #f8f9fa;
+  padding: 30px;
+  border-radius: 12px;
+}
+
+.help-section h3 {
+  color: #222831;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.help-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #e9ecef;
+}
+
+.help-card:last-child {
+  margin-bottom: 0;
+}
+
+.help-card h4 {
+  margin: 0 0 15px 0;
+  color: #222831;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.help-card h4 i {
+  color: #7289da;
+}
+
+.help-card p {
+  margin: 0 0 15px 0;
+  color: #666;
+  line-height: 1.6;
+}
+
+.help-card ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.steps {
+  display: grid;
+  gap: 10px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.step-number {
+  width: 24px;
+  height: 24px;
+  background: #7289da;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.step-text {
+  color: #666;
+  font-size: 14px;
+}
+
+.alert {
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.d-none {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .discord-verification-page {
+    padding: 15px;
+  }
+  
+  .verification-content {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding: 30px 20px;
+  }
+  
+  .channel-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('discordVerificationForm');
+  const verifyBtn = document.getElementById('verifyBtn');
+  const verificationStatus = document.getElementById('verificationStatus');
+  
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const discordUsername = document.getElementById('discord_username').value;
+    
+    if (!discordUsername.trim()) {
+      showVerificationResult(false, 'Please enter your Discord username.');
+      return;
+    }
+    
+    // Show loading state
+    verifyBtn.disabled = true;
+    verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+    
+    // Submit via AJAX for better UX
+    fetch('<%= complete_connection_channel_path(@channel) %>', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+        'Accept': 'application/json'
+      },
+      body: new URLSearchParams({
+        discord_username: discordUsername,
+        authenticity_token: '<%= form_authenticity_token %>'
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        showVerificationResult(true, data.message);
+        // Redirect to channels page after success
+        setTimeout(() => {
+          window.location.href = '<%= channels_path %>';
+        }, 2000);
+      } else {
+        showVerificationResult(false, data.message, data.invite_link);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showVerificationResult(false, 'An error occurred during verification. Please try again.');
+    })
+    .finally(() => {
+      // Reset button
+      verifyBtn.disabled = false;
+      verifyBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Verify Membership';
+    });
+  });
+  
+  function showVerificationResult(success, message, inviteLink = null) {
+    verificationStatus.classList.remove('d-none', 'success', 'error');
+    verificationStatus.classList.add(success ? 'success' : 'error');
+    
+    let html = `<div class="verification-result">
+      <div class="result-icon">
+        <i class="fas fa-${success ? 'check-circle' : 'times-circle'}"></i>
+      </div>
+      <div class="result-content">
+        <h4>${success ? 'Verification Successful!' : 'Verification Failed'}</h4>
+        <p>${message}</p>`;
+        
+    if (!success && inviteLink) {
+      html += `<a href="${inviteLink}" target="_blank" class="btn btn-discord">
+        <i class="fab fa-discord"></i> Join Discord Server
+      </a>`;
+    }
+    
+    html += `</div></div>`;
+    
+    verificationStatus.innerHTML = html;
+  }
+});
+</script> 

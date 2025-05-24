@@ -1,0 +1,503 @@
+<div class="channel-detail-page">
+  <div class="page-header">
+    <div class="header-content">
+      <div class="channel-icon-large">
+        <i class="fas fa-satellite"></i>
+      </div>
+      <div class="header-text">
+        <h1><%= @channel.name %></h1>
+        <p class="channel-subtitle"><%= @channel.description || "Trading signals and market analysis" %></p>
+        <div class="connection-status">
+          <% if @is_connected %>
+            <span class="status-badge connected">
+              <i class="fas fa-check-circle"></i> Connected
+            </span>
+          <% else %>
+            <span class="status-badge available">
+              <i class="fas fa-plus-circle"></i> Available
+            </span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flash messages -->
+  <% if notice %>
+    <div class="alert alert-success">
+      <%= notice %>
+    </div>
+  <% end %>
+  
+  <% if alert %>
+    <div class="alert alert-danger">
+      <%= alert %>
+    </div>
+  <% end %>
+
+  <div class="channel-content">
+    <div class="channel-info-section">
+      <h2>Channel Information</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Channel Name</span>
+          <span class="info-value"><%= @channel.name %></span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Discord Channel ID</span>
+          <span class="info-value"><%= @channel.discord_channel_id || "Not specified" %></span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Status</span>
+          <span class="info-value">
+            <%= @is_connected ? "Connected" : "Available" %>
+          </span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Created</span>
+          <span class="info-value"><%= @channel.created_at.strftime("%B %d, %Y") %></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="channel-description-section">
+      <h2>About This Channel</h2>
+      <div class="description-content">
+        <p><%= @channel.description || "This channel provides automated trading signals and market analysis to help you make informed trading decisions." %></p>
+        
+        <h3>What you'll get:</h3>
+        <ul>
+          <li>Real-time trading signals</li>
+          <li>Market analysis and insights</li>
+          <li>Automated trade execution</li>
+          <li>Performance tracking</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="requirements-section">
+      <h2>Requirements</h2>
+      <div class="requirements-list">
+        <div class="requirement-item">
+          <div class="requirement-icon">
+            <i class="fab fa-discord"></i>
+          </div>
+          <div class="requirement-content">
+            <h4>Discord Membership</h4>
+            <p>You must be a member of the Discord server to receive signals from this channel.</p>
+          </div>
+          <div class="requirement-status">
+            <span class="status-pending">Verify Manually</span>
+          </div>
+        </div>
+
+        <div class="requirement-item">
+          <div class="requirement-icon">
+            <i class="fas fa-key"></i>
+          </div>
+          <div class="requirement-content">
+            <h4>Binance API Credentials</h4>
+            <p>API keys are required for automated trading execution.</p>
+          </div>
+          <div class="requirement-status">
+            <% if current_user.has_valid_binance_credentials? %>
+              <span class="status-complete">
+                <i class="fas fa-check"></i> Connected
+              </span>
+            <% else %>
+              <span class="status-missing">
+                <i class="fas fa-times"></i> Not Setup
+              </span>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="requirement-item">
+          <div class="requirement-icon">
+            <i class="fas fa-crown"></i>
+          </div>
+          <div class="requirement-content">
+            <h4>Active Subscription</h4>
+            <p>An active subscription is required to receive trading signals.</p>
+          </div>
+          <div class="requirement-status">
+            <% if current_user.subscription_status == 'active' %>
+              <span class="status-complete">
+                <i class="fas fa-check"></i> Active
+              </span>
+            <% else %>
+              <span class="status-missing">
+                <i class="fas fa-times"></i> Inactive
+              </span>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions-section">
+      <div class="action-buttons">
+        <% if @is_connected %>
+          <%= link_to "Disconnect", channel_path(@channel), method: :delete, 
+                      class: "btn btn-danger",
+                      confirm: "Are you sure you want to disconnect from #{@channel.name}? You will stop receiving signals from this channel." %>
+          <span class="action-note">You are currently connected to this channel and receiving signals.</span>
+        <% else %>
+          <%= link_to "Connect to Channel", channel_path(@channel), method: :post, 
+                      class: "btn btn-primary" %>
+          <span class="action-note">Connect to start receiving automated trading signals.</span>
+        <% end %>
+        
+        <%= link_to "Back to Channels", channels_path, class: "btn btn-secondary" %>
+      </div>
+
+      <% unless current_user.has_valid_binance_credentials? %>
+        <div class="setup-prompt">
+          <h3>Setup Required</h3>
+          <p>To start automated trading, you need to configure your Binance API credentials.</p>
+          <%= link_to "Setup API Credentials", api_credentials_path, class: "btn btn-warning" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<style>
+.channel-detail-page {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.page-header {
+  background: linear-gradient(135deg, #00ADB5, #393E46);
+  color: white;
+  padding: 40px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+.channel-icon-large {
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  flex-shrink: 0;
+}
+
+.header-text h1 {
+  margin: 0 0 10px 0;
+  font-size: 32px;
+}
+
+.channel-subtitle {
+  margin: 0 0 15px 0;
+  font-size: 18px;
+  opacity: 0.9;
+}
+
+.connection-status .status-badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-badge.connected {
+  background: rgba(46, 213, 115, 0.2);
+  color: #2ed573;
+}
+
+.status-badge.available {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.alert {
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.channel-content {
+  display: grid;
+  gap: 30px;
+}
+
+.channel-info-section,
+.channel-description-section,
+.requirements-section,
+.actions-section {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.channel-info-section h2,
+.channel-description-section h2,
+.requirements-section h2 {
+  margin: 0 0 25px 0;
+  color: #222831;
+  font-size: 24px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #00ADB5;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.info-label {
+  font-size: 14px;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.info-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #222831;
+}
+
+.description-content p {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.description-content h3 {
+  color: #222831;
+  margin-bottom: 15px;
+}
+
+.description-content ul {
+  color: #666;
+  line-height: 1.8;
+}
+
+.description-content li {
+  margin-bottom: 8px;
+}
+
+.requirements-list {
+  display: grid;
+  gap: 20px;
+}
+
+.requirement-item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.requirement-icon {
+  width: 50px;
+  height: 50px;
+  background: #00ADB5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.requirement-content {
+  flex-grow: 1;
+}
+
+.requirement-content h4 {
+  margin: 0 0 5px 0;
+  color: #222831;
+}
+
+.requirement-content p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.requirement-status {
+  flex-shrink: 0;
+}
+
+.status-complete {
+  color: #2ed573;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.status-missing {
+  color: #dc3545;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.status-pending {
+  color: #ffc107;
+  font-weight: 500;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.action-note {
+  color: #666;
+  font-size: 14px;
+  margin-left: 15px;
+}
+
+.btn {
+  padding: 12px 24px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  font-size: 16px;
+}
+
+.btn-primary {
+  background: #00ADB5;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #008a91;
+  text-decoration: none;
+  color: white;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #545b62;
+  text-decoration: none;
+  color: white;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #c82333;
+  text-decoration: none;
+  color: white;
+}
+
+.btn-warning {
+  background: #ffc107;
+  color: #212529;
+}
+
+.btn-warning:hover {
+  background: #e0a800;
+  text-decoration: none;
+  color: #212529;
+}
+
+.setup-prompt {
+  background: #fff3cd;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #ffeaa7;
+}
+
+.setup-prompt h3 {
+  margin: 0 0 10px 0;
+  color: #856404;
+}
+
+.setup-prompt p {
+  margin: 0 0 15px 0;
+  color: #856404;
+}
+
+@media (max-width: 768px) {
+  .channel-detail-page {
+    padding: 15px;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .requirement-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .action-note {
+    margin-left: 0;
+    text-align: center;
+  }
+}
+</style> 

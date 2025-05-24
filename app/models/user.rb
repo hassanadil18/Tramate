@@ -14,6 +14,7 @@ class User < ApplicationRecord
   validates :email, presence: true, uniqueness: { case_sensitive: false }, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :full_name, presence: true
   validates :discord_username, presence: true, if: :discord_verification_required?
+  validates :discord_id, uniqueness: { message: "is already registered with Tramate. Please use a different Discord username." }, allow_blank: true
   validates :subscription_status, inclusion: { in: %w[active inactive pending] }, allow_nil: true
   validates :terms_of_service, acceptance: true
   validates :password, length: { minimum: 6 }, allow_nil: true

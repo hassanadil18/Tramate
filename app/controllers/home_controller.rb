@@ -9,11 +9,7 @@ class HomeController < ApplicationController
   # Public landing page controller
   def index
     if user_signed_in?
-      if current_user.admin?
-        redirect_to admin_root_path
-      else
-        redirect_to dashboard_path
-      end
+      redirect_to user_dashboard_path
     end
   end
 end

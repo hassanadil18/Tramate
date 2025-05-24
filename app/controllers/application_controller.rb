@@ -4,7 +4,7 @@ class ApplicationController < ActionController::Base
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 
-  helper_method :current_user, :user_signed_in?
+  helper_method :current_user, :user_signed_in?, :user_dashboard_path
 
   protect_from_forgery with: :exception
 
@@ -20,6 +20,14 @@ class ApplicationController < ActionController::Base
     !!current_user
   end
 
+  def user_dashboard_path
+    if current_user&.admin?
+      admin_root_path
+    else
+      dashboard_path
+    end
+  end
+
   def authenticate_user!
     unless user_signed_in?
       flash[:alert] = "You need to login first"
@@ -30,7 +38,7 @@ class ApplicationController < ActionController::Base
   def require_admin
     unless current_user&.admin?
       flash[:alert] = "You do not have permission to access this page"
-      redirect_to dashboard_path
+      redirect_to user_dashboard_path
     end
   end
 

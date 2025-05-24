@@ -39,7 +39,7 @@
     <% end %>
 
     <div class="step-content">
-      <%= form_with url: registration_step2_path, method: :post, local: true, class: "registration-form" do |form| %>
+      <%= form_with url: registration_step2_path, method: :post, local: true, class: "registration-form", authenticity_token: true do |form| %>
         
         <!-- Channel Selection -->
         <div class="form-section">

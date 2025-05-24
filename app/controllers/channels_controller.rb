@@ -111,30 +111,54 @@ class ChannelsController < ApplicationController
 
   # Discord verification logic (reused from auth controller)
   def verify_discord_membership(discord_username, channel_id)
-    # This would be replaced by actual Discord API integration
-    # For now, simulating verification with realistic scenarios
-    
     return { success: false, message: "Discord username is required." } if discord_username.blank?
     
-    # Simulate Discord API call to check membership
-    # In real implementation, this would use Discord bot API to check if user is in the server/channel
-    
-    # For demo: 70% success rate to simulate real verification
-    is_member = rand > 0.3
-    
-    if is_member
-      {
-        success: true,
-        message: "Discord membership verified successfully!"
-      }
-    else
+    begin
       channel = Channel.find_by(id: channel_id)
-      invite_link = channel&.discord_invite_link || "https://discord.gg/tramate"
+      
+      if channel.blank? || channel.discord_guild_id.blank?
+        return {
+          success: false,
+          message: "Channel configuration is incomplete. Please contact support.",
+          help_text: "This channel doesn't have Discord integration properly configured."
+        }
+      end
+
+      # Use DiscordService for real API integration
+      discord_service = DiscordService.new
+      
+      # Check if user is a member of the Discord server
+      is_member = discord_service.check_member_by_username(
+        guild_id: channel.discord_guild_id,
+        username: discord_username
+      )
+      
+      if is_member
+        {
+          success: true,
+          message: "Discord membership verified successfully! You're now connected to #{channel.name}.",
+          discord_username: discord_username
+        }
+      else
+        invite_link = channel.discord_invite_link.presence || "https://discord.gg/tramate"
+        
+        {
+          success: false,
+          message: "Discord username '#{discord_username}' was not found in the #{channel.name} Discord server.",
+          invite_link: invite_link,
+          help_text: "Please make sure you have joined the Discord server first, then try again. It may take a few minutes for membership to sync.",
+          action_required: "join_server"
+        }
+      end
+      
+    rescue => e
+      Rails.logger.error "Discord verification error: #{e.message}"
+      SystemLog.log_error("Discord verification failed for user #{current_user.email}: #{e.message}")
+      
       {
         success: false,
-        message: "Discord username '#{discord_username}' not found in #{channel&.name || 'this'} channel.",
-        invite_link: invite_link,
-        help_text: "Please make sure you have joined the Discord server and are a member of the channel."
+        message: "Unable to verify Discord membership at this time. Please try again in a few moments.",
+        help_text: "If this problem persists, please contact support."
       }
     end
   end

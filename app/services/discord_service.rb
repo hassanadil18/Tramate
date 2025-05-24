@@ -39,6 +39,42 @@ class DiscordService
     end
   end
   
+  # Check membership by Discord username (username#discriminator format)
+  def check_member_by_username(guild_id:, username:)
+    # Get all guild members (this might need pagination for large servers)
+    response = self.class.get("/guilds/#{guild_id}/members?limit=1000", headers: bot_headers)
+    
+    return false unless response.code == 200
+    
+    members = response.parsed_response
+    
+    # Normalize the input username
+    normalized_input = normalize_username(username)
+    
+    # Search for the user by username
+    found_member = members.find do |member|
+      user = member['user']
+      next unless user
+      
+      # Handle both old format (username#discriminator) and new format (@username)
+      if user['discriminator'] && user['discriminator'] != '0'
+        # Old format: username#discriminator
+        full_username = "#{user['username']}##{user['discriminator']}"
+        normalize_username(full_username) == normalized_input
+      else
+        # New format: just username or @username
+        normalize_username(user['username']) == normalized_input ||
+        normalize_username("@#{user['username']}") == normalized_input
+      end
+    end
+    
+    return found_member.present?
+    
+  rescue => e
+    Rails.logger.error "Discord member check error: #{e.message}"
+    false
+  end
+  
   # 2. CHANNEL PERMISSIONS CHECK
   def check_channel_permissions(guild_id, channel_id, user_id)
     response = self.class.get("/channels/#{channel_id}", headers: bot_headers)
@@ -168,5 +204,15 @@ class DiscordService
     else
       { success: false, error: response.body }
     end
+  end
+  
+  private
+  
+  # Normalize username for comparison (handle @ prefix and case sensitivity)
+  def normalize_username(username)
+    return '' if username.blank?
+    
+    # Remove @ prefix if present, convert to lowercase, and strip whitespace
+    username.to_s.strip.downcase.gsub(/^@/, '')
   end
 end 

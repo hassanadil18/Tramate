@@ -45,11 +45,19 @@ module Admin
         SystemLog.log_info("Channel created: #{@channel.name}", { channel_id: @channel.id })
         
         # Auto-setup Discord webhook if it's a Discord channel
+        webhook_status = ""
         if @channel.channel_type == 'discord' && @channel.discord_channel_id.present?
-          setup_discord_webhook_for_channel(@channel)
+          webhook_result = setup_discord_webhook_for_channel(@channel)
+          if webhook_result
+            webhook_status = " Discord webhook was automatically created and configured!"
+          else
+            webhook_status = " Note: Discord webhook setup failed - you can set it up manually from the channel details page."
+          end
         end
         
-        redirect_to admin_channel_path(@channel), notice: 'Channel was successfully created.'
+        success_message = "🎉 Channel '#{@channel.name}' was successfully created!#{webhook_status}"
+        flash[:success_popup] = true
+        redirect_to admin_channel_path(@channel), notice: success_message
       else
         render :new
       end
@@ -138,7 +146,7 @@ module Admin
     end
 
     def setup_discord_webhook_for_channel(channel)
-      return unless channel.discord_channel_id.present?
+      return false unless channel.discord_channel_id.present?
       
       discord_service = DiscordService.new
       result = discord_service.create_webhook(channel.discord_channel_id, "Tramate-#{channel.name}")
@@ -149,6 +157,9 @@ module Admin
           channel_id: channel.id,
           webhook_url: result[:webhook_url]
         })
+        true
+      else
+        false
       end
     end
   end

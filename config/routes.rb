@@ -83,19 +83,19 @@ Rails.application.routes.draw do
 
   # Multi-step user registration process
   namespace :registration do
-    get "step1" => "registration#step1", as: :registration_step1
-    post "step1" => "registration#submit_step1"
+    get "step1" => "steps#step1", as: :step1
+    post "step1" => "steps#submit_step1"
 
-    get "step2" => "registration#step2", as: :registration_step2
-    post "step2" => "registration#submit_step2"
+    get "step2" => "steps#step2", as: :step2
+    post "step2" => "steps#submit_step2"
 
-    get "step3" => "registration#step3", as: :registration_step3
-    post "step3" => "registration#submit_step3"
+    get "step3" => "steps#step3", as: :step3
+    post "step3" => "steps#submit_step3"
 
-    get "step4" => "registration#step4", as: :registration_step4
-    post "step4" => "registration#submit_step4"
+    get "step4" => "steps#step4", as: :step4
+    post "step4" => "steps#submit_step4"
     
-    get "subscription" => "registration#subscription", as: :subscription
-    post "subscription" => "registration#submit_subscription"
+    get "subscription" => "steps#subscription", as: :subscription
+    post "subscription" => "steps#submit_subscription"
   end
 end

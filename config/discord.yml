@@ -1,16 +1,16 @@
 development:
-  client_id: <%= ENV['DISCORD_CLIENT_ID'] %>
-  client_secret: <%= ENV['DISCORD_CLIENT_SECRET'] %>
-  bot_token: <%= ENV['DISCORD_BOT_TOKEN'] %>
-  redirect_uri: <%= ENV['DISCORD_REDIRECT_URI'] || 'http://localhost:3000/auth/discord/callback' %>
+  client_id: <%= Rails.application.credentials.discord[:client_id] %>
+  client_secret: <%= Rails.application.credentials.discord[:client_secret] %>
+  bot_token: <%= Rails.application.credentials.discord[:bot_token] %>
+  redirect_uri: <%= Rails.application.credentials.discord[:redirect_uri] %>
   api_base_url: 'https://discord.com/api/v10'
   gateway_url: 'wss://gateway.discord.gg'
 
 production:
-  client_id: <%= ENV['DISCORD_CLIENT_ID'] %>
-  client_secret: <%= ENV['DISCORD_CLIENT_SECRET'] %>
-  bot_token: <%= ENV['DISCORD_BOT_TOKEN'] %>
-  redirect_uri: <%= ENV['DISCORD_REDIRECT_URI'] %>
+  client_id: <%= Rails.application.credentials.discord[:client_id] %>
+  client_secret: <%= Rails.application.credentials.discord[:client_secret] %>
+  bot_token: <%= Rails.application.credentials.discord[:bot_token] %>
+  redirect_uri: <%= Rails.application.credentials.discord[:redirect_uri] %>
   api_base_url: 'https://discord.com/api/v10'
   gateway_url: 'wss://gateway.discord.gg'
 

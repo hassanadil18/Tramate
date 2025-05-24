@@ -477,6 +477,115 @@
   display: none !important;
 }
 
+/* Success Popup Styles */
+.success-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(5px);
+}
+
+.success-popup {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  transform: scale(0.9);
+  animation: popupAppear 0.3s ease forwards;
+}
+
+@keyframes popupAppear {
+  to {
+    transform: scale(1);
+  }
+}
+
+.success-icon {
+  font-size: 64px;
+  color: #28a745;
+  margin-bottom: 20px;
+}
+
+.success-popup h3 {
+  color: #222831;
+  margin: 0 0 15px 0;
+  font-size: 24px;
+}
+
+.success-popup p {
+  color: #666;
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0 0 30px 0;
+}
+
+.success-actions {
+  display: flex;
+  justify-content: center;
+}
+
+/* Enhanced verification result styles */
+.verification-result {
+  display: flex;
+  gap: 15px;
+  align-items: flex-start;
+}
+
+.result-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.result-content {
+  flex: 1;
+}
+
+.result-content h4 {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+}
+
+.result-content p {
+  margin: 0 0 15px 0;
+  line-height: 1.6;
+}
+
+.action-required {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 15px;
+  text-align: left;
+}
+
+.action-required p {
+  margin: 0 0 15px 0;
+  font-weight: 600;
+  color: #222831;
+}
+
+.action-required ol {
+  margin: 0 0 20px 0;
+  padding-left: 20px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.action-required ol li {
+  margin-bottom: 8px;
+}
+
 @media (max-width: 768px) {
   .discord-verification-page {
     padding: 15px;
@@ -497,6 +606,15 @@
   .form-actions {
     flex-direction: column;
   }
+  
+  .success-popup {
+    padding: 30px 20px;
+    margin: 20px;
+  }
+  
+  .success-icon {
+    font-size: 48px;
+  }
 }
 </style>
 
@@ -509,16 +627,22 @@ document.addEventListener('DOMContentLoaded', function() {
   form.addEventListener('submit', function(e) {
     e.preventDefault();
     
-    const discordUsername = document.getElementById('discord_username').value;
+    const discordUsername = document.getElementById('discord_username').value.trim();
     
-    if (!discordUsername.trim()) {
+    if (!discordUsername) {
       showVerificationResult(false, 'Please enter your Discord username.');
+      return;
+    }
+    
+    // Validate username format
+    if (!isValidDiscordUsername(discordUsername)) {
+      showVerificationResult(false, 'Please enter a valid Discord username. Examples: username#1234 or @username');
       return;
     }
     
     // Show loading state
     verifyBtn.disabled = true;
-    verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+    verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking Discord membership...';
     
     // Submit via AJAX for better UX
     fetch('<%= complete_connection_channel_path(@channel) %>', {
@@ -536,13 +660,14 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
+        showSuccessPopup(data.message);
         showVerificationResult(true, data.message);
         // Redirect to channels page after success
         setTimeout(() => {
           window.location.href = '<%= channels_path %>';
-        }, 2000);
+        }, 3000);
       } else {
-        showVerificationResult(false, data.message, data.invite_link);
+        showVerificationResult(false, data.message, data.invite_link, data.action_required);
       }
     })
     .catch(error => {
@@ -556,7 +681,53 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
   
-  function showVerificationResult(success, message, inviteLink = null) {
+  function isValidDiscordUsername(username) {
+    // Accept various formats: username#1234, @username, username
+    const patterns = [
+      /^[a-zA-Z0-9._-]+#[0-9]{4}$/, // username#1234 format
+      /^@?[a-zA-Z0-9._-]+$/ // @username or username format
+    ];
+    
+    return patterns.some(pattern => pattern.test(username));
+  }
+  
+  function showSuccessPopup(message) {
+    // Create success popup overlay
+    const popup = document.createElement('div');
+    popup.className = 'success-popup-overlay';
+    popup.innerHTML = `
+      <div class="success-popup">
+        <div class="success-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h3>Connection Successful!</h3>
+        <p>${message}</p>
+        <div class="success-actions">
+          <button onclick="closeSuccessPopup()" class="btn btn-primary">
+            <i class="fas fa-arrow-right"></i> Continue to Channels
+          </button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(popup);
+    
+    // Auto-close after 5 seconds
+    setTimeout(() => {
+      closeSuccessPopup();
+    }, 5000);
+  }
+  
+  // Make closeSuccessPopup globally available
+  window.closeSuccessPopup = function() {
+    const popup = document.querySelector('.success-popup-overlay');
+    if (popup) {
+      popup.remove();
+      window.location.href = '<%= channels_path %>';
+    }
+  };
+  
+  function showVerificationResult(success, message, inviteLink = null, actionRequired = null) {
     verificationStatus.classList.remove('d-none', 'success', 'error');
     verificationStatus.classList.add(success ? 'success' : 'error');
     
@@ -568,7 +739,20 @@ document.addEventListener('DOMContentLoaded', function() {
         <h4>${success ? 'Verification Successful!' : 'Verification Failed'}</h4>
         <p>${message}</p>`;
         
-    if (!success && inviteLink) {
+    if (!success && actionRequired === 'join_server' && inviteLink) {
+      html += `
+        <div class="action-required">
+          <p><strong>What to do next:</strong></p>
+          <ol>
+            <li>Click the button below to join the Discord server</li>
+            <li>Wait a few minutes for membership to sync</li>
+            <li>Come back and try verification again</li>
+          </ol>
+          <a href="${inviteLink}" target="_blank" class="btn btn-discord">
+            <i class="fab fa-discord"></i> Join Discord Server
+          </a>
+        </div>`;
+    } else if (!success && inviteLink) {
       html += `<a href="${inviteLink}" target="_blank" class="btn btn-discord">
         <i class="fab fa-discord"></i> Join Discord Server
       </a>`;

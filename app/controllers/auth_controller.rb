@@ -2,55 +2,63 @@ class AuthController < ApplicationController
   # Skip authentication for these actions since they're for non-logged-in users
   skip_before_action :authenticate_user!, only: [:login_form, :login, :register_form, :register, :verify_discord_username, :get_channels, :update_connection_info]
   protect_from_forgery except: [ :verify_discord_username ]
-  
+
   # Use application layout for consistent header/footer
   layout 'application'
 
   def login_form
-    # Login page view
-    # If already logged in, redirect to dashboard
     if user_signed_in?
-      redirect_to dashboard_path
+      redirect_to user_dashboard_path
     end
   end
 
   def login
-    # Process login form submission
-    email = params[:email]
-    password = params[:password]
-
-    user = User.find_by(email: email.downcase)
-
-    if user && user.authenticate(password)
-      # Set session and redirect to dashboard
+    user = User.find_by(email: params[:email])
+    
+    if user&.authenticate(params[:password])
       session[:user_id] = user.id
-      # Log login notification (instead of sending email)
+      
       Rails.logger.info "LOGIN NOTIFICATION: User #{user.email} logged in at #{Time.current}"
-      redirect_to dashboard_path, notice: "Successfully logged in!"
+      
+      redirect_to user_dashboard_path, notice: "Successfully logged in!"
     else
-      # Show error and redirect back to login
       flash.now[:alert] = "Invalid email or password"
       render :login_form
     end
   end
 
   def register_form
-    # Registration page view
-    # If already logged in, redirect to dashboard
     if user_signed_in?
-      redirect_to dashboard_path
+      redirect_to user_dashboard_path
     end
     @user = User.new
     @channels = Channel.all
   end
 
   def register
-    # Redirect to multi-step registration process instead of creating user directly
-    redirect_to registration_step1_path
+    # Store the form data and redirect to multi-step registration process
+    if params[:full_name].present? && params[:email].present? && params[:password].present?
+      # Store basic user data in session for multi-step process
+      session[:registration] = {
+        user: {
+          full_name: params[:full_name],
+          email: params[:email],
+          password: params[:password],
+          password_confirmation: params[:password_confirmation],
+          terms_of_service: params[:terms_of_service] == 'on'
+        },
+        current_step: 2
+      }
+      
+      redirect_to registration_step2_path
+    else
+      # If form data is missing, redirect back with error
+      flash[:alert] = "Please fill in all required fields"
+      redirect_to auth_register_form_path
+    end
   end
 
   def logout
-    # Clear session and redirect to home
     session[:user_id] = nil
     redirect_to root_path, notice: "You have been logged out."
   end

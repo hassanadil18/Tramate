@@ -76,5 +76,4 @@ end
 gem 'discordrb'
 
 # Official Binance API gem
-
-gem "binance-connector-ruby", "~> 1.7"
+gem 'binance-connector-ruby'

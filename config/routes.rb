@@ -107,4 +107,7 @@ Rails.application.routes.draw do
     post "payment" => "steps#submit_payment"
     get "payment/success" => "steps#payment_success", as: :payment_success
   end
+
+  get 'privacy_policy', to: 'static_pages#privacy_policy'
+  get 'terms_and_conditions', to: 'static_pages#terms_and_conditions'
 end

@@ -18,7 +18,7 @@
     <div class="features-grid">
       <div class="feature-card">
         <div class="feature-icon">
-          <i class="feature-bolt"></i>
+          <i class="fas fa-bolt"></i>
         </div>
         <h3 class="feature-title">Automated Trading</h3>
         <p class="feature-description">Connect your Binance account and let our system execute trades automatically based on signals from your trusted channels.</p>
@@ -26,7 +26,7 @@
       
       <div class="feature-card">
         <div class="feature-icon">
-          <i class="feature-shield"></i>
+          <i class="fas fa-shield-alt"></i>
         </div>
         <h3 class="feature-title">Secure & Reliable</h3>
         <p class="feature-description">Your API keys are encrypted and secure. We never have access to your funds - just trading permissions you control.</p>
@@ -34,7 +34,7 @@
       
       <div class="feature-card">
         <div class="feature-icon">
-          <i class="feature-chart"></i>
+          <i class="fas fa-chart-line"></i>
         </div>
         <h3 class="feature-title">Performance Tracking</h3>
         <p class="feature-description">Track your trades, measure performance, and optimize your strategy over time with detailed analytics.</p>
@@ -168,23 +168,23 @@
 </section>
 <% end %>
 
-<!-- Pricing -->
-<% cache 'home_pricing', expires_in: 24.hours do %>
-<section class="pricing-section" id="pricing">
+<!-- Memberships -->
+<% cache 'home_memberships', expires_in: 24.hours do %>
+<section class="pricing-section" id="memberships">
   <div class="container">
-    <h2 class="section-title">Simple, Transparent Pricing</h2>
+    <h2 class="section-title">Choose Your Membership</h2>
     <div class="pricing-container">
       <div class="pricing-card">
         <div class="pricing-header">
-          <h3 class="pricing-title">Basic</h3>
-          <div class="pricing-price">$19<span>/month</span></div>
+          <h3 class="pricing-title">Starter</h3>
+          <div class="pricing-price">Free</div>
         </div>
         <div class="pricing-features">
           <ul>
             <li>Connect 1 signal channel</li>
-            <li>Connect 1 exchange account</li>
             <li>Basic trade tracking</li>
             <li>Email notifications</li>
+            <li>Community support</li>
           </ul>
         </div>
         <div class="pricing-action">
@@ -195,16 +195,16 @@
       <div class="pricing-card featured">
         <div class="pricing-badge">Most Popular</div>
         <div class="pricing-header">
-          <h3 class="pricing-title">Pro</h3>
-          <div class="pricing-price">$39<span>/month</span></div>
+          <h3 class="pricing-title">Intermediate</h3>
+          <div class="pricing-price">$5<span>/month</span></div>
         </div>
         <div class="pricing-features">
           <ul>
-            <li>Connect 5 signal channels</li>
-            <li>Connect 2 exchange accounts</li>
+            <li>Connect 3 signal channels</li>
+            <li>Connect 1 exchange account</li>
             <li>Advanced analytics</li>
             <li>Priority support</li>
-            <li>Custom risk management</li>
+            <li>Risk management tools</li>
           </ul>
         </div>
         <div class="pricing-action">
@@ -214,8 +214,8 @@
       
       <div class="pricing-card">
         <div class="pricing-header">
-          <h3 class="pricing-title">Enterprise</h3>
-          <div class="pricing-price">$99<span>/month</span></div>
+          <h3 class="pricing-title">Premium</h3>
+          <div class="pricing-price">$15<span>/month</span></div>
         </div>
         <div class="pricing-features">
           <ul>
@@ -228,7 +228,7 @@
           </ul>
         </div>
         <div class="pricing-action">
-          <%= link_to "Contact Sales", "#contact", class: "btn btn-secondary" %>
+          <%= link_to "Get Started", auth_register_form_path, class: "btn btn-secondary" %>
         </div>
       </div>
     </div>

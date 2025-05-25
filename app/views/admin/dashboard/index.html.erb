@@ -1,0 +1,73 @@
+<h1>Admin Dashboard</h1>
+<p>Welcome, <%= current_user&.full_name || "Administrator" %>!</p>
+
+<div class="dashboard-grid">
+  <div class="card">
+    <h4>Total Users</h4>
+    <p class="large-text"><%= @users_count %></p>
+  </div>
+  <div class="card">
+    <h4>Active Subscriptions</h4>
+    <p class="large-text"><%= @active_subscriptions %></p>
+  </div>
+  <div class="card">
+    <h4>Total Trades</h4>
+    <p class="large-text"><%= @total_trades %></p>
+  </div>
+  <div class="card">
+    <h4>Completed Trades</h4>
+    <p class="large-text positive"><%= @completed_trades %></p>
+  </div>
+  <div class="card">
+    <h4>Failed Trades</h4>
+    <p class="large-text negative"><%= @failed_trades %></p>
+  </div>
+  <div class="card">
+    <h4>Success Rate</h4>
+    <p class="large-text"><%= @success_rate %>%</p>
+  </div>
+</div>
+
+<div class="card">
+  <h4>Recent Trades</h4>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Status</th>
+        <th>Created At</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @recent_trades.each do |trade| %>
+        <tr>
+          <td><%= trade.id %></td>
+          <td><%= trade.status %></td>
+          <td><%= trade.created_at.strftime('%Y-%m-%d %H:%M:%S') %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h4>Recent Users</h4>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Joined At</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @recent_users.each do |user| %>
+        <tr>
+          <td><%= user.full_name %></td>
+          <td><%= user.email %></td>
+          <td><%= user.created_at.strftime('%Y-%m-%d %H:%M:%S') %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

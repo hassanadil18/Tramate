@@ -1,0 +1,9 @@
+class StaticPagesController < ApplicationController
+  skip_before_action :authenticate_user!, only: [:privacy_policy, :terms_and_conditions]
+  
+  def privacy_policy
+  end
+
+  def terms_and_conditions
+  end
+end 

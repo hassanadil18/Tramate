@@ -32,7 +32,7 @@
     .sidebar {
       width: 250px;
       min-height: calc(100vh - 20px);
-      background-color: #00ADB5;
+      background-color: #222831;
       border-radius: 20px;
       color: white;
       padding: 20px;
@@ -44,7 +44,14 @@
     .logo-container {
       display: flex;
       align-items: center;
+      justify-content: center;
       margin-bottom: 20px;
+      padding: 10px 0;
+    }
+
+    .logo-image {
+      height: 50px;
+      width: auto;
     }
 
     .logo {
@@ -576,7 +583,7 @@
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="logo-container">
-      <h2 class="logo">Tramate.</h2>
+      <%= image_tag "tramateLogog.png", alt: "Tramate Logo", class: "logo-image" %>
     </div>
     <nav>
       <p class="admin-tools">Admin Dashboard</p>

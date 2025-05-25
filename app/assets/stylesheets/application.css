@@ -18,6 +18,11 @@
   --text-light: #ffffff;
 }
 
+/* Add smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
 /* Import admin styles */
 @import "admin.css";
 
@@ -35,10 +40,6 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 15px;
-  background-color: var(--primary-bg);
-  border-radius: 12px;
-  padding: 20px;
-  color: var(--text-light);
 }
 
 /* Typography */
@@ -81,12 +82,24 @@ h1, h2, h3, h4, h5, h6 {
 
 .btn-secondary {
   background-color: transparent;
-  color: white;
-  border: 2px solid white;
+  color: #222831;
+  border: 2px solid #222831;
 }
 
 .btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: #222831;
+  color: white;
+}
+
+/* Special styling for secondary buttons in hero section */
+.hero-section .btn-secondary {
+  color: white;
+  border-color: white;
+}
+
+.hero-section .btn-secondary:hover {
+  background-color: white;
+  color: #222831;
 }
 
 .btn-large {
@@ -714,20 +727,20 @@ h1, h2, h3, h4, h5, h6 {
 /* Contact Form */
 .cta-section {
   padding: 80px 0;
-  background-color: #222831;
+  background-color: #f8f9fa;
   text-align: center;
-  color: white;
+  color: #222831;
 }
 
 .cta-title {
   font-size: 48px;
   font-weight: 600;
-  color: white;
+  color: #222831;
   margin-bottom: 20px;
 }
 
 .cta-description {
-  color: rgba(255, 255, 255, 0.75);
+  color: #666;
   font-size: 20px;
   margin-bottom: 30px;
 }
@@ -736,17 +749,18 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 600px;
   margin: 50px auto 0;
   text-align: left;
-  background-color: #2E323C;
+  background-color: #ffffff;
   padding: 30px 40px;
   border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
 }
 
 .contact-form h3 {
   font-size: 28px;
   margin-bottom: 30px;
   text-align: center;
-  color: #FFFFFF;
+  color: #222831;
 }
 
 .form-group {
@@ -758,9 +772,9 @@ h1, h2, h3, h4, h5, h6 {
   width: 100%;
   padding: 16px 20px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background-color: #3B3F48;
-  color: white;
+  border: 1px solid #dee2e6;
+  background-color: #ffffff;
+  color: #222831;
   font-family: Inter, sans-serif;
   font-size: 16px;
   transition: all 0.3s ease;
@@ -776,7 +790,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .form-group input::placeholder,
 .form-group textarea::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: #6c757d;
 }
 
 .form-group textarea {

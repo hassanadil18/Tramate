@@ -14,11 +14,14 @@ class AuthController < ApplicationController
 
   def login
     user = User.find_by(email: params[:email])
-    
+
     if user&.authenticate(params[:password])
       session[:user_id] = user.id
       
       Rails.logger.info "LOGIN NOTIFICATION: User #{user.email} logged in at #{Time.current}"
+      
+      # Send signin notification email
+      user.send_signin_notification(request)
       
       redirect_to user_dashboard_path, notice: "Successfully logged in!"
     else

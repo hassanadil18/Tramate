@@ -55,6 +55,7 @@ class User < ApplicationRecord
   # Callbacks
   before_save :downcase_email
   before_create :set_default_subscription
+  after_create :send_welcome_email
   
   # Class methods
   def self.to_csv
@@ -134,14 +135,44 @@ class User < ApplicationRecord
     admin
   end
 
+  # Email notification methods
+  def send_signin_notification(request = nil)
+    UserMailer.signin_notification(self, request).deliver_later
+  rescue => e
+    Rails.logger.error "Failed to send signin notification: #{e.message}"
+  end
+
+  def send_trade_notification(trade, notification_type)
+    case notification_type
+    when :executed
+      UserMailer.trade_executed(self, trade).deliver_later
+    when :completed
+      UserMailer.trade_completed(self, trade).deliver_later
+    when :failed
+      UserMailer.trade_failed(self, trade.trade_signal, trade.error_message).deliver_later
+    when :order_filled
+      UserMailer.order_filled(self, trade).deliver_later
+    when :order_failed
+      UserMailer.order_failed(self, trade, trade.status).deliver_later
+    end
+  rescue => e
+    Rails.logger.error "Failed to send trade notification: #{e.message}"
+  end
+
   private
+
+  def send_welcome_email
+    UserMailer.welcome_email(self).deliver_later
+  rescue => e
+    Rails.logger.error "Failed to send welcome email: #{e.message}"
+  end
 
   def downcase_email
     self.email = email.downcase if email.present?
   end
   
   def set_default_subscription
-    # If no subscription is set, assign the free plan by default
+    # Only set default subscription if no subscription is already assigned
     if subscription.nil?
       self.subscription = Subscription.starter
       self.subscription_status = 'active'

@@ -1,125 +1,327 @@
-require 'net/http'
-require 'uri'
-require 'json'
-require 'openssl'
-require 'timeout'
+begin
+  require 'binance'
+rescue LoadError => e
+  Rails.logger.error "Failed to load binance gem: #{e.message}"
+  raise "Binance gem not available. Please ensure 'binance-connector-ruby' gem is installed."
+end
+
+# Official Binance Service using binance-connector-ruby gem
+# Works with user-provided API credentials for individual customers
+# Documentation: https://www.rubydoc.info/gems/binance-connector-ruby
 
 class BinanceService
-  BASE_URL = 'https://api.binance.com'
-  REQUEST_TIMEOUT = 10 # seconds
+  attr_reader :client, :api_key, :api_secret, :testnet_mode
   
-  def initialize(api_key = nil, api_secret = nil)
+  # Initialize with user-provided API credentials
+  def initialize(api_key = nil, api_secret = nil, testnet: false)
     @api_key = api_key&.strip
     @api_secret = api_secret&.strip
-  end
-  
-  # Validate API keys by testing account access
-  def validate_api_keys
-    return { success: false, message: "API key and secret are required" } if @api_key.blank? || @api_secret.blank?
+    @testnet_mode = testnet
     
-    # Basic format validation
-    return { success: false, message: "API key must be 64 characters long" } if @api_key.length != 64
-    return { success: false, message: "API secret must be 64 characters long" } if @api_secret.length != 64
+    Rails.logger.info "BinanceService initialized for #{@testnet_mode ? 'TESTNET' : 'MAINNET'}"
     
     begin
-      # Test connectivity first
-      unless self.class.test_connectivity
-        return { success: false, message: "Unable to connect to Binance API. Please check your internet connection." }
+      # Ensure Binance::Spot is available
+      unless defined?(Binance::Spot)
+        Rails.logger.error "Binance::Spot class not found. Available constants: #{Binance.constants.inspect}"
+        raise "Binance::Spot class not available. Please restart the Rails server."
       end
       
-      # Test with account info endpoint (requires signature)
-      response = get_account_info
+      # Initialize Binance client using binance-connector-ruby gem
+      client_options = {}
       
-      if response['code']
-        # API returned an error
-        case response['code']
-        when -2014
-          { success: false, message: "API key format is invalid" }
-        when -1021
-          { success: false, message: "Timestamp outside of receive window. Please check your system clock." }
-        when -1022
-          { success: false, message: "Invalid signature - please check your API secret" }
-        when -2015
-          { success: false, message: "Invalid API key, IP restriction, or insufficient permissions" }
-        when -1003
-          { success: false, message: "Too many requests. Please wait a moment and try again." }
-        else
-          { success: false, message: "API validation failed: #{response['msg']}" }
-        end
-      elsif response['accountType']
-        # Success - we got account info
-        { 
-          success: true, 
-          message: "API keys validated successfully!",
-          account_type: response['accountType'],
-          can_trade: response['canTrade'],
-          can_withdraw: response['canWithdraw']
-        }
+      # Set base URL for testnet if needed
+      if @testnet_mode
+        client_options[:base_url] = 'https://testnet.binance.vision'
+      end
+      
+      # Add API credentials if provided
+      if @api_key.present? && @api_secret.present?
+        client_options[:key] = @api_key
+        client_options[:secret] = @api_secret
+        Rails.logger.info "Binance client initialized with user API credentials"
       else
-        { success: false, message: "Unexpected response from Binance API" }
+        Rails.logger.info "Binance client initialized for public endpoints only"
       end
       
-    rescue Timeout::Error
-      { success: false, message: "Request timed out. Please try again." }
-    rescue SocketError, Errno::ECONNREFUSED
-      { success: false, message: "Network connection failed. Please check your internet connection." }
+      # Set timeout and other options
+      client_options[:timeout] = 10 # 10 second timeout
+      client_options[:show_weight_usage] = true # Show rate limit usage
+      
+      @client = Binance::Spot.new(**client_options)
+      Rails.logger.info "Binance::Spot client created successfully"
+      
     rescue => e
-      Rails.logger.error "Binance API validation error: #{e.message}"
-      { success: false, message: "Unable to validate API keys. Please try again." }
+      Rails.logger.error "Failed to initialize Binance client: #{e.message}"
+      Rails.logger.error "Error class: #{e.class}"
+      Rails.logger.error "Backtrace: #{e.backtrace.first(3).join(', ')}"
+      @client = nil
     end
   end
   
-  # Test API connectivity (no auth required)
-  def self.test_connectivity
+  # Validate user-provided API keys
+  def validate_api_keys
+    return validation_error("API key and secret are required") if @api_key.blank? || @api_secret.blank?
+    
+    # Basic length validation
+    return validation_error("API key is too short") if @api_key.length < 32
+    return validation_error("API secret is too short") if @api_secret.length < 32
+    
+    return validation_error("Binance client not initialized") unless @client
+    
     begin
-      uri = URI("#{BASE_URL}/api/v3/ping")
-      response = Net::HTTP.get_response(uri)
-      response.code == '200'
+      Rails.logger.info "Binance: Validating API credentials for user"
+      
+      # Test connectivity first
+      Rails.logger.info "Binance: Testing connectivity..."
+      unless test_connectivity
+        return validation_error("Unable to connect to Binance API. Please check your internet connection.")
+      end
+      
+      Rails.logger.info "Binance: Connectivity OK, testing API permissions..."
+      
+      # Test API key by getting account information
+      account_data = @client.account
+      
+      Rails.logger.info "Binance: Account data retrieved successfully"
+      
+      {
+        success: true,
+        message: "API keys validated successfully!",
+        account_type: account_data['accountType'] || 'SPOT',
+        can_trade: account_data['canTrade'] || false,
+        can_withdraw: account_data['canWithdraw'] || false,
+        permissions: account_data['permissions'] || [],
+        testnet: @testnet_mode
+      }
+      
+    rescue Binance::ClientError => e
+      Rails.logger.error "Binance Client Error: #{e.message}"
+      handle_client_error(e)
+    rescue Binance::ServerError => e
+      Rails.logger.error "Binance Server Error: #{e.message}"
+      validation_error("Binance server error. Please try again in a few moments.")
+    rescue => e
+      Rails.logger.error "Binance API validation error: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      validation_error("Connection error. Please check your internet connection and try again.")
+    end
+  end
+  
+  # Test connectivity using public endpoint
+  def test_connectivity
+    return false unless @client
+    
+    begin
+      @client.time
+      true
     rescue => e
       Rails.logger.error "Binance connectivity test failed: #{e.message}"
       false
     end
   end
   
-  # Get server time (no auth required)
-  def self.get_server_time
+  # Get account information (requires API key)
+  def get_account_info
+    return { success: false, error: "Binance client not initialized" } unless @client
+    return { success: false, error: "API credentials required" } if @api_key.blank? || @api_secret.blank?
+    
     begin
-      uri = URI("#{BASE_URL}/api/v3/time")
-      response = Net::HTTP.get_response(uri)
-      JSON.parse(response.body)['serverTime']
+      account_data = @client.account
+      {
+        success: true,
+        data: account_data
+      }
+    rescue Binance::ClientError => e
+      Rails.logger.error "Binance account info error: #{e.message}"
+      {
+        success: false,
+        error: parse_client_error(e)
+      }
     rescue => e
-      Rails.logger.error "Failed to get Binance server time: #{e.message}"
-      Time.current.to_i * 1000
+      Rails.logger.error "Account info error: #{e.message}"
+      {
+        success: false,
+        error: "Failed to get account information"
+      }
+    end
+  end
+  
+  # Get symbol price (public endpoint)
+  def get_symbol_price(symbol)
+    return { success: false, error: "Client not initialized" } unless @client
+    
+    begin
+      response = @client.ticker_24hr(symbol: symbol.upcase)
+      {
+        success: true,
+        price: response['lastPrice'].to_f,
+        symbol: response['symbol']
+      }
+    rescue Binance::ClientError => e
+      {
+        success: false,
+        error: parse_client_error(e)
+      }
+    rescue => e
+      {
+        success: false,
+        error: "Failed to get price for #{symbol}"
+      }
+    end
+  end
+  
+  # Create a new order (requires API key)
+  def create_order(params)
+    return { success: false, error: "Client not initialized" } unless @client
+    return { success: false, error: "API credentials required" } if @api_key.blank? || @api_secret.blank?
+    
+    begin
+      # Validate required parameters
+      validate_order_params(params)
+      
+      # Prepare order parameters
+      order_params = {
+        symbol: params[:symbol].upcase,
+        side: params[:side].upcase,
+        type: params[:type].upcase
+      }
+      
+      # Add quantity and price based on order type
+      case params[:type].upcase
+      when 'MARKET'
+        if params[:quote_order_qty]
+          order_params[:quoteOrderQty] = params[:quote_order_qty]
+        else
+          order_params[:quantity] = params[:quantity]
+        end
+      when 'LIMIT'
+        order_params[:quantity] = params[:quantity]
+        order_params[:price] = params[:price]
+        order_params[:timeInForce] = params[:time_in_force] || 'GTC'
+      end
+      
+      # Add optional parameters
+      order_params[:newClientOrderId] = params[:client_order_id] if params[:client_order_id]
+      
+      Rails.logger.info "Creating order: #{order_params}"
+      
+      # Create the order
+      response = @client.new_order(**order_params)
+      
+      Rails.logger.info "Order created successfully: #{response['orderId']}"
+      
+      {
+        success: true,
+        data: response,
+        order_id: response['orderId']
+      }
+      
+    rescue Binance::ClientError => e
+      Rails.logger.error "Order creation failed: #{e.message}"
+      {
+        success: false,
+        error: parse_client_error(e)
+      }
+    rescue => e
+      Rails.logger.error "Order creation error: #{e.message}"
+      {
+        success: false,
+        error: "Failed to create order"
+      }
+    end
+  end
+  
+  # Get open orders
+  def get_open_orders(symbol = nil)
+    return { success: false, error: "Client not initialized" } unless @client
+    return { success: false, error: "API credentials required" } if @api_key.blank? || @api_secret.blank?
+    
+    begin
+      params = {}
+      params[:symbol] = symbol.upcase if symbol
+      
+      response = @client.open_orders(**params)
+      
+      {
+        success: true,
+        data: response,
+        count: response.length
+      }
+    rescue Binance::ClientError => e
+      {
+        success: false,
+        error: parse_client_error(e)
+      }
+    rescue => e
+      {
+        success: false,
+        error: "Failed to get open orders"
+      }
     end
   end
   
   private
   
-  # Get account information (requires signature)
-  def get_account_info
-    timestamp = self.class.get_server_time
-    query_string = "timestamp=#{timestamp}"
-    signature = generate_signature(query_string)
+  def validation_error(message)
+    { success: false, message: message }
+  end
+  
+  def validate_order_params(params)
+    required_fields = [:symbol, :side, :type]
     
-    uri = URI("#{BASE_URL}/api/v3/account?#{query_string}&signature=#{signature}")
+    required_fields.each do |field|
+      raise ArgumentError, "#{field} is required" if params[field].blank?
+    end
     
-    Timeout::timeout(REQUEST_TIMEOUT) do
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = true
-      http.verify_mode = OpenSSL::SSL::VERIFY_PEER
-      http.read_timeout = REQUEST_TIMEOUT
-      http.open_timeout = REQUEST_TIMEOUT
-      
-      request = Net::HTTP::Get.new(uri)
-      request['X-MBX-APIKEY'] = @api_key
-      
-      response = http.request(request)
-      JSON.parse(response.body)
+    # Validate order type specific requirements
+    case params[:type].upcase
+    when 'MARKET'
+      unless params[:quantity] || params[:quote_order_qty]
+        raise ArgumentError, "Either quantity or quote_order_qty is required for MARKET orders"
+      end
+    when 'LIMIT'
+      if params[:quantity].blank? || params[:price].blank?
+        raise ArgumentError, "Both quantity and price are required for LIMIT orders"
+      end
     end
   end
   
-  # Generate HMAC SHA256 signature for Binance API
-  def generate_signature(query_string)
-    OpenSSL::HMAC.hexdigest('sha256', @api_secret, query_string)
+  def handle_client_error(error)
+    # Parse the error response from Binance
+    error_code = error.response.dig(:body, 'code') if error.response
+    error_msg = error.response.dig(:body, 'msg') if error.response
+    
+    case error_code
+    when -2014
+      validation_error("Invalid API key format.")
+    when -1022
+      validation_error("Invalid API secret or signature.")
+    when -2015
+      validation_error("Invalid API key, IP, or permissions for action.")
+    when -1021
+      validation_error("Timestamp issue. Please synchronize your system clock.")
+    when -2010
+      validation_error("Insufficient balance.")
+    else
+      # Use the message from Binance if available, otherwise use a generic message
+      message = error_msg || parse_client_error(error)
+      validation_error(message)
+    end
+  end
+  
+  def parse_client_error(error)
+    # Extract error message from binance-connector-ruby ClientError
+    if error.response && error.response[:body]
+      error_data = error.response[:body]
+      if error_data.is_a?(Hash)
+        return error_data['msg'] || error_data['message'] || "API error"
+      elsif error_data.is_a?(String)
+        return error_data
+      end
+    end
+    
+    # Fallback to the exception message
+    error.message || "Unknown API error"
   end
 end 

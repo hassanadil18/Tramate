@@ -1,0 +1,26 @@
+🔐 Account Access Notification
+==============================
+
+Hello <%= @user.full_name || @user.email %>!
+
+We're letting you know that your Tramate account was successfully accessed.
+
+📊 Sign-in Details:
+- Time: <%= @signin_time.strftime("%B %d, %Y at %I:%M %p %Z") %>
+- Location: <%= @location %>
+- Device: <%= @user_agent.truncate(100) %>
+
+🛡️ Security Notice:
+If this wasn't you, please:
+- Change your password immediately
+- Review your account activity  
+- Contact support if you notice any suspicious activity
+
+Your account security is our top priority. We monitor all access to help keep your trading activity safe.
+
+Happy Trading!
+The Tramate Team 🎯
+
+---
+This is an automated security notification sent to <%= @user.email %>
+© 2024 Tramate. All rights reserved. 

@@ -74,3 +74,7 @@ group :test do
   gem "selenium-webdriver"
 end
 gem 'discordrb'
+
+# Official Binance API gem
+
+gem "binance-connector-ruby", "~> 1.7"

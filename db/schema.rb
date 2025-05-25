@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_24_174106) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_24_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -113,7 +113,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_24_174106) do
     t.json "parsed_data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "status", default: "pending"
+    t.string "signal_type"
+    t.decimal "confidence_score", precision: 5, scale: 3
+    t.text "error_message"
+    t.string "urgency"
+    t.decimal "risk_reward_ratio", precision: 8, scale: 2
+    t.index "((parsed_data ->> 'symbol'::text))", name: "index_trade_signals_on_symbol"
     t.index ["channel_id"], name: "index_trade_signals_on_channel_id"
+    t.index ["confidence_score"], name: "index_trade_signals_on_confidence_score"
+    t.index ["signal_type"], name: "index_trade_signals_on_signal_type"
+    t.index ["status"], name: "index_trade_signals_on_status"
   end
 
   create_table "trades", force: :cascade do |t|

@@ -24,8 +24,12 @@ Rails.application.routes.draw do
       post 'complete_connection'
     end
   end
-  resources :api_credentials
-  resources :subscriptions, only: [:index, :show] do
+  resources :api_credentials do
+    member do
+      post 'validate'
+    end
+  end
+  resources :subscriptions, only: [:index, :show, :new, :create] do
     post 'select', on: :member
     get 'payment', on: :member
     post 'process_payment', on: :member
@@ -97,5 +101,10 @@ Rails.application.routes.draw do
     
     get "subscription" => "steps#subscription", as: :subscription
     post "subscription" => "steps#submit_subscription"
+    
+    # Step 5: Payment processing
+    get "payment" => "steps#payment", as: :payment
+    post "payment" => "steps#submit_payment"
+    get "payment/success" => "steps#payment_success", as: :payment_success
   end
 end

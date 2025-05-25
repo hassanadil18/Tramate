@@ -52,21 +52,38 @@ Rails.application.configure do
   # Replace the default in-process and non-durable queuing backend for Active Job.
   # config.active_job.queue_adapter = :resque
 
-  Ignore bad email addresses and do not raise email delivery errors.
-  Set this to true and configure the email server for immediate delivery to raise delivery errors.
-  config.action_mailer.raise_delivery_errors = false
+  # Email configuration for production
+  config.action_mailer.raise_delivery_errors = true
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.perform_deliveries = true
 
-  Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: "example.com" }
+  # Use Rails credentials for email configuration with fallback
+  # Handle missing credentials gracefully
+  begin
+    email_config = Rails.application.credentials.email || {}
+    production_domain = Rails.application.credentials.production_domain
+  rescue ActiveSupport::MessageEncryptor::InvalidMessage
+    puts "⚠️  Rails credentials not configured properly. Using environment variables as fallback."
+    email_config = {}
+    production_domain = nil
+  end
+  
+  # Set host to be used by links generated in mailer templates.
+  config.action_mailer.default_url_options = { 
+    host: production_domain || ENV['DOMAIN'] || "tramate.com",
+    protocol: 'https'
+  }
 
-  Specify outgoing SMTP server. Remember to add smtp/* credentials via rails credentials:edit.
+  # Configure SMTP settings using Rails credentials
   config.action_mailer.smtp_settings = {
-  #   user_name: Rails.application.credentials.dig(:smtp, :user_name),
-  #   password: Rails.application.credentials.dig(:smtp, :password),
-  #   address: "smtp.example.com",
-  #   port: 587,
-  #   authentication: :plain
-  # }
+    user_name: email_config[:smtp_username] || ENV['SMTP_USERNAME'],
+    password: email_config[:smtp_password] || ENV['SMTP_PASSWORD'],
+    address: email_config[:smtp_address] || ENV['SMTP_ADDRESS'] || 'smtp.gmail.com',
+    port: email_config[:smtp_port] || ENV['SMTP_PORT']&.to_i || 587,
+    domain: email_config[:smtp_domain] || ENV['SMTP_DOMAIN'] || 'gmail.com',
+    authentication: :plain,
+    enable_starttls_auto: true
+  }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).

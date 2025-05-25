@@ -21,11 +21,13 @@
 !/tmp/pids/
 !/tmp/pids/.keep
 
-
-
 # Ignore master key for decrypting credentials and more.
+/config/master.key
+/config/credentials/*.key
+
+# Legacy environment files
 .env
-.env
+.env.*
 
 # Allow database dump for collaboration
 !tramate_db_dump.sql

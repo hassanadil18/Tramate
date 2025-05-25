@@ -32,16 +32,36 @@ Rails.application.configure do
   config.active_storage.service = :local
 
   # Don't care if the mailer can't send.
-  config.action_mailer.raise_delivery_errors = false
+  config.action_mailer.raise_delivery_errors = true
 
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false
 
   # Set localhost to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
-  # Use test delivery method in development
-  config.action_mailer.delivery_method = :test
+  
+  # Enable email delivery in development
+  config.action_mailer.delivery_method = :smtp
   config.action_mailer.perform_deliveries = true
+  
+  # Use Rails credentials for email configuration with fallback
+  # Handle missing credentials gracefully
+  begin
+    email_config = Rails.application.credentials.email || {}
+  rescue ActiveSupport::MessageEncryptor::InvalidMessage
+    puts "⚠️  Rails credentials not configured properly. Using environment variables as fallback."
+    email_config = {}
+  end
+  
+  config.action_mailer.smtp_settings = {
+    address: email_config[:smtp_address] || ENV['GMAIL_ADDRESS'] || ENV['SMTP_ADDRESS'] || 'smtp.gmail.com',
+    port: email_config[:smtp_port] || ENV['GMAIL_PORT'] || ENV['SMTP_PORT'] || 587,
+    domain: email_config[:smtp_domain] || ENV['GMAIL_DOMAIN'] || ENV['SMTP_DOMAIN'] || 'gmail.com',
+    user_name: email_config[:smtp_username] || ENV['GMAIL_USERNAME'] || ENV['SMTP_USERNAME'],
+    password: email_config[:smtp_password] || ENV['GMAIL_PASSWORD'] || ENV['SMTP_PASSWORD'],
+    authentication: 'plain',
+    enable_starttls_auto: true
+  }
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log

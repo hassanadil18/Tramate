@@ -6,14 +6,19 @@ class DashboardController < ApplicationController
     @subscription = current_user.subscription || Subscription.starter
     
     # Get user's recent trades
-    @recent_trades = current_user.trades.recent.limit(5)
+    @recent_trades = current_user.trades.order(created_at: :desc).limit(5)
     
     # Count trades by status
     @trades_count = {
-      completed: current_user.trades.completed.count,
-      pending: current_user.trades.pending.count,
-      failed: current_user.trades.failed.count
+      completed: current_user.trades.where(status: 'completed').count,
+      pending: current_user.trades.where(status: 'pending').count,
+      failed: current_user.trades.where(status: 'failed').count
     }
+    
+    # Set individual counts for the dashboard view
+    @completed_trades = @trades_count[:completed]
+    @pending_trades = @trades_count[:pending]
+    @failed_trades = @trades_count[:failed]
     
     # Calculate success rate
     total_executed = @trades_count[:completed] + @trades_count[:failed]
@@ -22,6 +27,7 @@ class DashboardController < ApplicationController
     # Get available/subscribed channels
     @user_channels = current_user.channels
     @available_channels = Channel.where.not(id: @user_channels.pluck(:id)).limit(3)
+    @connected_channels_count = @user_channels.count
     
     # Calculate trades remaining in subscription
     @trades_remaining = current_user.trades_remaining

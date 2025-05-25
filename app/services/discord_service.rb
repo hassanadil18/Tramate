@@ -4,10 +4,27 @@ class DiscordService
   base_uri 'https://discord.com/api/v10'
   
   def initialize
-    @config = Rails.application.config_for(:discord)
-    @bot_token = @config['bot_token']
-    @client_id = @config['client_id']
-    @client_secret = @config['client_secret']
+    # Try to get config from credentials with proper fallbacks
+    discord_credentials = Rails.application.credentials.discord || {}
+    
+    # Handle different key naming conventions
+    @bot_token = discord_credentials[:bot_token] || 
+                 discord_credentials[:Bot_token] || 
+                 discord_credentials['bot_token'] || 
+                 discord_credentials['Bot_token']
+    
+    @client_id = discord_credentials[:client_id] || 
+                 discord_credentials['client_id']
+    
+    @client_secret = discord_credentials[:client_secret] || 
+                     discord_credentials['client_secret']
+    
+    # Log configuration status
+    Rails.logger.info "Discord Service initialized: bot_token=#{@bot_token.present? ? 'PRESENT' : 'MISSING'}"
+    
+    if @bot_token.blank?
+      Rails.logger.error "Discord bot token is missing from credentials!"
+    end
   end
   
   # Bot Authentication Headers
@@ -41,15 +58,41 @@ class DiscordService
   
   # Check membership by Discord username (username#discriminator format)
   def check_member_by_username(guild_id:, username:)
+    Rails.logger.info "Discord: Checking membership for username '#{username}' in guild '#{guild_id}'"
+    
+    # Validate inputs
+    if guild_id.blank?
+      Rails.logger.error "Discord: Guild ID is blank"
+      return false
+    end
+    
+    if username.blank?
+      Rails.logger.error "Discord: Username is blank"
+      return false
+    end
+    
+    if @bot_token.blank?
+      Rails.logger.error "Discord: Bot token is missing - cannot check membership"
+      return false
+    end
+    
     # Get all guild members (this might need pagination for large servers)
+    Rails.logger.info "Discord: Making API request to get guild members"
     response = self.class.get("/guilds/#{guild_id}/members?limit=1000", headers: bot_headers)
     
-    return false unless response.code == 200
+    Rails.logger.info "Discord API Response: Code=#{response.code}, Headers=#{response.headers.inspect}"
+    
+    if response.code != 200
+      Rails.logger.error "Discord API Error: #{response.code} - #{response.body}"
+      return false
+    end
     
     members = response.parsed_response
+    Rails.logger.info "Discord: Found #{members&.length || 0} members in guild"
     
     # Normalize the input username
     normalized_input = normalize_username(username)
+    Rails.logger.info "Discord: Normalized input username: '#{normalized_input}'"
     
     # Search for the user by username
     found_member = members.find do |member|
@@ -60,18 +103,29 @@ class DiscordService
       if user['discriminator'] && user['discriminator'] != '0'
         # Old format: username#discriminator
         full_username = "#{user['username']}##{user['discriminator']}"
-        normalize_username(full_username) == normalized_input
+        normalized_full = normalize_username(full_username)
+        Rails.logger.debug "Discord: Checking member '#{full_username}' (normalized: '#{normalized_full}')"
+        normalized_full == normalized_input
       else
         # New format: just username or @username
-        normalize_username(user['username']) == normalized_input ||
-        normalize_username("@#{user['username']}") == normalized_input
+        normalized_username = normalize_username(user['username'])
+        normalized_at_username = normalize_username("@#{user['username']}")
+        Rails.logger.debug "Discord: Checking member '#{user['username']}' (normalized: '#{normalized_username}', with @: '#{normalized_at_username}')"
+        normalized_username == normalized_input || normalized_at_username == normalized_input
       end
     end
     
-    return found_member.present?
+    if found_member
+      Rails.logger.info "Discord: Member found! User: #{found_member['user']['username']}##{found_member['user']['discriminator'] || '0'}"
+      return true
+    else
+      Rails.logger.info "Discord: Member '#{username}' not found in guild '#{guild_id}'"
+      return false
+    end
     
   rescue => e
     Rails.logger.error "Discord member check error: #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
     false
   end
   

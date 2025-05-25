@@ -110,12 +110,12 @@
                 <td><%= trade.created_at.strftime("%b %d, %Y %H:%M") %></td>
                 <td>
                   <span class="trading-pair">
-                    <%= trade.signal&.symbol || trade.trading_pair || 'N/A' %>
+                    <%= trade.trade_signal&.symbol || trade.trading_pair || 'N/A' %>
                   </span>
                 </td>
                 <td>
-                  <span class="trade-type <%= trade.signal&.signal_type&.downcase %>">
-                    <%= trade.signal&.signal_type || trade.trade_type || 'N/A' %>
+                  <span class="trade-type <%= trade.trade_signal&.side&.downcase %>">
+                    <%= trade.trade_signal&.side || trade.trade_type || 'N/A' %>
                   </span>
                 </td>
                 <td><%= trade.amount || 'N/A' %></td>
@@ -126,7 +126,7 @@
                   </span>
                 </td>
                 <td>
-                  <%= trade.signal&.channel&.name || 'Manual' %>
+                  <%= trade.trade_signal&.channel&.name || 'Manual' %>
                 </td>
                 <td>
                   <%= link_to "View", trade_path(trade), class: "btn btn-sm btn-outline-primary" %>

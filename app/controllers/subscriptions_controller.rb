@@ -28,7 +28,7 @@ class SubscriptionsController < ApplicationController
       redirect_to success_subscription_path(@subscription)
       return
     end
-
+    
     # Initialize Checkout.com payment with credentials from Rails credentials
     begin
       checkout_credentials = Rails.application.credentials.checkout || {}
@@ -160,7 +160,7 @@ class SubscriptionsController < ApplicationController
         render json: { success: false, error: error_message }
       else
         flash[:error] = error_message
-        redirect_to subscriptions_path
+      redirect_to subscriptions_path
       end
     end
   end

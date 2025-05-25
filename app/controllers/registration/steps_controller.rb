@@ -155,7 +155,7 @@ module Registration
           Rails.logger.info "API keys validated successfully, proceeding to subscription"
           Rails.logger.info "Session after API validation: #{session[:registration].inspect}"
       
-          redirect_to registration_subscription_path
+      redirect_to registration_subscription_path
         else
           # Show validation error
           Rails.logger.error "API validation failed: #{validation_result[:message]}"
@@ -223,9 +223,9 @@ module Registration
       else
         Rails.logger.info "Paid plan selected, redirecting to payment step"
         redirect_to registration_payment_path
-      end
-    end
-    
+          end
+        end
+        
     # Step 5: Payment processing (for paid plans only)
     def payment
       # Initialize session if it doesn't exist
@@ -275,9 +275,9 @@ module Registration
         @subscription = subscription
         initialize_checkout_payment
         render :payment
-      end
-    end
-    
+          end
+        end
+        
     def payment_success
       # Handle successful payment callback from Checkout.com
       subscription_id = session[:registration]['selected_subscription_id']

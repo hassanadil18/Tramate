@@ -4,10 +4,10 @@
     <p class="api-credentials-subtitle">Connect your Binance account to enable automated trading based on signals.</p>
   </div>
 
-  <% if @api_credentials.any? %>
+<% if @api_credentials.any? %>
     <!-- Existing API Credentials -->
     <div class="credentials-list">
-      <% @api_credentials.each do |credential| %>
+        <% @api_credentials.each do |credential| %>
         <div class="credential-card">
           <div class="credential-header">
             <div class="credential-info">
@@ -105,7 +105,7 @@
             <% end %>
             
             <%= link_to api_credential_path(credential), 
-                        method: :delete, 
+                    method: :delete, 
                         data: { 
                           confirm: "Are you sure you want to remove this API connection? This will disable automated trading." 
                         }, 
@@ -126,9 +126,9 @@
           <i class="fas fa-plus"></i> Add New Binance Connection
         <% end %>
       </div>
-    </div>
+  </div>
 
-  <% else %>
+<% else %>
     <!-- No Credentials Yet -->
     <div class="empty-state">
       <div class="empty-icon">🔑</div>
@@ -137,17 +137,17 @@
       <%= link_to new_api_credential_path, class: "btn btn-primary btn-lg" do %>
         <i class="fas fa-plus"></i> Add New Binance Connection
       <% end %>
-    </div>
-  <% end %>
+  </div>
+<% end %>
 
   <!-- Information Section -->
   <div class="info-section">
     <div class="info-card">
       <h3>About Binance API Integration</h3>
-      <p>
-        Tramate uses your Binance API credentials to execute trades on your behalf based on signals.
-        Your API credentials are encrypted securely and never shared with third parties.
-      </p>
+  <p>
+    Tramate uses your Binance API credentials to execute trades on your behalf based on signals.
+    Your API credentials are encrypted securely and never shared with third parties.
+  </p>
       
       <div class="security-notice">
         <div class="notice-icon">

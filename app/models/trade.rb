@@ -224,6 +224,11 @@ class Trade < ApplicationRecord
     self.post_trade_data['exit_reason'] = reason.to_s
   end
 
+  # Price method for dashboard display (alias for execution_price)
+  def price
+    execution_price
+  end
+
   private
 
   def set_timestamp

@@ -61,6 +61,25 @@ class TradeSignal < ApplicationRecord
     end
   end
 
+  # Check if signal is ready for trading
+  def tradeable?
+    status == 'pending' && symbol.present? && entry_price.present?
+  end
+
+  # Update signal status and related fields
+  def mark_as_processed!(trades_created_count = 0)
+    update!(
+      status: 'processed',
+      processed_at: Time.current,
+      trades_created: trades_created_count
+    )
+  end
+
+  # Check if signal is urgent
+  def urgent?
+    urgency == 'high' || urgency == 'urgent'
+  end
+
   private
 
   def parse_message(content)

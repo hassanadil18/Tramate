@@ -3,7 +3,7 @@ class TradesController < ApplicationController
   layout 'user'
   
   def index
-    @trades = current_user.trades.includes(:signal, :user)
+    @trades = current_user.trades.includes(:trade_signal, :user)
                          .order(created_at: :desc)
                          .page(params[:page]).per(20)
     
@@ -32,7 +32,7 @@ class TradesController < ApplicationController
   
   def show
     @trade = current_user.trades.find(params[:id])
-    @signal = @trade.signal
+    @signal = @trade.trade_signal
     @channel = @signal&.channel
   rescue ActiveRecord::RecordNotFound
     redirect_to trades_path, alert: "Trade not found."

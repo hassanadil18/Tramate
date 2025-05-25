@@ -1,5 +1,5 @@
 begin
-  require 'binance'
+require 'binance'
 rescue LoadError => e
   Rails.logger.error "Failed to load binance gem: #{e.message}"
   raise "Binance gem not available. Please ensure 'binance-connector-ruby' gem is installed."
@@ -85,15 +85,15 @@ class BinanceService
       
       Rails.logger.info "Binance: Account data retrieved successfully"
       
-      {
-        success: true,
-        message: "API keys validated successfully!",
+        {
+          success: true,
+          message: "API keys validated successfully!",
         account_type: account_data['accountType'] || 'SPOT',
         can_trade: account_data['canTrade'] || false,
         can_withdraw: account_data['canWithdraw'] || false,
         permissions: account_data['permissions'] || [],
-        testnet: @testnet_mode
-      }
+          testnet: @testnet_mode
+        }
       
     rescue Binance::ClientError => e
       Rails.logger.error "Binance Client Error: #{e.message}"
@@ -207,7 +207,7 @@ class BinanceService
       Rails.logger.info "Creating order: #{order_params}"
       
       # Create the order
-      response = @client.new_order(**order_params)
+        response = @client.new_order(**order_params)
       
       Rails.logger.info "Order created successfully: #{response['orderId']}"
       
@@ -257,6 +257,62 @@ class BinanceService
       {
         success: false,
         error: "Failed to get open orders"
+      }
+    end
+  end
+  
+  # Get exchange information (public endpoint)
+  def get_exchange_info(symbol = nil)
+    return { success: false, error: "Client not initialized" } unless @client
+    
+    begin
+      params = {}
+      params[:symbol] = symbol.upcase if symbol
+      
+      response = @client.exchange_info(**params)
+      
+      {
+        success: true,
+        data: response
+      }
+    rescue Binance::ClientError => e
+      {
+        success: false,
+        error: parse_client_error(e)
+      }
+    rescue => e
+      {
+        success: false,
+        error: "Failed to get exchange info"
+      }
+    end
+  end
+  
+  # Get order status
+  def get_order_status(symbol, order_id: nil, orig_client_order_id: nil)
+    return { success: false, error: "Client not initialized" } unless @client
+    return { success: false, error: "API credentials required" } if @api_key.blank? || @api_secret.blank?
+    
+    begin
+      params = { symbol: symbol.upcase }
+      params[:orderId] = order_id if order_id
+      params[:origClientOrderId] = orig_client_order_id if orig_client_order_id
+      
+      response = @client.get_order(**params)
+      
+      {
+        success: true,
+        data: response
+      }
+    rescue Binance::ClientError => e
+      {
+        success: false,
+        error: parse_client_error(e)
+      }
+    rescue => e
+      {
+        success: false,
+        error: "Failed to get order status"
       }
     end
   end

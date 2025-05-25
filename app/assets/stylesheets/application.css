@@ -9,13 +9,25 @@
  * Consider organizing styles into separate files for maintainability.
  */
 
-/* Base styles */
+/* Global styles */
+:root {
+  --primary-bg: #222831;
+  --button-bg: #008A91;
+  --button-hover: #006d73;
+  --text-dark: #222831;
+  --text-light: #ffffff;
+}
+
+/* Import admin styles */
+@import "admin.css";
+
 body {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
+  color: var(--text-dark);
+  background-color: #f8f9fa;
   margin: 0;
   padding: 0;
-  color: #222831;
-  line-height: 1.5;
 }
 
 .container {
@@ -23,6 +35,10 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 15px;
+  background-color: var(--primary-bg);
+  border-radius: 12px;
+  padding: 20px;
+  color: var(--text-light);
 }
 
 /* Typography */
@@ -34,25 +50,33 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Buttons */
 .btn {
-  display: inline-block;
-  padding: 12px 24px;
+  padding: 8px 16px;
   border-radius: 6px;
   font-weight: 500;
-  font-size: 16px;
-  text-align: center;
   text-decoration: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: none;
+  display: inline-block;
+  transition: background-color 0.2s;
 }
 
 .btn-primary {
-  background-color: #00ADB5;
-  color: white;
+  background-color: var(--button-bg);
+  color: var(--text-light);
+  border: none;
 }
 
 .btn-primary:hover {
-  background-color: #008a91;
+  background-color: var(--button-hover);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--button-bg);
+  color: var(--button-bg);
+}
+
+.btn-outline:hover {
+  background-color: var(--button-bg);
+  color: var(--text-light);
 }
 
 .btn-secondary {
@@ -1148,7 +1172,9 @@ h1, h2, h3, h4, h5, h6 {
 /* Body with menu open */
 body.menu-open {
   overflow: hidden;
-}/* Responsive fixes */
+}
+
+/* Responsive fixes */
 body { overflow-x: hidden !important; width: 100%; }
 .container { box-sizing: border-box !important; padding: 0 20px !important; }
 .tramate-header { width: 100%; }

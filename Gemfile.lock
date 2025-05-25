@@ -432,7 +432,7 @@ PLATFORMS
 DEPENDENCIES
   attr_encrypted (~> 4.2.0)
   bcrypt (~> 3.1.7)
-  binance-connector-ruby (~> 1.7)
+  binance-connector-ruby
   bootsnap
   brakeman
   capybara

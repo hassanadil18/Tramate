@@ -22,15 +22,15 @@
           <div class="info-item">
             <span class="info-label">Trading Pair:</span>
             <span class="info-value trading-pair">
-              <%= @trade.signal&.symbol || @trade.trading_pair || 'N/A' %>
+              <%= @trade.trade_signal&.symbol || @trade.trading_pair || 'N/A' %>
             </span>
           </div>
           
           <div class="info-item">
             <span class="info-label">Type:</span>
             <span class="info-value">
-              <span class="trade-type <%= @trade.signal&.signal_type&.downcase %>">
-                <%= @trade.signal&.signal_type || @trade.trade_type || 'N/A' %>
+              <span class="trade-type <%= @trade.trade_signal&.side&.downcase %>">
+                <%= @trade.trade_signal&.side || @trade.trade_type || 'N/A' %>
               </span>
             </span>
           </div>

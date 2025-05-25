@@ -30,16 +30,7 @@ class Binance::TradeExecutor
     # Create trade record
     @trade = user.trades.create!(
       trade_signal: signal,
-      symbol: signal.symbol,
-      trading_pair: signal.trading_pair,
-      entry_price: signal.entry_price,
-      target_price: signal.take_profit,
-      stop_loss: signal.stop_loss,
-      order_side: signal.order_side,
-      trade_type: signal.side,
-      status: 'pending',
-      urgency: signal.urgency,
-      confidence_score: signal.confidence_score
+      status: 'pending'
     )
     
     begin
@@ -68,8 +59,11 @@ class Binance::TradeExecutor
         # Mark trade as failed
         @trade.update!(
           status: 'failed',
+          error_data: {
           error_message: entry_result[:error],
-          notes: "Failed to execute entry order: #{entry_result[:error]}"
+            notes: "Failed to execute entry order: #{entry_result[:error]}",
+            timestamp: Time.current
+          }
         )
         
         entry_result
@@ -108,11 +102,15 @@ class Binance::TradeExecutor
       
       # Update trade with order information
       @trade.update!(
-        binance_order_id: order_data['orderId'],
+        binance_trade_id: order_data['orderId'],
+        pre_trade_data: {
         execution_price: order_data['price']&.to_f || current_price,
         executed_quantity: order_data['executedQty']&.to_f,
         order_status: order_data['status'],
-        binance_response: order_data
+          binance_response: order_data,
+          executed_at: Time.current,
+          notes: "Order placed successfully at #{Time.current}"
+        }
       )
       
       {
@@ -160,8 +158,10 @@ class Binance::TradeExecutor
     
     if tp_result[:success]
       @trade.update!(
-        take_profit_order_id: tp_result[:order_id],
-        take_profit_order_data: tp_result[:data]
+        take_profit_data: {
+          order_id: tp_result[:order_id],
+          order_data: tp_result[:data]
+        }
       )
       Rails.logger.info "Take profit order placed: #{tp_result[:order_id]}"
     else
@@ -198,8 +198,10 @@ class Binance::TradeExecutor
     
     if sl_result[:success]
       @trade.update!(
-        stop_loss_order_id: sl_result[:order_id],
-        stop_loss_order_data: sl_result[:data]
+        stop_loss_data: {
+          order_id: sl_result[:order_id],
+          order_data: sl_result[:data]
+        }
       )
       Rails.logger.info "Stop loss order placed: #{sl_result[:order_id]}"
     else
@@ -210,12 +212,12 @@ class Binance::TradeExecutor
   # Monitor and update trade status
   def monitor_trade(trade_id)
     trade = Trade.find_by(id: trade_id)
-    return unless trade&.binance_order_id
+    return unless trade&.binance_trade_id
     
     # Check main order status
     status_result = @binance_service.get_order_status(
       trade.trading_pair, 
-      order_id: trade.binance_order_id
+      order_id: trade.binance_trade_id
     )
     
     if status_result[:success]
@@ -226,21 +228,27 @@ class Binance::TradeExecutor
       when 'FILLED'
         trade.update!(
           status: 'executed',
+          pre_trade_data: (trade.pre_trade_data || {}).merge({
           execution_price: order_data['price'].to_f,
           executed_quantity: order_data['executedQty'].to_f,
           order_status: 'FILLED'
+          })
         )
       when 'PARTIALLY_FILLED'
         trade.update!(
+          pre_trade_data: (trade.pre_trade_data || {}).merge({
           execution_price: order_data['price'].to_f,
           executed_quantity: order_data['executedQty'].to_f,
           order_status: 'PARTIALLY_FILLED'
+          })
         )
       when 'CANCELED', 'REJECTED', 'EXPIRED'
         trade.update!(
           status: 'failed',
+          error_data: (trade.error_data || {}).merge({
           order_status: order_data['status'],
           error_message: "Order #{order_data['status'].downcase}"
+          })
         )
       end
     end
@@ -380,12 +388,15 @@ class Binance::TradeExecutor
   
   def update_trade_from_order(order_data)
     @trade.update!(
-      binance_order_id: order_data['orderId'],
+      binance_trade_id: order_data['orderId'],
+      pre_trade_data: {
       execution_price: order_data['price']&.to_f,
       executed_quantity: order_data['executedQty']&.to_f,
       order_status: order_data['status'],
       binance_response: order_data,
+        executed_at: Time.current,
       notes: "Order placed successfully at #{Time.current}"
+      }
     )
     
     # If order was immediately filled, update status
@@ -399,7 +410,6 @@ class Binance::TradeExecutor
     
     @trade&.update!(
       status: 'failed',
-      error_message: error_message,
       error_data: {
         error_class: error.class.name,
         error_message: error.message,

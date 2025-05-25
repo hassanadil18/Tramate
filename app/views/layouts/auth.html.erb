@@ -29,7 +29,7 @@
       display: flex;
       width: 900px;
       max-width: 90%;
-      background-color: white;
+      background-color: #222831;
       border-radius: 20px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
       overflow: hidden;
@@ -58,7 +58,10 @@
     
     .auth-form {
       flex: 1;
-      padding: 40px;
+      padding: 30px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     
     .auth-logo {
@@ -73,10 +76,11 @@
     }
     
     .auth-title {
+      color: #222831;
       font-size: 24px;
-      font-weight: bold;
-      color: #333;
+      font-weight: 600;
       margin-bottom: 20px;
+      text-align: center;
     }
     
     .form-group {
@@ -91,18 +95,16 @@
     }
     
     .form-control {
-      width: 100%;
-      padding: 12px 15px;
       border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 16px;
-      transition: all 0.3s;
+      border-radius: 6px;
+      padding: 10px 15px;
+      width: 100%;
+      transition: border-color 0.2s;
     }
     
     .form-control:focus {
-      border-color: #3C00D8;
+      border-color: #008A91;
       outline: none;
-      box-shadow: 0 0 0 3px rgba(60, 0, 216, 0.1);
     }
     
     .form-row {
@@ -114,21 +116,19 @@
       flex: 1;
     }
     
-    .auth-btn {
-      width: 100%;
-      padding: 15px;
-      background-color: #3C00D8;
-      color: white;
+    .btn-primary {
+      background-color: #008A91;
       border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s;
+      border-radius: 6px;
+      color: white;
+      padding: 12px 20px;
+      width: 100%;
+      font-weight: 500;
+      transition: background-color 0.2s;
     }
     
-    .auth-btn:hover {
-      background-color: #2900b5;
+    .btn-primary:hover {
+      background-color: #006d73;
     }
     
     .auth-text {
@@ -208,6 +208,20 @@
       color: #ef4444;
       font-size: 14px;
       margin-top: 5px;
+    }
+    
+    .auth-links {
+      margin-top: 20px;
+      text-align: center;
+    }
+    
+    .auth-links a {
+      color: #222831;
+      text-decoration: none;
+    }
+    
+    .auth-links a:hover {
+      text-decoration: underline;
     }
     
     @media screen and (max-width: 768px) {

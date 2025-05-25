@@ -108,7 +108,7 @@
                 <td><%= payment.created_at.strftime("%b %d, %Y %H:%M") %></td>
                 <td>
                   <div class="payment-description">
-                    <%= payment.description || 'Payment' %>
+                    <%= payment.notes || 'Payment' %>
                   </div>
                 </td>
                 <td>
@@ -193,7 +193,7 @@
 .stat-icon {
   width: 50px;
   height: 50px;
-  background: #00ADB5;
+  background: #008A91;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -215,11 +215,11 @@
 }
 
 .payment-filters {
-  background: white;
+  background: #222831;
   padding: 20px;
   border-radius: 12px;
   margin-bottom: 30px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  color: white;
 }
 
 .filter-form {
@@ -276,9 +276,9 @@
 }
 
 .payments-table th {
-  background: #f8f9fa;
+  background: #222831;
+  color: white;
   font-weight: 600;
-  color: #333;
 }
 
 .payment-description {
@@ -334,27 +334,27 @@
 }
 
 .btn-primary {
-  background: #00ADB5;
+  background: #008A91;
   color: white;
 }
 
 .btn-primary:hover {
-  background: #008a91;
+  background: #006d73;
 }
 
 .btn-secondary {
-  background: #6c757d;
+  background: #222831;
   color: white;
 }
 
 .btn-outline-primary {
-  border: 1px solid #00ADB5;
-  color: #00ADB5;
+  border: 1px solid #008A91;
+  color: #008A91;
   background: transparent;
 }
 
 .btn-outline-primary:hover {
-  background: #00ADB5;
+  background: #008A91;
   color: white;
 }
 
@@ -374,7 +374,7 @@
 }
 
 .empty-state h3 {
-  color: #333;
+  color: #222831;
   margin-bottom: 10px;
 }
 

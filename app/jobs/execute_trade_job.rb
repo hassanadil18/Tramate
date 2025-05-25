@@ -94,16 +94,12 @@ class ExecuteTradeJob < ApplicationJob
   def create_failed_trade_record(user, signal, error_message)
     user.trades.create!(
       trade_signal: signal,
-      symbol: signal.symbol,
-      trading_pair: signal.trading_pair,
-      entry_price: signal.entry_price,
-      target_price: signal.take_profit,
-      stop_loss: signal.stop_loss,
-      order_side: signal.order_side,
-      trade_type: signal.side,
       status: 'failed',
+      error_data: {
       error_message: error_message,
-      notes: "Failed during job execution: #{error_message}",
+        timestamp: Time.current,
+        notes: "Failed during job execution: #{error_message}"
+      },
       created_at: Time.current
     )
   rescue => e

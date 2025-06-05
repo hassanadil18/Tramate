@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to Tramate</title>
+  <style>
+    body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; }
+    .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+    .content { padding: 30px; }
+    .button { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0; }
+    .feature { background-color: #f8fafc; padding: 20px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #667eea; }
+    .footer { background-color: #f8fafc; padding: 20px; text-align: center; color: #6b7280; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎉 Welcome to Tramate!</h1>
+      <p>Your automated trading journey starts now</p>
+    </div>
+    
+    <div class="content">
+      <h2>Hello <%= @user.full_name || @user.email %>! 👋</h2>
+      
+      <p>Congratulations on joining <strong>Tramate</strong> - the most advanced Discord-to-Binance trading automation platform!</p>
+      
+      <div class="feature">
+        <h3>🚀 What You Can Do Now:</h3>
+        <ul>
+          <li><strong>Connect Binance API:</strong> Link your Binance account for automated trading</li>
+          <li><strong>Join Trading Channels:</strong> Subscribe to premium Discord trading signals</li>
+          <li><strong>Set Trading Preferences:</strong> Configure position sizing and risk management</li>
+          <li><strong>Start Trading:</strong> Receive instant trade executions from Discord signals</li>
+        </ul>
+      </div>
+      
+      <div class="feature">
+        <h3>⚡ Key Features:</h3>
+        <ul>
+          <li>Real-time Discord signal processing (88.6% success rate)</li>
+          <li>Official Binance API integration with testnet support</li>
+          <li>Advanced position sizing and risk management</li>
+          <li>Multiple take profit and stop loss orders</li>
+          <li>Comprehensive trade monitoring and notifications</li>
+        </ul>
+      </div>
+      
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="<%= @login_url %>" class="button">Start Trading Now 🚀</a>
+      </div>
+      
+      <div class="feature">
+        <h3>📧 Email Notifications Enabled:</h3>
+        <p>You'll receive instant email notifications for:</p>
+        <ul>
+          <li>✅ Successful trade executions</li>
+          <li>💰 Profit/Loss updates</li>
+          <li>🔐 Account access alerts</li>
+          <li>⚠️ Important system updates</li>
+        </ul>
+      </div>
+      
+      <p><strong>Need Help?</strong> Our support team is ready to assist you with setting up your first automated trades.</p>
+      
+      <p>Happy Trading!<br>
+      The Tramate Team 🎯</p>
+    </div>
+    
+    <div class="footer">
+      <p>This email was sent to <%= @user.email %> because you signed up for Tramate.</p>
+      <p>© 2024 Tramate. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html> 

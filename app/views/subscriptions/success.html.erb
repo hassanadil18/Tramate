@@ -1,0 +1,190 @@
+<div class="success-container">
+  <div class="success-content">
+    <div class="success-icon">✓</div>
+    <h1 class="success-title">Subscription Activated!</h1>
+    <p class="success-message">Your <%= @subscription&.name || 'subscription' %> plan has been successfully activated.</p>
+    
+    <div class="plan-details">
+      <div class="detail-item">
+        <span class="detail-label">Plan:</span>
+        <span class="detail-value"><%= @subscription&.name || 'N/A' %></span>
+      </div>
+      
+      <div class="detail-item">
+        <span class="detail-label">Status:</span>
+        <span class="detail-value status-active">Active</span>
+      </div>
+      
+      <div class="detail-item">
+        <span class="detail-label">Trade Limit:</span>
+        <span class="detail-value">
+          <% if @subscription&.unlimited_trades? %>
+            Unlimited
+          <% else %>
+            <%= @subscription&.trade_limit || 0 %> trades
+          <% end %>
+        </span>
+      </div>
+      
+      <div class="detail-item">
+        <span class="detail-label">Valid Until:</span>
+        <span class="detail-value"><%= current_user&.subscription_end_date&.strftime('%B %d, %Y') || '1 month from today' %></span>
+      </div>
+    </div>
+    
+    <div class="next-steps">
+      <h2>Next Steps</h2>
+      <ul>
+        <li>Connect your Binance account if you haven't already</li>
+        <li>Join our Discord channel for trading signals</li>
+        <li>Explore the trading dashboard to start automating your trades</li>
+      </ul>
+    </div>
+    
+    <div class="action-buttons">
+      <%= link_to "Go to Dashboard", user_dashboard_path, class: "btn btn-primary" %>
+      <%= link_to "View Subscription Details", subscriptions_path, class: "btn btn-outline" %>
+    </div>
+  </div>
+</div>
+
+<style>
+.success-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.success-content {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  text-align: center;
+}
+
+.success-icon {
+  width: 80px;
+  height: 80px;
+  background-color: #2ed573;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  margin: 0 auto 20px;
+}
+
+.success-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #222831;
+  margin-bottom: 15px;
+}
+
+.success-message {
+  font-size: 18px;
+  color: #555;
+  margin-bottom: 30px;
+}
+
+.plan-details {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 25px;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #555;
+}
+
+.detail-value {
+  color: #222831;
+}
+
+.status-active {
+  color: #2ed573;
+  font-weight: 600;
+}
+
+.next-steps {
+  text-align: left;
+  margin-bottom: 30px;
+}
+
+.next-steps h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.next-steps ul {
+  padding-left: 20px;
+}
+
+.next-steps li {
+  margin-bottom: 10px;
+  color: #555;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.btn {
+  padding: 12px 25px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: #00ADB5;
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #008C93;
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: #00ADB5;
+  border: 2px solid #00ADB5;
+}
+
+.btn-outline:hover {
+  background-color: #00ADB5;
+  color: white;
+}
+
+@media (max-width: 576px) {
+  .action-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+}
+</style>

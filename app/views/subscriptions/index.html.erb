@@ -1,0 +1,289 @@
+<div class="subscription-container">
+  <h1 class="subscription-title">Choose Your Trading Plan</h1>
+  <p class="subscription-subtitle">Select the plan that best fits your trading needs</p>
+  
+  <% if @current_subscription %>
+    <div class="current-plan-banner">
+      <div class="current-plan-info">
+        <h3>Current Plan: <%= @current_subscription.name %></h3>
+        <p>
+          <% if @current_subscription.price.zero? %>
+            Free Plan
+          <% else %>
+            $<%= @current_subscription.price %>/month
+          <% end %>
+          • Active until <%= current_user.subscription_end_date&.strftime("%B %d, %Y") || "N/A" %>
+        </p>
+      </div>
+    </div>
+  <% end %>
+  
+  <div class="subscription-plans">
+    <% @subscriptions.each do |subscription| %>
+      <div class="plan-card <%= subscription.name.downcase %> <%= 'current' if @current_subscription&.id == subscription.id %>">
+        <% if @current_subscription&.id == subscription.id %>
+          <div class="current-badge">Current Plan</div>
+        <% end %>
+        
+        <div class="plan-header">
+          <h2><%= subscription.name %></h2>
+          <div class="plan-price">
+            <% if subscription.price.zero? %>
+              <span class="price">FREE</span>
+            <% else %>
+              <span class="price">$<%= subscription.price %></span>
+              <span class="period">/month</span>
+            <% end %>
+          </div>
+        </div>
+        
+        <div class="plan-features">
+          <p class="plan-description"><%= subscription.description %></p>
+          <ul>
+            <% if subscription.trade_limit.nil? %>
+              <li><strong>Unlimited</strong> trades</li>
+            <% else %>
+              <li><strong><%= subscription.trade_limit %></strong> trades per month</li>
+            <% end %>
+            <li>Real-time signal execution</li>
+            <li>Access to trading dashboard</li>
+            <% if subscription.name == 'Premium' %>
+              <li>Priority support</li>
+              <li>Advanced analytics</li>
+            <% end %>
+          </ul>
+        </div>
+        
+        <div class="plan-footer">
+          <% if @current_subscription&.id == subscription.id %>
+            <button class="btn btn-current" disabled>Current Plan</button>
+          <% else %>
+            <%= button_to "Select Plan", select_subscription_path(subscription), 
+                          method: :post, 
+                          class: "btn btn-primary btn-select-plan",
+                          form: { style: "display: inline;" },
+                          data: { 
+                            confirm: subscription.price > 0 ? "This will change your subscription. Continue?" : nil 
+                          } %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+.subscription-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.subscription-title {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: #222831;
+  margin-bottom: 10px;
+}
+
+.subscription-subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 40px;
+  font-size: 18px;
+}
+
+.current-plan-banner {
+  background: linear-gradient(135deg, #00ADB5, #008a91);
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.current-plan-info h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.current-plan-info p {
+  margin: 0;
+  opacity: 0.9;
+}
+
+.subscription-plans {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.plan-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.plan-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.plan-card.current {
+  border: 2px solid #00ADB5;
+  box-shadow: 0 4px 20px rgba(0, 173, 181, 0.2);
+}
+
+.current-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: #00ADB5;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 1;
+}
+
+.plan-card.starter {
+  border-top: 5px solid #00ADB5;
+}
+
+.plan-card.intermediate {
+  border-top: 5px solid #FF5722;
+}
+
+.plan-card.premium {
+  border-top: 5px solid #673AB7;
+}
+
+.plan-header {
+  padding: 25px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+
+.plan-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.plan-price {
+  margin-top: 15px;
+}
+
+.plan-price .price {
+  font-size: 36px;
+  font-weight: 700;
+}
+
+.plan-price .period {
+  font-size: 16px;
+  color: #666;
+}
+
+.plan-features {
+  padding: 25px;
+  flex-grow: 1;
+}
+
+.plan-description {
+  margin-bottom: 20px;
+  color: #555;
+}
+
+.plan-features ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.plan-features li {
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  position: relative;
+}
+
+.plan-features li:before {
+  content: "✓";
+  color: #00ADB5;
+  margin-right: 10px;
+}
+
+.plan-footer {
+  padding: 25px;
+  text-align: center;
+  border-top: 1px solid #eee;
+}
+
+.btn-select-plan {
+  display: inline-block;
+  background-color: #00ADB5;
+  color: white;
+  padding: 12px 30px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+.btn-select-plan:hover {
+  background-color: #008C93;
+}
+
+.btn-current {
+  display: inline-block;
+  background-color: #6c757d;
+  color: white;
+  padding: 12px 30px;
+  border-radius: 4px;
+  font-weight: 600;
+  border: none;
+  cursor: not-allowed;
+  width: 100%;
+  opacity: 0.7;
+}
+
+.starter .btn-select-plan {
+  background-color: #00ADB5;
+}
+
+.starter .btn-select-plan:hover {
+  background-color: #008C93;
+}
+
+.intermediate .btn-select-plan {
+  background-color: #FF5722;
+}
+
+.intermediate .btn-select-plan:hover {
+  background-color: #E64A19;
+}
+
+.premium .btn-select-plan {
+  background-color: #673AB7;
+}
+
+.premium .btn-select-plan:hover {
+  background-color: #5E35B1;
+}
+
+@media (max-width: 768px) {
+  .subscription-plans {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

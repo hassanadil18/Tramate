@@ -1,0 +1,245 @@
+<div class="admin-dashboard">
+  <div class="admin-header">
+    <div class="back-link">
+      <%= link_to admin_root_path do %>
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+      <% end %>
+    </div>
+    <h1>System Logs</h1>
+    <p class="admin-subtitle">Monitor system activity and events</p>
+  </div>
+
+  <!-- System Logs Page -->
+  <div class="card">
+    <div class="card-header">
+      <div class="header-left">
+        <span class="icon"></span>
+        <h4>System Logs</h4>
+      </div>
+      
+      <!-- Filter controls -->
+      <div style="display: flex; gap: 15px;">
+        <%= form_tag admin_logs_path, method: :get, class: "filter-form", style: "display: flex; gap: 10px;" do %>
+          <select name="level" class="search-box" style="width: auto;">
+            <option value="">All Levels</option>
+            <option value="info" <%= 'selected' if params[:level] == 'info' %>>Info</option>
+            <option value="warn" <%= 'selected' if params[:level] == 'warn' %>>Warnings</option>
+            <option value="error" <%= 'selected' if params[:level] == 'error' %>>Errors</option>
+          </select>
+          
+          <input type="date" name="date" value="<%= params[:date] %>" class="search-box" style="width: auto;">
+          
+          <button type="submit" class="primary-btn" style="padding: 8px 15px; font-size: 14px;">
+            <i class="fas fa-filter"></i> Filter
+          </button>
+        <% end %>
+      </div>
+    </div>
+    
+    <div class="table-container">
+      <% if @logs.present? %>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Level</th>
+              <th>Message</th>
+              <th>Source</th>
+              <th>Context</th>
+              <th>Timestamp</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @logs.each do |log| %>
+              <tr>
+                <td><%= log.id %></td>
+                <td>
+                  <% if log.level == "error" %>
+                    <span class="badge-status badge-inactive">Error</span>
+                  <% elsif log.level == "warn" %>
+                    <span class="badge-status badge-pending">Warning</span>
+                  <% else %>
+                    <span class="badge-status badge-active">Info</span>
+                  <% end %>
+                </td>
+                <td><%= log.message.truncate(60) %></td>
+                <td><%= log.source %></td>
+                <td>
+                  <% if log.context.present? %>
+                    <button class="btn-action btn-view" onclick="toggleDetails('log-<%= log.id %>')">
+                      <i class="fas fa-code"></i> View
+                    </button>
+                  <% else %>
+                    N/A
+                  <% end %>
+                </td>
+                <td><%= log.created_at.strftime("%Y-%m-%d %H:%M:%S") %></td>
+                <td>
+                  <div class="action-buttons">
+                    <%= link_to admin_log_path(log), class: "btn-action btn-view" do %>
+                      <i class="fas fa-eye"></i>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+              <% if log.context.present? %>
+                <tr id="log-<%= log.id %>" style="display: none;">
+                  <td colspan="7">
+                    <div style="background-color: #f8f9fa; padding: 10px; border-radius: 5px; max-height: 200px; overflow: auto;">
+                      <pre><%= JSON.pretty_generate(log.context) rescue log.context.to_s %></pre>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p>No logs found matching your criteria.</p>
+      <% end %>
+    </div>
+    
+    <!-- Pagination -->
+    <div style="margin-top: 20px; display: flex; justify-content: center;">
+      <%= paginate @logs %>
+    </div>
+  </div>
+</div>
+
+<script>
+  function toggleDetails(id) {
+    const element = document.getElementById(id);
+    if (element.style.display === 'none') {
+      element.style.display = 'table-row';
+    } else {
+      element.style.display = 'none';
+    }
+  }
+</script>
+
+<style>
+  /* Log specific styles */
+  .log-entry {
+    font-family: monospace;
+    font-size: 13px;
+  }
+  
+  .log-entry.error {
+    background-color: #fff5f5;
+  }
+  
+  .log-entry.warning {
+    background-color: #fffbea;
+  }
+  
+  .log-entry.info {
+    background-color: #f0f7ff;
+  }
+  
+  .log-entry.debug {
+    background-color: #f9f9f9;
+  }
+  
+  .log-level {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .log-level.error {
+    background-color: #ffecee;
+    color: #e63a52;
+  }
+  
+  .log-level.warning {
+    background-color: #fff4db;
+    color: #e69500;
+  }
+  
+  .log-level.info {
+    background-color: #e6f7ff;
+    color: #0066cc;
+  }
+  
+  .log-level.debug {
+    background-color: #f0f0f0;
+    color: #666;
+  }
+  
+  /* Modal styles */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    position: relative;
+    background-color: white;
+    margin: 10% auto;
+    padding: 0;
+    width: 80%;
+    max-width: 800px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+  
+  .modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+  }
+  
+  .close-modal {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #666;
+    cursor: pointer;
+    padding: 0;
+  }
+  
+  .close-modal:hover {
+    color: #333;
+  }
+  
+  .modal-body {
+    padding: 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+  
+  .context-data {
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .modal-content {
+      width: 95%;
+      margin: 5% auto;
+    }
+  }
+</style> 

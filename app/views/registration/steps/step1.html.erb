@@ -1,0 +1,379 @@
+<div class="registration-container">
+  <div class="registration-sidebar">
+    <div class="logo-wrapper">
+      <h2 class="logo">Tramate.</h2>
+    </div>
+    
+    <div class="steps-container">
+      <div class="step-item active">
+        <div class="step-number">1</div>
+        <div class="step-label">Create Account</div>
+      </div>
+      <div class="step-item">
+        <div class="step-number">2</div>
+        <div class="step-label">Connect Discord</div>
+      </div>
+      <div class="step-item">
+        <div class="step-number">3</div>
+        <div class="step-label">API Setup</div>
+      </div>
+      <div class="step-item">
+        <div class="step-number">4</div>
+        <div class="step-label">Subscription</div>
+      </div>
+    </div>
+    
+    <div class="registration-info">
+      <h3>Why register with Tramate?</h3>
+      <p>Create an account to access professional trading signals, automate your trades, and manage your portfolio with our advanced tools.</p>
+    </div>
+  </div>
+  
+  <div class="registration-form">
+    <h2>Create your account</h2>
+    <p class="form-subtitle">Enter your details to get started with Tramate's automated trading system.</p>
+    
+    <% if flash[:alert] %>
+      <div class="alert alert-danger"><%= flash[:alert] %></div>
+    <% end %>
+    
+    <%= form_with model: @user, url: registration_step1_path, method: :post do |f| %>
+      <div class="form-group">
+        <%= f.label :full_name, "Full Name" %>
+        <%= f.text_field :full_name, class: "form-control", required: true, autofocus: true %>
+        <% if @user&.errors&.include?(:full_name) %>
+          <p class="form-error"><%= @user.errors[:full_name].first %></p>
+        <% end %>
+      </div>
+      
+      <div class="form-group">
+        <%= f.label :email, "Email Address" %>
+        <%= f.email_field :email, class: "form-control", required: true %>
+        <% if @user&.errors&.include?(:email) %>
+          <p class="form-error"><%= @user.errors[:email].first %></p>
+        <% end %>
+      </div>
+      
+      <div class="form-group">
+        <%= f.label :password %>
+        <%= f.password_field :password, class: "form-control", required: true, placeholder: "Minimum 6 characters" %>
+        <% if @user&.errors&.include?(:password) %>
+          <p class="form-error"><%= @user.errors[:password].first %></p>
+        <% end %>
+      </div>
+      
+      <div class="form-group">
+        <%= f.label :password_confirmation, "Confirm Password" %>
+        <%= f.password_field :password_confirmation, class: "form-control", required: true %>
+        <% if @user&.errors&.include?(:password_confirmation) %>
+          <p class="form-error"><%= @user.errors[:password_confirmation].first %></p>
+        <% end %>
+      </div>
+      
+      <div class="form-group">
+        <div class="checkbox-wrapper">
+          <%= f.check_box :terms_of_service, required: true, class: "custom-checkbox" %>
+          <label for="user_terms_of_service" class="checkbox-label">
+            <span class="checkmark"></span>
+            <span class="checkbox-text">
+              I agree to the <%= link_to "Terms of Service", terms_and_conditions_path, target: "_blank", class: "policy-link" %> 
+              and <%= link_to "Privacy Policy", privacy_policy_path, target: "_blank", class: "policy-link" %>
+            </span>
+          </label>
+        </div>
+        <% if @user&.errors&.include?(:terms_of_service) %>
+          <p class="form-error"><%= @user.errors[:terms_of_service].first %></p>
+        <% end %>
+      </div>
+      
+      <%= f.submit "Continue to Discord Setup", class: "btn btn-primary btn-block" %>
+    <% end %>
+    
+    <div class="login-link">
+      Already have an account? <%= link_to "Log in", auth_login_form_path %>
+    </div>
+  </div>
+</div>
+
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+  }
+  
+  .registration-container {
+    display: flex;
+    min-height: 100vh;
+  }
+  
+  .registration-sidebar {
+    width: 320px;
+    background-color: #00ADB5;
+    color: white;
+    padding: 40px 30px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .logo-wrapper {
+    margin-bottom: 60px;
+  }
+  
+  .logo {
+    font-size: 28px;
+    font-weight: 700;
+  }
+  
+  .steps-container {
+    margin-bottom: 40px;
+  }
+  
+  .step-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+    opacity: 0.7;
+  }
+  
+  .step-item.active {
+    opacity: 1;
+  }
+  
+  .step-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    font-weight: 600;
+  }
+  
+  .step-item.active .step-number {
+    background-color: white;
+    color: #00ADB5;
+  }
+  
+  .step-label {
+    font-size: 16px;
+    font-weight: 500;
+  }
+  
+  .registration-info {
+    margin-top: auto;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+  }
+  
+  .registration-info h3 {
+    font-size: 18px;
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+  
+  .registration-info p {
+    font-size: 14px;
+    line-height: 1.5;
+    opacity: 0.9;
+  }
+  
+  .registration-form {
+    flex: 1;
+    padding: 60px;
+    max-width: 600px;
+  }
+  
+  h2 {
+    margin-top: 0;
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  .form-subtitle {
+    color: #666;
+    margin-bottom: 30px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+  }
+  
+  .form-control:focus {
+    border-color: #00ADB5;
+    outline: none;
+  }
+  
+  .checkbox-wrapper {
+    position: relative;
+    display: block;
+    margin: 20px 0;
+  }
+  
+  .custom-checkbox {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+  
+  .checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #555;
+    font-weight: normal;
+  }
+  
+  .checkmark {
+    position: relative;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    margin-right: 12px;
+    margin-top: 2px;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+  }
+  
+  .checkbox-label:hover .checkmark {
+    border-color: #00ADB5;
+    box-shadow: 0 0 0 2px rgba(0, 173, 181, 0.1);
+  }
+  
+  .custom-checkbox:checked + .checkbox-label .checkmark {
+    background-color: #00ADB5;
+    border-color: #00ADB5;
+  }
+  
+  .custom-checkbox:checked + .checkbox-label .checkmark:after {
+    content: "";
+    position: absolute;
+    display: block;
+    left: 6px;
+    top: 2px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  
+  .checkbox-text {
+    flex: 1;
+  }
+  
+  .policy-link {
+    color: #00ADB5;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+  
+  .policy-link:hover {
+    color: #008e96;
+    text-decoration: underline;
+  }
+  
+  .custom-checkbox:focus + .checkbox-label .checkmark {
+    border-color: #00ADB5;
+    box-shadow: 0 0 0 3px rgba(0, 173, 181, 0.2);
+  }
+  
+  .btn {
+    padding: 14px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .btn-primary {
+    background-color: #00ADB5;
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    background-color: #008e96;
+  }
+  
+  .btn-block {
+    display: block;
+    width: 100%;
+  }
+  
+  .login-link {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 15px;
+    color: #666;
+  }
+  
+  .login-link a {
+    color: #00ADB5;
+    text-decoration: none;
+  }
+  
+  .form-error {
+    color: #dc3545;
+    font-size: 14px;
+    margin-top: 5px;
+    margin-bottom: 0;
+  }
+  
+  .alert {
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+  }
+  
+  .alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+  
+  @media (max-width: 992px) {
+    .registration-container {
+      flex-direction: column;
+    }
+    
+    .registration-sidebar {
+      width: 100%;
+      padding: 30px 20px;
+    }
+    
+    .registration-form {
+      padding: 30px 20px;
+    }
+  }
+</style> 

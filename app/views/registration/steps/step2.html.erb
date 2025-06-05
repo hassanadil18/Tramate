@@ -1,0 +1,619 @@
+<div class="registration-step">
+  <div class="registration-container">
+    <div class="step-header">
+      <div class="step-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 50%;"></div>
+        </div>
+        <div class="step-indicators">
+          <div class="step-indicator completed">1</div>
+          <div class="step-indicator active">2</div>
+          <div class="step-indicator">3</div>
+          <div class="step-indicator">4</div>
+        </div>
+        <div class="step-labels">
+          <span class="completed">Account</span>
+          <span class="active">Discord</span>
+          <span>API Setup</span>
+          <span>Subscription</span>
+        </div>
+      </div>
+      
+      <div class="step-content-header">
+        <h1>Discord Verification & Channel Selection</h1>
+        <p class="subtitle">Choose your signal channel and verify your Discord membership</p>
+      </div>
+    </div>
+
+    <!-- Flash messages -->
+    <% if notice %>
+      <div class="alert alert-success">
+        <%= notice %>
+      </div>
+    <% end %>
+    
+    <% if alert %>
+      <div class="alert alert-danger">
+        <%= alert %>
+      </div>
+    <% end %>
+
+    <div class="step-content">
+      <%= form_with url: registration_step2_path, method: :post, local: true, class: "registration-form", authenticity_token: true do |form| %>
+        
+        <!-- Channel Selection -->
+        <div class="form-section">
+          <h2>Choose Your Signal Channel</h2>
+          <p>Select the trading signal channel you want to connect to. You must be a member of the corresponding Discord server.</p>
+          
+          <div class="channels-selection">
+            <% @channels.each do |channel| %>
+              <div class="channel-option">
+                <input type="radio" 
+                       name="channel_id" 
+                       value="<%= channel.id %>" 
+                       id="channel_<%= channel.id %>"
+                       <%= 'checked' if @selected_channel_id&.to_i == channel.id %>
+                       required>
+                <label for="channel_<%= channel.id %>" class="channel-card">
+                  <div class="channel-icon">
+                    <i class="fas fa-satellite"></i>
+                  </div>
+                  <div class="channel-info">
+                    <h3><%= channel.name %></h3>
+                    <p class="channel-description">
+                      <%= channel.description || "Premium trading signals and market analysis" %>
+                    </p>
+                    <div class="channel-meta">
+                      <span class="discord-id">Discord ID: <%= channel.discord_channel_id || "N/A" %></span>
+                      <% if channel.discord_invite_link.present? %>
+                        <a href="<%= channel.discord_invite_link %>" target="_blank" class="discord-link">
+                          <i class="fab fa-discord"></i> Join Server
+                        </a>
+                      <% end %>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Discord Verification -->
+        <div class="form-section">
+          <h2>Discord Username Verification</h2>
+          <p>Enter your Discord username to verify that you're a member of the selected channel's Discord server.</p>
+          
+          <div class="form-group">
+            <label for="discord_username">Discord Username</label>
+            <div class="input-group">
+              <div class="input-icon">
+                <i class="fab fa-discord"></i>
+              </div>
+              <input type="text" 
+                     name="discord_username" 
+                     id="discord_username" 
+                     class="form-control" 
+                     placeholder="username#1234" 
+                     value="<%= @discord_username %>"
+                     required
+                     autocomplete="off">
+            </div>
+            <small class="form-text">
+              Enter your complete Discord username including the # and numbers (e.g., JohnDoe#1234)
+            </small>
+          </div>
+
+          <div class="verification-info">
+            <div class="info-card">
+              <div class="info-icon">
+                <i class="fas fa-info-circle"></i>
+              </div>
+              <div class="info-content">
+                <h4>How verification works</h4>
+                <ul>
+                  <li>We'll check if your Discord username is a member of the selected channel's server</li>
+                  <li>You must have joined the Discord server before attempting verification</li>
+                  <li>If verification fails, you'll be provided with an invite link</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Help Section -->
+        <div class="help-section">
+          <h3>Need Help?</h3>
+          
+          <div class="help-grid">
+            <div class="help-card">
+              <h4><i class="fas fa-user-circle"></i> Finding Your Discord Username</h4>
+              <div class="steps">
+                <div class="step">
+                  <span class="step-number">1</span>
+                  <span class="step-text">Open Discord and click on your profile picture</span>
+                </div>
+                <div class="step">
+                  <span class="step-number">2</span>
+                  <span class="step-text">Your username will be displayed (e.g., username#1234)</span>
+                </div>
+                <div class="step">
+                  <span class="step-number">3</span>
+                  <span class="step-text">Copy it exactly including the # and numbers</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="help-card">
+              <h4><i class="fas fa-question-circle"></i> Not a Discord Member?</h4>
+              <p>You need to join the Discord server for your selected channel first. Use the "Join Server" links above or contact support for invite links.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <%= link_to "Back", registration_step1_path, class: "btn btn-secondary" %>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-shield-alt"></i>
+            Verify & Continue
+          </button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<style>
+.registration-step {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.registration-container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.step-header {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 30px;
+}
+
+.step-progress {
+  margin-bottom: 30px;
+}
+
+.progress-bar {
+  background: rgba(255, 255, 255, 0.2);
+  height: 4px;
+  border-radius: 2px;
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: white;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.step-indicators {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.step-indicator {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.step-indicator.completed {
+  background: #2ed573;
+}
+
+.step-indicator.active {
+  background: white;
+  color: #667eea;
+}
+
+.step-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.step-labels .completed {
+  color: #2ed573;
+}
+
+.step-labels .active {
+  color: white;
+  font-weight: 600;
+}
+
+.step-content-header h1 {
+  margin: 0 0 10px 0;
+  font-size: 28px;
+}
+
+.subtitle {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 16px;
+}
+
+.step-content {
+  padding: 40px;
+}
+
+.form-section {
+  margin-bottom: 40px;
+}
+
+.form-section h2 {
+  color: #222831;
+  margin-bottom: 10px;
+  font-size: 22px;
+}
+
+.form-section p {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 25px;
+}
+
+.channels-selection {
+  display: grid;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.channel-option {
+  position: relative;
+}
+
+.channel-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.channel-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.channel-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+}
+
+.channel-option input[type="radio"]:checked + .channel-card {
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.channel-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.channel-info {
+  flex-grow: 1;
+}
+
+.channel-info h3 {
+  margin: 0 0 8px 0;
+  color: #222831;
+  font-size: 18px;
+}
+
+.channel-description {
+  margin: 0 0 12px 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.channel-meta {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 12px;
+}
+
+.discord-id {
+  color: #999;
+}
+
+.discord-link {
+  color: #7289da;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.discord-link:hover {
+  text-decoration: underline;
+}
+
+.form-group {
+  margin-bottom: 25px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #222831;
+}
+
+.input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 15px;
+  color: #7289da;
+  font-size: 18px;
+  z-index: 1;
+}
+
+.form-control {
+  width: 100%;
+  height: 50px;
+  padding: 12px 15px 12px 50px;
+  font-size: 16px;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  background-color: #fff;
+  transition: all 0.3s;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-text {
+  font-size: 14px;
+  color: #666;
+  margin-top: 8px;
+}
+
+.verification-info {
+  margin-bottom: 30px;
+}
+
+.info-card {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  gap: 15px;
+}
+
+.info-icon {
+  color: #667eea;
+  font-size: 24px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.info-content h4 {
+  margin: 0 0 10px 0;
+  color: #222831;
+}
+
+.info-content ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.help-section {
+  background: #f8f9fa;
+  padding: 30px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+}
+
+.help-section h3 {
+  color: #222831;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.help-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.help-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid #e9ecef;
+}
+
+.help-card h4 {
+  margin: 0 0 15px 0;
+  color: #222831;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+}
+
+.help-card h4 i {
+  color: #667eea;
+}
+
+.help-card p {
+  margin: 0;
+  color: #666;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.steps {
+  display: grid;
+  gap: 8px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.step-number {
+  width: 20px;
+  height: 20px;
+  background: #667eea;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.step-text {
+  color: #666;
+  font-size: 13px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+  padding-top: 20px;
+  border-top: 1px solid #e9ecef;
+}
+
+.btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  border: 2px solid;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s;
+  font-size: 16px;
+}
+
+.btn-primary {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.btn-primary:hover {
+  background: #5a67d8;
+  border-color: #5a67d8;
+  text-decoration: none;
+  color: white;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #6c757d;
+  border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+  background: #6c757d;
+  color: white;
+  text-decoration: none;
+}
+
+.alert {
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+@media (max-width: 768px) {
+  .registration-step {
+    padding: 10px;
+  }
+  
+  .step-content {
+    padding: 30px 20px;
+  }
+  
+  .help-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .channel-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+}
+</style> 

@@ -1,0 +1,38 @@
+🚀 Trade Executed!
+==================
+
+Hello <%= @user.full_name || @user.email %>!
+
+Great news! Your automated trade has been executed successfully on Binance.
+
+📈 Trade Details:
+- Symbol: <%= @trade.symbol %>USDT
+- Side: <%= @trade.trade_type %>
+- Entry Price: $<%= number_with_delimiter(@trade.entry_price, delimiter: ',') %>
+- Execution Price: $<%= number_with_delimiter(@trade.execution_price, delimiter: ',') %>
+- Quantity: <%= @trade.executed_quantity %> <%= @trade.symbol %>
+- Order ID: <%= @trade.binance_order_id %>
+
+<% if @signal %>
+📱 Original Signal:
+- Channel: <%= @signal.channel.name %>
+- Entry: $<%= number_with_delimiter(@signal.entry_price, delimiter: ',') %>
+<% if @signal.take_profit %>- Take Profit: $<%= number_with_delimiter(@signal.take_profit, delimiter: ',') %><% end %>
+<% if @signal.stop_loss %>- Stop Loss: $<%= number_with_delimiter(@signal.stop_loss, delimiter: ',') %><% end %>
+- Confidence: <%= (@signal.confidence_score * 100).round(1) %>%
+<% end %>
+
+📊 What's Next:
+Your trade is now active and being monitored. You'll receive notifications when:
+- ✅ Take profit orders are filled
+- 🛑 Stop loss orders are triggered
+- 📈 Position is closed with profit/loss summary
+
+View your trades: Login to your Tramate dashboard to monitor this and all your active trades.
+
+Happy Trading!
+The Tramate Team 🎯
+
+---
+Trade executed at <%= Time.current.strftime("%B %d, %Y at %I:%M %p %Z") %>
+© 2024 Tramate. All rights reserved. 

@@ -1,0 +1,550 @@
+<div class="channels-page">
+  <div class="page-header">
+    <h1>Trading Channels</h1>
+    <p class="page-subtitle">Connect to signal channels to receive automated trading signals</p>
+  </div>
+
+  <!-- Flash messages -->
+  <% if notice %>
+    <div class="alert alert-success">
+      <%= notice %>
+    </div>
+  <% end %>
+  
+  <% if alert %>
+    <div class="alert alert-danger">
+      <%= alert %>
+    </div>
+  <% end %>
+
+  <!-- Connected Channels Section -->
+  <% if @user_channels.present? %>
+    <div class="channels-section">
+      <h2 class="section-title">Your Connected Channels</h2>
+      <div class="channels-grid">
+        <% @user_channels.each do |channel| %>
+          <div class="channel-card connected">
+            <div class="channel-header">
+              <div class="channel-icon">
+                <i class="fas fa-satellite"></i>
+              </div>
+              <div class="channel-info">
+                <h3><%= channel.name %></h3>
+                <span class="channel-status connected">
+                  <i class="fas fa-check-circle"></i> Connected
+                </span>
+              </div>
+            </div>
+            
+            <div class="channel-content">
+              <p class="channel-description">
+                <%= channel.description || "Trading signals and market analysis" %>
+              </p>
+              
+              <div class="channel-stats">
+                <div class="stat">
+                  <span class="stat-label">Discord ID</span>
+                  <span class="stat-value"><%= channel.discord_channel_id || "N/A" %></span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">Status</span>
+                  <span class="stat-value">Active</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="channel-actions">
+              <%= link_to "View Details", channel_path(channel), class: "btn btn-outline-primary" %>
+              <%= link_to "Disconnect", channel_path(channel), method: :delete, 
+                          class: "btn btn-outline-danger",
+                          confirm: "Are you sure you want to disconnect from #{channel.name}?" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Available Channels Section -->
+  <div class="channels-section">
+    <h2 class="section-title">
+      <%= @user_channels.present? ? "Available Channels" : "Connect to Channels" %>
+    </h2>
+    
+    <% if @available_channels.present? %>
+      <div class="verification-notice">
+        <div class="notice-icon">
+          <i class="fab fa-discord"></i>
+        </div>
+        <div class="notice-content">
+          <h4>Discord Verification Required</h4>
+          <p>To connect to any channel, you must be a member of their Discord server. We'll verify your membership before granting access.</p>
+        </div>
+      </div>
+      
+      <div class="channels-grid">
+        <% @available_channels.each do |channel| %>
+          <div class="channel-card available">
+            <div class="channel-header">
+              <div class="channel-icon">
+                <i class="fas fa-satellite"></i>
+              </div>
+              <div class="channel-info">
+                <h3><%= channel.name %></h3>
+                <span class="channel-status available">
+                  <i class="fas fa-plus-circle"></i> Available
+                </span>
+              </div>
+            </div>
+            
+            <div class="channel-content">
+              <p class="channel-description">
+                <%= channel.description || "Trading signals and market analysis" %>
+              </p>
+              
+              <div class="channel-stats">
+                <div class="stat">
+                  <span class="stat-label">Discord ID</span>
+                  <span class="stat-value"><%= channel.discord_channel_id || "N/A" %></span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">Type</span>
+                  <span class="stat-value">Signal Channel</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="connection-requirements">
+              <div class="requirement">
+                <i class="fab fa-discord"></i>
+                <span>Discord membership required</span>
+              </div>
+            </div>
+            
+            <div class="channel-actions">
+              <%= link_to "View Details", channel_path(channel), class: "btn btn-outline-primary" %>
+              <%= link_to "Verify & Connect", channel_path(channel), method: :post, class: "btn btn-primary" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-satellite-dish"></i>
+        </div>
+        <h3>All Channels Connected</h3>
+        <p>You're connected to all available channels. New channels will appear here when they become available.</p>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Setup Requirements -->
+  <div class="setup-requirements">
+    <h2 class="section-title">Setup Requirements</h2>
+    <div class="requirements-grid">
+      <div class="requirement-card">
+        <div class="requirement-icon">
+          <i class="fab fa-discord"></i>
+        </div>
+        <div class="requirement-content">
+          <h4>Discord Membership</h4>
+          <p>You must be a member of the Discord server for each channel you want to connect to. We'll verify your membership during the connection process.</p>
+        </div>
+      </div>
+      
+      <div class="requirement-card">
+        <div class="requirement-icon">
+          <i class="fas fa-key"></i>
+        </div>
+        <div class="requirement-content">
+          <h4>API Credentials</h4>
+          <p>Binance API keys are required for automated trading to work with connected channels.</p>
+          <% unless current_user.has_valid_binance_credentials? %>
+            <%= link_to "Setup API", api_credentials_path, class: "btn btn-sm btn-warning" %>
+          <% end %>
+        </div>
+      </div>
+      
+      <div class="requirement-card">
+        <div class="requirement-icon">
+          <i class="fas fa-crown"></i>
+        </div>
+        <div class="requirement-content">
+          <h4>Active Subscription</h4>
+          <p>An active subscription is required to receive and execute trading signals.</p>
+          <% if current_user.subscription_status != 'active' %>
+            <%= link_to "Upgrade Plan", subscriptions_path, class: "btn btn-sm btn-primary" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.channels-page {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.page-header h1 {
+  font-size: 36px;
+  color: #222831;
+  margin-bottom: 10px;
+}
+
+.page-subtitle {
+  color: #666;
+  font-size: 18px;
+}
+
+.alert {
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.channels-section {
+  margin-bottom: 50px;
+}
+
+.section-title {
+  font-size: 24px;
+  color: #222831;
+  margin-bottom: 25px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #00ADB5;
+}
+
+.verification-notice {
+  background: linear-gradient(135deg, #7289da, #5865f2);
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.notice-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.notice-content h4 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+}
+
+.notice-content p {
+  margin: 0;
+  opacity: 0.9;
+  line-height: 1.5;
+}
+
+.channels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 25px;
+}
+
+.channel-card {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.channel-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.channel-card.connected {
+  border-color: #2ed573;
+}
+
+.channel-card.available {
+  border-color: #00ADB5;
+}
+
+.channel-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.channel-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #00ADB5, #393E46);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  margin-right: 15px;
+}
+
+.channel-info h3 {
+  margin: 0 0 5px 0;
+  font-size: 20px;
+  color: #222831;
+}
+
+.channel-status {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.channel-status.connected {
+  color: #2ed573;
+}
+
+.channel-status.available {
+  color: #00ADB5;
+}
+
+.channel-description {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.channel-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 25px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-label {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.stat-value {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #222831;
+}
+
+.connection-requirements {
+  margin-bottom: 20px;
+  padding: 12px;
+  background: rgba(114, 137, 218, 0.1);
+  border-radius: 6px;
+  border-left: 4px solid #7289da;
+}
+
+.requirement {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #7289da;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.channel-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  border: 2px solid;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  font-size: 14px;
+}
+
+.btn-primary {
+  background: #00ADB5;
+  color: white;
+  border-color: #00ADB5;
+}
+
+.btn-primary:hover {
+  background: #008a91;
+  border-color: #008a91;
+  text-decoration: none;
+  color: white;
+}
+
+.btn-outline-primary {
+  background: transparent;
+  color: #00ADB5;
+  border-color: #00ADB5;
+}
+
+.btn-outline-primary:hover {
+  background: #00ADB5;
+  color: white;
+  text-decoration: none;
+}
+
+.btn-outline-danger {
+  background: transparent;
+  color: #dc3545;
+  border-color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+  background: #dc3545;
+  color: white;
+  text-decoration: none;
+}
+
+.btn-warning {
+  background: #ffc107;
+  color: #212529;
+  border-color: #ffc107;
+}
+
+.btn-warning:hover {
+  background: #e0a800;
+  border-color: #e0a800;
+  text-decoration: none;
+  color: #212529;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.empty-icon {
+  font-size: 64px;
+  color: #00ADB5;
+  margin-bottom: 20px;
+}
+
+.empty-state h3 {
+  color: #222831;
+  margin-bottom: 10px;
+}
+
+.setup-requirements {
+  background: #f8f9fa;
+  padding: 30px;
+  border-radius: 12px;
+  margin-top: 40px;
+}
+
+.requirements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.requirement-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.requirement-icon {
+  width: 50px;
+  height: 50px;
+  background: #00ADB5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.requirement-content h4 {
+  margin: 0 0 5px 0;
+  color: #222831;
+}
+
+.requirement-content p {
+  margin: 0 0 10px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .channels-page {
+    padding: 15px;
+  }
+  
+  .channels-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .requirements-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .channel-actions {
+    flex-direction: column;
+  }
+  
+  .channel-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .verification-notice {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+}
+</style> 

@@ -1,0 +1,390 @@
+<div class="payments-container">
+  <div class="payments-header">
+    <h1>Payment History</h1>
+    <p class="payments-subtitle">Your complete payment and billing history</p>
+  </div>
+
+  <!-- Payment Statistics -->
+  <div class="payment-stats">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-credit-card"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value"><%= @stats[:total] %></span>
+        <span class="stat-label">Total Payments</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value"><%= @stats[:completed] %></span>
+        <span class="stat-label">Completed</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-clock"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value"><%= @stats[:pending] %></span>
+        <span class="stat-label">Pending</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-times-circle"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value"><%= @stats[:failed] %></span>
+        <span class="stat-label">Failed</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-dollar-sign"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">$<%= number_with_precision(@stats[:total_amount], precision: 2) %></span>
+        <span class="stat-label">Total Spent</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="payment-filters">
+    <%= form_with url: payments_path, method: :get, local: true, class: "filter-form" do |f| %>
+      <div class="filter-group">
+        <%= f.label :status, "Status:" %>
+        <%= f.select :status, options_for_select([
+          ['All', ''],
+          ['Completed', 'completed'],
+          ['Pending', 'pending'],
+          ['Failed', 'failed']
+        ], params[:status]), {}, { class: "form-select" } %>
+      </div>
+      
+      <div class="filter-group">
+        <%= f.label :start_date, "From:" %>
+        <%= f.date_field :start_date, value: params[:start_date], class: "form-control" %>
+      </div>
+      
+      <div class="filter-group">
+        <%= f.label :end_date, "To:" %>
+        <%= f.date_field :end_date, value: params[:end_date], class: "form-control" %>
+      </div>
+      
+      <div class="filter-actions">
+        <%= f.submit "Filter", class: "btn btn-primary" %>
+        <%= link_to "Clear", payments_path, class: "btn btn-secondary" %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Payments Table -->
+  <div class="payments-table-container">
+    <% if @payments.any? %>
+      <div class="table-responsive">
+        <table class="payments-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Payment ID</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @payments.each do |payment| %>
+              <tr>
+                <td><%= payment.created_at.strftime("%b %d, %Y %H:%M") %></td>
+                <td>
+                  <div class="payment-description">
+                    <%= payment.notes || 'Payment' %>
+                  </div>
+                </td>
+                <td>
+                  <span class="payment-amount">
+                    $<%= number_with_precision(payment.amount, precision: 2) %>
+                  </span>
+                </td>
+                <td>
+                  <span class="status-badge <%= payment.status&.downcase %>">
+                    <%= payment.status&.capitalize || 'Unknown' %>
+                  </span>
+                </td>
+                <td>
+                  <span class="payment-id">
+                    <%= payment.payment_gateway_id || payment.id %>
+                  </span>
+                </td>
+                <td>
+                  <%= link_to "View", payment_path(payment), class: "btn btn-sm btn-outline-primary" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Pagination -->
+      <div class="pagination-container">
+        <%= paginate @payments if respond_to?(:paginate) %>
+      </div>
+    <% else %>
+      <div class="empty-state">
+        <div class="empty-icon">💳</div>
+        <h3>No payments found</h3>
+        <p>You haven't made any payments yet. Upgrade your plan to start making payments!</p>
+        <%= link_to "View Plans", subscriptions_path, class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+.payments-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.payments-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.payments-header h1 {
+  font-size: 32px;
+  color: #222831;
+  margin-bottom: 5px;
+}
+
+.payments-subtitle {
+  color: #666;
+  font-size: 16px;
+}
+
+.payment-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  background: #008A91;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+}
+
+.stat-value {
+  display: block;
+  font-size: 28px;
+  font-weight: bold;
+  color: #222831;
+}
+
+.stat-label {
+  color: #666;
+  font-size: 14px;
+}
+
+.payment-filters {
+  background: #222831;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  color: white;
+}
+
+.filter-form {
+  display: flex;
+  gap: 20px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filter-group label {
+  font-weight: 500;
+  color: #333;
+}
+
+.form-select, .form-control {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.payments-table-container {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.payments-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.payments-table th,
+.payments-table td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.payments-table th {
+  background: #222831;
+  color: white;
+  font-weight: 600;
+}
+
+.payment-description {
+  font-weight: 500;
+  color: #333;
+}
+
+.payment-amount {
+  font-weight: 600;
+  color: #00ADB5;
+  font-size: 16px;
+}
+
+.payment-id {
+  font-family: monospace;
+  font-size: 12px;
+  color: #666;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.failed {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #008A91;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #006d73;
+}
+
+.btn-secondary {
+  background: #222831;
+  color: white;
+}
+
+.btn-outline-primary {
+  border: 1px solid #008A91;
+  color: #008A91;
+  background: transparent;
+}
+
+.btn-outline-primary:hover {
+  background: #008A91;
+  color: white;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+}
+
+.empty-state h3 {
+  color: #222831;
+  margin-bottom: 10px;
+}
+
+.empty-state p {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.pagination-container {
+  padding: 20px;
+  text-align: center;
+}
+</style> 

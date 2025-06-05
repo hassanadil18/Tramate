@@ -1,0 +1,321 @@
+<% content_for :title, "Payment - Tramate Registration" %>
+
+<div class="registration-container">
+  <!-- Progress Steps -->
+  <div class="progress-steps">
+    <div class="step completed">
+      <div class="step-number">1</div>
+      <div class="step-label">Account</div>
+    </div>
+    <div class="step completed">
+      <div class="step-number">2</div>
+      <div class="step-label">Discord</div>
+    </div>
+    <div class="step completed">
+      <div class="step-number">3</div>
+      <div class="step-label">API Setup</div>
+    </div>
+    <div class="step completed">
+      <div class="step-number">4</div>
+      <div class="step-label">Plan</div>
+    </div>
+    <div class="step active">
+      <div class="step-number">5</div>
+      <div class="step-label">Payment</div>
+    </div>
+  </div>
+
+  <!-- Payment Form -->
+  <div class="registration-form">
+    <h2>Complete Your Payment</h2>
+    <p class="form-subtitle">Secure payment processing powered by Checkout.com</p>
+    
+    <% if flash[:alert] %>
+      <div class="alert alert-danger"><%= flash[:alert] %></div>
+    <% end %>
+
+    <!-- Plan Summary -->
+    <div class="plan-summary-card">
+      <div class="plan-header">
+        <h3><%= @subscription.name %> Plan</h3>
+        <div class="plan-price">
+          <span class="price">$<%= @subscription.price %></span>
+          <span class="period">/month</span>
+        </div>
+      </div>
+      
+      <div class="plan-features">
+        <ul>
+          <% if @subscription.trade_limit.nil? %>
+            <li><i class="fas fa-check"></i> <strong>Unlimited</strong> trades</li>
+          <% else %>
+            <li><i class="fas fa-check"></i> <strong><%= @subscription.trade_limit %></strong> trades per month</li>
+          <% end %>
+          <li><i class="fas fa-check"></i> Real-time signal execution</li>
+          <li><i class="fas fa-check"></i> Access to trading dashboard</li>
+          <% if @subscription.name == 'Premium' %>
+            <li><i class="fas fa-check"></i> Priority support</li>
+            <li><i class="fas fa-check"></i> Advanced analytics</li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Payment Options -->
+    <div class="payment-section">
+      <% if @payment_error %>
+        <div class="payment-error">
+          <h3>Payment System Unavailable</h3>
+          <p>We're experiencing technical difficulties with our payment system. Please try again later or contact support.</p>
+          
+          <div class="payment-actions">
+            <%= link_to "Change Plan", registration_subscription_path, class: "btn btn-secondary" %>
+            <%= button_to "Skip Payment (Demo)", registration_payment_path, 
+                params: { skip_payment: true }, 
+                method: :post, 
+                class: "btn btn-outline-primary",
+                confirm: "This will create your account without payment. Continue?" %>
+          </div>
+        </div>
+      <% else %>
+        <div class="payment-methods">
+          <h3>Payment Method</h3>
+          
+          <!-- Checkout.com Payment Button -->
+          <div class="checkout-payment">
+            <% if @payment_link %>
+              <a href="<%= @payment_link %>" class="btn btn-primary btn-payment">
+                <i class="fas fa-credit-card"></i>
+                Pay $<%= @subscription.price %> with Card
+              </a>
+              <p class="payment-note">You'll be redirected to our secure payment processor</p>
+            <% else %>
+              <button class="btn btn-primary btn-payment" disabled>
+                <i class="fas fa-spinner fa-spin"></i>
+                Initializing Payment...
+              </button>
+            <% end %>
+          </div>
+
+          <!-- Demo/Test Payment -->
+          <div class="demo-payment">
+            <p class="demo-note">For testing purposes:</p>
+            <%= button_to "Simulate Successful Payment", registration_payment_path, 
+                params: { payment_status: 'success' }, 
+                method: :post, 
+                class: "btn btn-outline-success btn-demo" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Plan Change Option -->
+    <div class="plan-change-section">
+      <p>Want to change your plan?</p>
+      <%= link_to "← Back to Plan Selection", registration_subscription_path, class: "btn btn-link" %>
+    </div>
+
+    <!-- Security Notice -->
+    <div class="security-notice">
+      <div class="security-icon">
+        <i class="fas fa-shield-alt"></i>
+      </div>
+      <div class="security-text">
+        <h4>Secure Payment</h4>
+        <p>Your payment information is encrypted and processed securely by Checkout.com. We never store your card details.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.plan-summary-card {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.plan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.plan-header h3 {
+  margin: 0;
+  color: #222831;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.plan-price {
+  text-align: right;
+}
+
+.plan-price .price {
+  font-size: 32px;
+  font-weight: 700;
+  color: #4f46e5;
+}
+
+.plan-price .period {
+  color: #666;
+  font-size: 16px;
+}
+
+.plan-features ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.plan-features li {
+  padding: 8px 0;
+  color: #555;
+}
+
+.plan-features li i {
+  color: #10b981;
+  margin-right: 8px;
+  width: 16px;
+}
+
+.payment-section {
+  margin-bottom: 32px;
+}
+
+.payment-methods h3 {
+  margin-bottom: 24px;
+  color: #222831;
+}
+
+.checkout-payment {
+  margin-bottom: 24px;
+}
+
+.btn-payment {
+  width: 100%;
+  padding: 16px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.payment-note {
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  margin: 0;
+}
+
+.demo-payment {
+  padding: 16px;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.demo-note {
+  margin: 0 0 12px 0;
+  color: #856404;
+  font-size: 14px;
+}
+
+.btn-demo {
+  font-size: 14px;
+  padding: 8px 16px;
+}
+
+.payment-error {
+  text-align: center;
+  padding: 32px;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 8px;
+}
+
+.payment-error h3 {
+  color: #dc3545;
+  margin-bottom: 16px;
+}
+
+.payment-actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.plan-change-section {
+  text-align: center;
+  padding: 24px 0;
+  border-top: 1px solid #e9ecef;
+  margin-bottom: 32px;
+}
+
+.plan-change-section p {
+  margin: 0 0 8px 0;
+  color: #666;
+}
+
+.security-notice {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  margin-top: 24px;
+}
+
+.security-icon {
+  margin-right: 16px;
+  color: #0ea5e9;
+  font-size: 24px;
+}
+
+.security-text h4 {
+  margin: 0 0 4px 0;
+  color: #0c4a6e;
+  font-size: 16px;
+}
+
+.security-text p {
+  margin: 0;
+  color: #0369a1;
+  font-size: 14px;
+}
+
+@media (max-width: 576px) {
+  .plan-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .plan-price {
+    text-align: center;
+    margin-top: 8px;
+  }
+  
+  .payment-actions {
+    flex-direction: column;
+  }
+  
+  .security-notice {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .security-icon {
+    margin-right: 0;
+    margin-bottom: 12px;
+  }
+}
+</style> 

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trade Completed</title>
+  <style>
+    body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; }
+    .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+    .header { background: linear-gradient(135deg, <%= @is_profit ? '#10b981' : '#ef4444' %> 0%, <%= @is_profit ? '#059669' : '#dc2626' %> 100%); color: white; padding: 30px; text-align: center; }
+    .content { padding: 30px; }
+    .result-box { background-color: <%= @is_profit ? '#d1fae5' : '#fee2e2' %>; padding: 20px; border-radius: 6px; margin: 15px 0; border-left: 4px solid <%= @is_profit ? '#10b981' : '#ef4444' %>; }
+    .trade-box { background-color: #f8fafc; padding: 20px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #6b7280; }
+    .footer { background-color: #f8fafc; padding: 20px; text-align: center; color: #6b7280; font-size: 14px; }
+    .profit { font-weight: 600; color: #10b981; font-size: 18px; }
+    .loss { font-weight: 600; color: #ef4444; font-size: 18px; }
+    .price { font-weight: 600; color: #4b5563; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1><%= @is_profit ? '💰' : '📉' %> Trade Completed!</h1>
+      <p>Your trade has been closed with <%= @is_profit ? 'profit' : 'loss' %></p>
+    </div>
+    
+    <div class="content">
+      <h2>Hello <%= @user.full_name || @user.email %>! 📊</h2>
+      
+      <p>Your automated trade for <strong><%= @trade.symbol %></strong> has been completed.</p>
+      
+      <div class="result-box">
+        <h3><%= @is_profit ? '🎉' : '💔' %> Final Result:</h3>
+        <p><strong>Profit/Loss:</strong> <span class="<%= @is_profit ? 'profit' : 'loss' %>"><%= @is_profit ? '+' : '' %>$<%= number_with_delimiter(@profit_loss.abs, delimiter: ',', precision: 2) %></span></p>
+        <p><strong>Exit Reason:</strong> <%= @trade.exit_reason&.humanize || 'Manual close' %></p>
+        <p><strong>Duration:</strong> <%= time_ago_in_words(@trade.created_at) %></p>
+      </div>
+      
+      <div class="trade-box">
+        <h3>📈 Trade Summary:</h3>
+        <p><strong>Symbol:</strong> <%= @trade.symbol %>USDT</p>
+        <p><strong>Side:</strong> <%= @trade.trade_type %></p>
+        <p><strong>Entry Price:</strong> <span class="price">$<%= number_with_delimiter(@trade.execution_price, delimiter: ',') %></span></p>
+        <p><strong>Exit Price:</strong> <span class="price">$<%= number_with_delimiter(@trade.exit_price, delimiter: ',') %></span></p>
+        <p><strong>Quantity:</strong> <%= @trade.executed_quantity %> <%= @trade.symbol %></p>
+        <% if @trade.profit_loss %>
+        <p><strong>Return:</strong> <%= @trade.profit_loss.round(2) %>%</p>
+        <% end %>
+      </div>
+      
+      <% if @is_profit %>
+      <div class="result-box">
+        <h3>🎯 Great Job!</h3>
+        <p>Your automated trading strategy successfully captured this profit. The signal analysis and execution worked perfectly!</p>
+      </div>
+      <% else %>
+      <div class="result-box">
+        <h3>🛡️ Risk Management</h3>
+        <p>Your stop loss protected you from larger losses. This is exactly how risk management should work - protecting your capital for future opportunities.</p>
+      </div>
+      <% end %>
+      
+      <p><strong>Continue Trading:</strong> Your automated system is ready for the next signal. Keep monitoring your dashboard for new opportunities!</p>
+      
+      <p>Happy Trading!<br>
+      The Tramate Team 🎯</p>
+    </div>
+    
+    <div class="footer">
+      <p>Trade completed at <%= @trade.completed_at&.strftime("%B %d, %Y at %I:%M %p %Z") || Time.current.strftime("%B %d, %Y at %I:%M %p %Z") %></p>
+      <p>© 2024 Tramate. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html> 

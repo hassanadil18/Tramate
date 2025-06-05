@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trade Executed</title>
+  <style>
+    body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; }
+    .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+    .header { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 30px; text-align: center; }
+    .content { padding: 30px; }
+    .trade-box { background-color: #fef3c7; padding: 20px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #f59e0b; }
+    .info-box { background-color: #f0f9ff; padding: 20px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #3b82f6; }
+    .footer { background-color: #f8fafc; padding: 20px; text-align: center; color: #6b7280; font-size: 14px; }
+    .price { font-weight: 600; color: #d97706; }
+    .side { font-weight: 600; color: <%= @trade.trade_type == 'LONG' ? '#10b981' : '#ef4444' %>; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🚀 Trade Executed!</h1>
+      <p>Your automated trade has been successfully placed</p>
+    </div>
+    
+    <div class="content">
+      <h2>Hello <%= @user.full_name || @user.email %>! 📊</h2>
+      
+      <p>Great news! Your automated trade has been executed successfully on Binance.</p>
+      
+      <div class="trade-box">
+        <h3>📈 Trade Details:</h3>
+        <p><strong>Symbol:</strong> <%= @trade.symbol %>USDT</p>
+        <p><strong>Side:</strong> <span class="side"><%= @trade.trade_type %></span></p>
+        <p><strong>Entry Price:</strong> <span class="price">$<%= number_with_delimiter(@trade.entry_price, delimiter: ',') %></span></p>
+        <p><strong>Execution Price:</strong> <span class="price">$<%= number_with_delimiter(@trade.execution_price, delimiter: ',') %></span></p>
+        <p><strong>Quantity:</strong> <%= @trade.executed_quantity %> <%= @trade.symbol %></p>
+        <p><strong>Order ID:</strong> <%= @trade.binance_order_id %></p>
+      </div>
+      
+      <% if @signal %>
+      <div class="info-box">
+        <h3>📱 Original Signal:</h3>
+        <p><strong>Channel:</strong> <%= @signal.channel.name %></p>
+        <p><strong>Entry:</strong> $<%= number_with_delimiter(@signal.entry_price, delimiter: ',') %></p>
+        <% if @signal.take_profit %>
+        <p><strong>Take Profit:</strong> $<%= number_with_delimiter(@signal.take_profit, delimiter: ',') %></p>
+        <% end %>
+        <% if @signal.stop_loss %>
+        <p><strong>Stop Loss:</strong> $<%= number_with_delimiter(@signal.stop_loss, delimiter: ',') %></p>
+        <% end %>
+        <p><strong>Confidence:</strong> <%= (@signal.confidence_score * 100).round(1) %>%</p>
+      </div>
+      <% end %>
+      
+      <div class="info-box">
+        <h3>📊 What's Next:</h3>
+        <p>Your trade is now active and being monitored. You'll receive notifications when:</p>
+        <ul>
+          <li>✅ Take profit orders are filled</li>
+          <li>🛑 Stop loss orders are triggered</li>
+          <li>📈 Position is closed with profit/loss summary</li>
+        </ul>
+      </div>
+      
+      <p><strong>View your trades:</strong> Login to your Tramate dashboard to monitor this and all your active trades.</p>
+      
+      <p>Happy Trading!<br>
+      The Tramate Team 🎯</p>
+    </div>
+    
+    <div class="footer">
+      <p>Trade executed at <%= Time.current.strftime("%B %d, %Y at %I:%M %p %Z") %></p>
+      <p>© 2024 Tramate. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html> 

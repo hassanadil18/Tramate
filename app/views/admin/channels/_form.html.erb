@@ -1,0 +1,294 @@
+<%= form_with(model: [:admin, @channel], class: "space-y-8") do |f| %>
+  <% if @channel.errors.any? %>
+    <div class="rounded-md bg-red-50 p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <i class="fas fa-exclamation-circle text-red-400"></i>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">
+            <%= pluralize(@channel.errors.count, "error") %> prohibited this channel from being saved:
+          </h3>
+          <div class="mt-2 text-sm text-red-700">
+            <ul class="list-disc pl-5 space-y-1">
+              <% @channel.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+        <!-- Basic Information -->
+        <div class="sm:col-span-6">
+          <h3 class="text-lg font-medium leading-6 text-gray-900">Basic Information</h3>
+          <p class="mt-1 text-sm text-gray-500">Enter the basic details about the channel.</p>
+        </div>
+
+        <div class="sm:col-span-3">
+          <%= f.label :name, class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= f.text_field :name, class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+          </div>
+        </div>
+
+        <div class="sm:col-span-3">
+          <%= f.label :channel_type, class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= f.select :channel_type,
+                options_for_select([['Discord', 'discord'], ['Telegram', 'telegram'], ['Webhook', 'webhook']], @channel.channel_type),
+                {},
+                class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+          </div>
+        </div>
+
+        <div class="sm:col-span-3">
+          <%= f.label :status, class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= f.select :status,
+                options_for_select([['Active', 'active'], ['Inactive', 'inactive']], @channel.status),
+                {},
+                class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+          </div>
+        </div>
+
+        <div class="sm:col-span-3">
+          <%= f.label :price_per_month, "Monthly Price ($)", class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= f.number_field :price_per_month, step: 0.01, class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+          </div>
+        </div>
+
+        <div class="sm:col-span-6">
+          <%= f.label :description, class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= f.text_area :description, rows: 3, class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+          </div>
+        </div>
+
+        <!-- Discord Configuration - Required Fields -->
+        <div class="sm:col-span-6 discord-section" style="<%= 'display: none;' unless @channel.channel_type == 'discord' %>">
+          <h3 class="text-lg font-medium leading-6 text-gray-900">
+            <i class="fab fa-discord text-indigo-600"></i> Discord Configuration
+          </h3>
+          <p class="mt-1 text-sm text-gray-500">These 3 fields are required for Discord channel integration.</p>
+        </div>
+
+        <!-- Required Field 1: Server ID -->
+        <div class="sm:col-span-2 discord-field" style="<%= 'display: none;' unless @channel.channel_type == 'discord' %>">
+          <div class="required-field-container">
+            <div class="required-field-header">
+              <span class="required-field-number">1</span>
+              <%= f.label :discord_guild_id, "Discord Server ID", class: "block text-sm font-medium text-gray-700" %>
+              <span class="required-asterisk">*</span>
+            </div>
+            <div class="mt-1">
+              <%= f.text_field :discord_guild_id, placeholder: "e.g., 123456789012345678", class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md", required: true %>
+            </div>
+            <p class="mt-1 text-xs text-gray-500">
+              <i class="fas fa-info-circle"></i> Right-click on server name → Copy Server ID
+            </p>
+          </div>
+        </div>
+
+        <!-- Required Field 2: Channel ID -->
+        <div class="sm:col-span-2 discord-field" style="<%= 'display: none;' unless @channel.channel_type == 'discord' %>">
+          <div class="required-field-container">
+            <div class="required-field-header">
+              <span class="required-field-number">2</span>
+              <%= f.label :discord_channel_id, "Discord Channel ID", class: "block text-sm font-medium text-gray-700" %>
+              <span class="required-asterisk">*</span>
+            </div>
+            <div class="mt-1">
+              <%= f.text_field :discord_channel_id, placeholder: "e.g., 987654321098765432", class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md", required: true %>
+            </div>
+            <p class="mt-1 text-xs text-gray-500">
+              <i class="fas fa-info-circle"></i> Right-click on channel → Copy Channel ID
+            </p>
+          </div>
+        </div>
+
+        <!-- Required Field 3: Channel Access Role ID -->
+        <div class="sm:col-span-2 discord-field" style="<%= 'display: none;' unless @channel.channel_type == 'discord' %>">
+          <div class="required-field-container">
+            <div class="required-field-header">
+              <span class="required-field-number">3</span>
+              <%= f.label :discord_bot_permissions, "Channel Access Role ID", class: "block text-sm font-medium text-gray-700" %>
+              <span class="required-asterisk">*</span>
+            </div>
+            <div class="mt-1">
+              <%= f.text_field :discord_bot_permissions, placeholder: "e.g., 456789012345678901", class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md", required: true %>
+            </div>
+            <p class="mt-1 text-xs text-gray-500">
+              <i class="fas fa-info-circle"></i> Right-click on role → Copy Role ID
+            </p>
+          </div>
+        </div>
+
+        <!-- Discord Optional Settings -->
+        <div class="sm:col-span-6 discord-field" style="<%= 'display: none;' unless @channel.channel_type == 'discord' %>">
+          <h4 class="text-md font-medium leading-6 text-gray-700 border-t pt-4">Optional Discord Settings</h4>
+          <p class="mt-1 text-sm text-gray-500">Additional configuration options (not required).</p>
+        </div>
+
+        <div class="sm:col-span-3 discord-field" style="<%= 'display: none;' unless @channel.channel_type == 'discord' %>">
+          <%= f.label :discord_invite_link, "Discord Invite Link", class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= f.url_field :discord_invite_link, placeholder: "https://discord.gg/...", class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+          </div>
+          <p class="mt-1 text-xs text-gray-500">Invite link for users to join the server</p>
+        </div>
+
+        <div class="sm:col-span-3 discord-field" style="<%= 'display: none;' unless @channel.channel_type == 'discord' %>">
+          <%= f.label :discord_webhook_url, "Webhook URL", class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= f.url_field :discord_webhook_url, readonly: true, class: "shadow-sm bg-gray-50 border-gray-300 block w-full sm:text-sm border rounded-md" %>
+          </div>
+          <p class="mt-1 text-xs text-gray-500">Auto-generated when bot creates webhook</p>
+        </div>
+
+        <!-- General Configuration -->
+        <div class="sm:col-span-6">
+          <h3 class="text-lg font-medium leading-6 text-gray-900">General Configuration</h3>
+          <p class="mt-1 text-sm text-gray-500">Additional channel settings and integration details.</p>
+        </div>
+
+        <div class="sm:col-span-3">
+          <%= f.label :webhook_url, "Generic Webhook URL", class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= f.url_field :webhook_url, class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+          </div>
+          <p class="mt-1 text-xs text-gray-500">For non-Discord webhook integrations</p>
+        </div>
+
+        <div class="sm:col-span-3">
+          <%= f.label :api_key, class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= f.text_field :api_key, class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+          </div>
+        </div>
+
+        <div class="sm:col-span-3">
+          <div class="flex items-center">
+            <%= f.check_box :tramate_resell_enabled, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+            <%= f.label :tramate_resell_enabled, "Enable Tramate Resell", class: "ml-2 block text-sm text-gray-900" %>
+          </div>
+          <p class="mt-1 text-xs text-gray-500">Allow reselling through Tramate platform</p>
+        </div>
+
+        <!-- Signal Configuration -->
+        <div class="sm:col-span-6">
+          <h3 class="text-lg font-medium leading-6 text-gray-900">Signal Configuration</h3>
+          <p class="mt-1 text-sm text-gray-500">Configure how signals are processed for this channel.</p>
+        </div>
+
+        <div class="sm:col-span-6">
+          <%= f.label :signal_format, class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= f.select :signal_format,
+                options_for_select([['Standard', 'standard'], ['Custom', 'custom']], @channel.signal_format),
+                {},
+                class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+          </div>
+          <p class="mt-2 text-sm text-gray-500">Select the format of signals received from this channel.</p>
+        </div>
+
+        <div class="sm:col-span-6">
+          <%= f.label :signal_template, class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= f.text_area :signal_template, rows: 4, class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md font-mono" %>
+          </div>
+          <p class="mt-2 text-sm text-gray-500">Define the template for parsing signals. Use JSON format for custom templates.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+      <%= link_to "Cancel", admin_channels_path, class: "btn-secondary mr-3" %>
+      <%= f.submit class: "btn-primary" %>
+    </div>
+  </div>
+<% end %>
+
+<script>
+// Show/hide Discord fields based on channel type
+document.addEventListener('DOMContentLoaded', function() {
+  const channelTypeSelect = document.querySelector('select[name="channel[channel_type]"]');
+  const discordFields = document.querySelectorAll('.discord-field, .discord-section');
+  
+  function toggleDiscordFields() {
+    const isDiscord = channelTypeSelect.value === 'discord';
+    discordFields.forEach(field => {
+      field.style.display = isDiscord ? 'block' : 'none';
+    });
+  }
+  
+  channelTypeSelect.addEventListener('change', toggleDiscordFields);
+  toggleDiscordFields(); // Initial call
+});
+</script>
+
+<% content_for :styles do %>
+<style>
+  .btn-primary {
+    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;
+  }
+
+  .required-field-container {
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+    background: #f9fafb;
+    transition: border-color 0.2s;
+  }
+
+  .required-field-container:hover {
+    border-color: #6366f1;
+  }
+
+  .required-field-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .required-field-number {
+    background: #6366f1;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+
+  .required-asterisk {
+    color: #ef4444;
+    font-weight: bold;
+    font-size: 16px;
+  }
+
+  .discord-field .form-control {
+    border-color: #6366f1;
+  }
+
+  .discord-field .form-control:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  }
+</style>
+<% end %> 

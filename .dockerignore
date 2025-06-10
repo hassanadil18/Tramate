@@ -1,51 +1,117 @@
-# See https://docs.docker.com/engine/reference/builder/#dockerignore-file for more about ignoring files.
+# ================================================================================
+# TRAMATE PLATFORM - DOCKER IGNORE
+# ================================================================================
+# Files and directories to exclude from Docker build context
+# ================================================================================
 
-# Ignore git directory.
+# Version control
 /.git/
 /.gitignore
+/.gitattributes
 
-# Ignore bundler config.
-/.bundle
-
-# Ignore all environment files.
+# Environment files
 /.env*
+!/.env.example
 
-# Ignore all default key files.
+# Ruby/Rails specific
+/.bundle
+/vendor/bundle
+/node_modules/
+
+# Credentials and keys
 /config/master.key
 /config/credentials/*.key
+!/config/credentials/.keep
 
-# Ignore all logfiles and tempfiles.
+# Logs and temporary files
 /log/*
-/tmp/*
 !/log/.keep
+/tmp/*
 !/tmp/.keep
-
-# Ignore pidfiles, but keep the directory.
 /tmp/pids/*
 !/tmp/pids/.keep
 
-# Ignore storage (uploaded files in development and any SQLite databases).
+# Storage (uploaded files and databases)
 /storage/*
 !/storage/.keep
 /tmp/storage/*
 !/tmp/storage/.keep
+*.sqlite3
+*.sqlite3-*
 
-# Ignore assets.
-/node_modules/
+# Compiled assets
 /app/assets/builds/*
 !/app/assets/builds/.keep
 /public/assets
 
-# Ignore CI service files.
-/.github
+# Dependencies
+/node_modules/
 
-# Ignore Kamal files.
+# CI/CD files
+/.github
+/.gitlab-ci.yml
+/.circleci
+
+# Deployment files (keep in image but ignore some)
 /config/deploy*.yml
 /.kamal
 
-# Ignore development files
+# Development tools
 /.devcontainer
+/.vscode
+/.idea
+*.swp
+*.swo
+*~
 
-# Ignore Docker-related files
-/.dockerignore
+# Docker files (don't include in build context)
+/docker-compose*.yml
 /Dockerfile*
+/.dockerignore
+
+# Documentation (keep essential docs only)
+/docs/
+/README.md
+/LICENSE.txt
+
+# Test files
+/test/
+/spec/
+/coverage/
+
+# Backup files
+*.bak
+*.backup
+/backups/
+/dumps/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Nginx configuration (handled separately)
+/nginx/
+
+# SSL certificates (handled separately)
+/ssl/
+
+# Data directories
+/data/
+
+# Package files
+*.gem
+*.tar.gz
+*.zip
+
+# Editor files
+*.sublime-project
+*.sublime-workspace
+
+# Temporary build files
+*.pid
+*.sock

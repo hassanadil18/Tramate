@@ -1,0 +1,201 @@
+TRAMATE PLATFORM - PROPRIETARY SOFTWARE LICENSE
+
+Copyright © 2024-2025 Tramate. All Rights Reserved.
+
+================================================================================
+PROPRIETARY SOFTWARE LICENSE AGREEMENT
+================================================================================
+
+This License Agreement ("Agreement") is a legal agreement between you ("Licensee") 
+and Tramate ("Licensor") for the use of the Tramate Platform software, 
+documentation, and related materials ("Software").
+
+BY ACCESSING, DOWNLOADING, INSTALLING, OR USING THE SOFTWARE, YOU AGREE TO BE 
+BOUND BY THE TERMS OF THIS AGREEMENT. IF YOU DO NOT AGREE TO THESE TERMS, 
+DO NOT USE THE SOFTWARE.
+
+================================================================================
+1. GRANT OF LICENSE
+================================================================================
+
+Subject to the terms and conditions of this Agreement, Licensor grants Licensee 
+a limited, non-exclusive, non-transferable, revocable license to use the Software 
+solely for the purposes explicitly authorized by Licensor.
+
+================================================================================
+2. RESTRICTIONS
+================================================================================
+
+Licensee SHALL NOT:
+
+a) Copy, reproduce, duplicate, or create derivative works of the Software
+b) Reverse engineer, decompile, disassemble, or attempt to derive source code
+c) Distribute, sell, lease, rent, lend, or sublicense the Software
+d) Remove, alter, or obscure any proprietary notices or labels
+e) Use the Software to create competing products or services
+f) Access the Software to build similar or competing applications
+g) Share access credentials or allow unauthorized third-party access
+h) Modify, adapt, alter, translate, or create derivative works
+i) Use the Software for any illegal or unauthorized purpose
+j) Circumvent any technical limitations or security measures
+
+================================================================================
+3. INTELLECTUAL PROPERTY RIGHTS
+================================================================================
+
+The Software and all intellectual property rights therein are and shall remain 
+the exclusive property of Licensor. This includes but is not limited to:
+
+- Source code, object code, and executable files
+- Algorithms, trading strategies, and signal processing logic
+- Database schemas, data structures, and architectures
+- User interfaces, designs, and visual elements
+- Documentation, guides, and technical specifications
+- Trade secrets, know-how, and proprietary methodologies
+- All improvements, enhancements, and modifications
+
+No title to or ownership of the Software is transferred to Licensee.
+
+================================================================================
+4. CONFIDENTIALITY
+================================================================================
+
+Licensee acknowledges that the Software contains valuable trade secrets and 
+confidential information. Licensee agrees to:
+
+a) Maintain strict confidentiality of all proprietary information
+b) Not disclose any aspect of the Software to third parties
+c) Protect the Software with the same degree of care used for own confidential information
+d) Limit access to authorized personnel only
+e) Return or destroy all confidential information upon termination
+
+================================================================================
+5. PROHIBITED USES
+================================================================================
+
+The Software SHALL NOT be used for:
+
+a) Creating competing trading platforms or applications
+b) Extracting trading algorithms or signal processing methods
+c) Reverse engineering proprietary trading strategies
+d) Building similar Discord-to-exchange integration systems
+e) Developing competing automated trading solutions
+f) Any commercial use without explicit written authorization
+g) Academic research or educational purposes without permission
+h) Benchmarking or competitive analysis
+
+================================================================================
+6. TERMINATION
+================================================================================
+
+This license is effective until terminated. Licensor may terminate this license 
+immediately upon notice if Licensee breaches any term of this Agreement. 
+Upon termination, Licensee must:
+
+a) Immediately cease all use of the Software
+b) Delete all copies of the Software from all systems
+c) Return or destroy all related documentation
+d) Certify in writing the completion of these actions
+
+================================================================================
+7. NO WARRANTIES
+================================================================================
+
+THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. LICENSOR 
+DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND 
+NON-INFRINGEMENT.
+
+================================================================================
+8. LIMITATION OF LIABILITY
+================================================================================
+
+IN NO EVENT SHALL LICENSOR BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, 
+CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO LOSS OF 
+PROFITS, DATA, OR USE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+================================================================================
+9. INDEMNIFICATION
+================================================================================
+
+Licensee agrees to indemnify, defend, and hold harmless Licensor from and 
+against any claims, damages, losses, costs, and expenses (including reasonable 
+attorney fees) arising from Licensee's use of the Software or breach of this 
+Agreement.
+
+================================================================================
+10. ENFORCEMENT
+================================================================================
+
+Any unauthorized use, copying, or distribution of the Software will result in:
+
+a) Immediate termination of all licenses
+b) Legal action for copyright and trade secret infringement
+c) Claims for monetary damages and injunctive relief
+d) Recovery of attorney fees and court costs
+e) Criminal prosecution where applicable
+
+================================================================================
+11. GOVERNING LAW
+================================================================================
+
+This Agreement shall be governed by and construed in accordance with the laws 
+of the jurisdiction where Licensor is established, without regard to conflict 
+of law principles.
+
+================================================================================
+12. ENTIRE AGREEMENT
+================================================================================
+
+This Agreement constitutes the entire agreement between the parties and 
+supersedes all prior or contemporaneous understandings regarding the subject 
+matter hereof. This Agreement may only be modified by written agreement 
+signed by both parties.
+
+================================================================================
+13. SEVERABILITY
+================================================================================
+
+If any provision of this Agreement is held to be invalid or unenforceable, 
+the remaining provisions shall remain in full force and effect.
+
+================================================================================
+14. CONTACT INFORMATION
+================================================================================
+
+For licensing inquiries, permissions, or legal matters, contact:
+
+Tramate Legal Department
+Email: legal@tramate.com
+Address: [Your Business Address]
+
+================================================================================
+NOTICE TO USERS
+================================================================================
+
+This software contains proprietary and confidential information protected by 
+copyright, trade secret, and other intellectual property laws. Unauthorized 
+use, copying, distribution, or reverse engineering is strictly prohibited and 
+may result in severe civil and criminal penalties.
+
+The Tramate Platform includes advanced trading algorithms, signal processing 
+methods, and integration techniques that represent substantial investment in 
+research and development. These innovations are protected trade secrets and 
+proprietary technologies.
+
+================================================================================
+ACKNOWLEDGMENT
+================================================================================
+
+BY USING THIS SOFTWARE, YOU ACKNOWLEDGE THAT YOU HAVE READ THIS LICENSE 
+AGREEMENT, UNDERSTAND IT, AND AGREE TO BE BOUND BY ITS TERMS AND CONDITIONS.
+
+================================================================================
+
+Tramate Platform - Proprietary Software
+All Rights Reserved © 2024-2025 Tramate
+
+This license was last updated: December 2024
+License Version: 1.0
+
+================================================================================

@@ -1,0 +1,85 @@
+# Tramate Logging Configuration
+# Centralized logging setup for production monitoring and debugging
+
+# Fluentd configuration for log aggregation
+services:
+  # Add to existing docker-compose.yml
+  fluentd:
+    image: fluentd:v1.16-debian-1
+    container_name: tramate_fluentd
+    volumes:
+      - ./fluentd:/fluentd/etc
+      - ./logs:/var/log/tramate
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    environment:
+      FLUENTD_CONF: fluent.conf
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+  # Elasticsearch for log storage
+  elasticsearch:
+    image: elasticsearch:8.11.0
+    container_name: tramate_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    restart: unless-stopped
+
+  # Kibana for log visualization
+  kibana:
+    image: kibana:8.11.0
+    container_name: tramate_kibana
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+  # Grafana for metrics visualization
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: tramate_grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: tramate_prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+volumes:
+  elasticsearch_data:
+    driver: local
+  grafana_data:
+    driver: local
+  prometheus_data:
+    driver: local

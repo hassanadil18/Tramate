@@ -75,14 +75,14 @@ Rails.application.routes.draw do
   post "auth/verify_discord_username" => "auth#verify_discord_username"
   get "auth/get_channels" => "auth#get_channels"
   post "auth/update_connection_info" => "auth#update_connection_info"
-
   # API namespace for external integrations
   namespace :api do
     # Discord webhook endpoint
     post '/discord/webhook', to: 'discord_webhooks#receive'
   end
 
-  # Health check
+  # Health check endpoints
+  get "health" => "health#show", as: :health_check
   get "up" => "rails/health#show", as: :rails_health_check
 
   # Multi-step user registration process

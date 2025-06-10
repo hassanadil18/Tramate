@@ -1,117 +1,51 @@
-# ================================================================================
-# TRAMATE PLATFORM - DOCKER IGNORE
-# ================================================================================
-# Files and directories to exclude from Docker build context
-# ================================================================================
+# See https://docs.docker.com/engine/reference/builder/#dockerignore-file for more about ignoring files.
 
-# Version control
+# Ignore git directory.
 /.git/
 /.gitignore
-/.gitattributes
 
-# Environment files
-/.env*
-!/.env.example
-
-# Ruby/Rails specific
+# Ignore bundler config.
 /.bundle
-/vendor/bundle
-/node_modules/
 
-# Credentials and keys
+# Ignore all environment files.
+/.env*
+
+# Ignore all default key files.
 /config/master.key
 /config/credentials/*.key
-!/config/credentials/.keep
 
-# Logs and temporary files
+# Ignore all logfiles and tempfiles.
 /log/*
-!/log/.keep
 /tmp/*
+!/log/.keep
 !/tmp/.keep
+
+# Ignore pidfiles, but keep the directory.
 /tmp/pids/*
 !/tmp/pids/.keep
 
-# Storage (uploaded files and databases)
+# Ignore storage (uploaded files in development and any SQLite databases).
 /storage/*
 !/storage/.keep
 /tmp/storage/*
 !/tmp/storage/.keep
-*.sqlite3
-*.sqlite3-*
 
-# Compiled assets
+# Ignore assets.
+/node_modules/
 /app/assets/builds/*
 !/app/assets/builds/.keep
 /public/assets
 
-# Dependencies
-/node_modules/
-
-# CI/CD files
+# Ignore CI service files.
 /.github
-/.gitlab-ci.yml
-/.circleci
 
-# Deployment files (keep in image but ignore some)
+# Ignore Kamal files.
 /config/deploy*.yml
 /.kamal
 
-# Development tools
+# Ignore development files
 /.devcontainer
-/.vscode
-/.idea
-*.swp
-*.swo
-*~
 
-# Docker files (don't include in build context)
-/docker-compose*.yml
-/Dockerfile*
+# Ignore Docker-related files
 /.dockerignore
-
-# Documentation (keep essential docs only)
-/docs/
-/README.md
-/LICENSE.txt
-
-# Test files
-/test/
-/spec/
-/coverage/
-
-# Backup files
-*.bak
-*.backup
-/backups/
-/dumps/
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Nginx configuration (handled separately)
-/nginx/
-
-# SSL certificates (handled separately)
-/ssl/
-
-# Data directories
-/data/
-
-# Package files
-*.gem
-*.tar.gz
-*.zip
-
-# Editor files
-*.sublime-project
-*.sublime-workspace
-
-# Temporary build files
-*.pid
-*.sock
+/Dockerfile*

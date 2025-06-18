@@ -104,7 +104,7 @@ jobs:
           path: tmp/rspec.xml
       
       - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         if: success()
         with:
           files: ./coverage/.resultset.json

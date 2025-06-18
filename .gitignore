@@ -31,3 +31,4 @@
 
 # Allow database dump for collaboration
 !tramate_db_dump.sql
+discordbot.txt
